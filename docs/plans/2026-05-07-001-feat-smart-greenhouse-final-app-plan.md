@@ -91,8 +91,8 @@ The hardest part is cyber-physical safety across multiple objects: telemetry, re
 
 ### Institutional Learnings
 
-- No `docs/solutions/` directory exists yet, so there are no project-specific post-implementation learnings to carry forward.
-- As implementation discovers bugs or durable conventions, capture them later with the project’s learning workflow rather than expanding this plan.
+- `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` captures the verified Docker Compose image set, pgvector init, FastAPI root redirect, NiceGUI mounting pattern, and dashboard/sidebar fix.
+- As implementation discovers more bugs or durable conventions, capture them with the project’s learning workflow rather than expanding this plan.
 
 ### External References
 
@@ -291,7 +291,7 @@ flowchart TB
 - Test: `tests/system/test_compose_health.py`
 
 **Approach:**
-- Pin infrastructure images, including InfluxDB 2.7.x and pgvector PostgreSQL 16.
+- Pin infrastructure images to verified tags, including `influxdb:2.7.12` and `pgvector/pgvector:0.8.2-pg17-trixie`.
 - Add health checks for PostgreSQL, InfluxDB, Mosquitto, Grafana, and the app.
 - Use named volumes for PostgreSQL, InfluxDB, and Grafana state.
 - Keep secrets in `.env` and `.env.example`; do not hardcode credentials.
@@ -336,10 +336,10 @@ flowchart TB
 
 **Approach:**
 - Use FastAPI lifespan to initialize and shut down shared clients, pools, and background task handles.
-- Choose and document one NiceGUI 3.x mounting strategy in `app/main.py`, preserving `/api/*` route ownership and avoiding catch-all page shadowing.
+- Mount NiceGUI 3.x with `ui.run_with(app, ...)`, run the process as `uvicorn app.main:app`, redirect `/` to `/dashboard`, and import all linked page modules before mounting so decorators register.
 - Provide liveness and readiness endpoints with dependency-specific readiness detail.
 - Ensure NiceGUI session secret and FastAPI session settings are configured consistently when session storage is used.
-- Define the first-run shell: sidebar navigation groups Operations (`dashboard`, `simulator`, `plants`, `control`), Intelligence (`ai-chat`, `rag`, `logs`), and System (`settings`), with placeholder/empty states available before telemetry exists.
+- Define the first-run shell with `ui.left_drawer()` navigation groups Operations (`dashboard`, `simulator`, `plants`, `control`), Intelligence (`ai-chat`, `rag`, `logs`), and System (`settings`), with placeholder/empty states available before telemetry exists.
 
 **Patterns to follow:**
 - FastAPI current docs for `lifespan` async context manager.

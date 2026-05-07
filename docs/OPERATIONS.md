@@ -10,7 +10,8 @@ docker compose up -d
 
 Expected services:
 
-- Mosquitto MQTT on `1883`
+- App on `8080`
+- Mosquitto MQTT on `11883` and WebSocket on `19001`
 - PostgreSQL with pgvector on `5432`
 - InfluxDB on `8086`
 - Grafana on `3000`
@@ -21,7 +22,7 @@ Run migrations before starting the app:
 
 ```bash
 uv run alembic upgrade head
-uv run python -m app.main
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8080
 ```
 
 The FastAPI lifespan initializes SQLAlchemy, InfluxDB, and telemetry repositories. MQTT clients are created on demand.
@@ -64,9 +65,11 @@ uv run python -m services.control_engine.main --group-id <uuid> --greenhouse-id 
 
 ## Manual verification
 
-1. Open `/` and confirm dashboard cards render.
+1. Open `/` and confirm it redirects to `/dashboard`, then confirm dashboard cards render.
 2. Open `/rag`, add/search knowledge, and verify source attribution.
 3. Open `/ai-chat`, ask for scoped greenhouse status, and inspect tool traces.
 4. Open `/control`, verify proposal cards show approval/rejection actions.
 5. Open `/logs`, filter recent alerts and command lifecycle records.
 6. Confirm dependency outages surface through `/health/ready` rather than silent success.
+
+Related troubleshooting: `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` documents the verified Docker Compose and FastAPI/NiceGUI launch fixes.

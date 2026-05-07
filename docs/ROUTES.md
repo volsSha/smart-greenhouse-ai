@@ -84,6 +84,8 @@
 
 ## NiceGUI Pages
 
+`/` redirects to `/dashboard`. NiceGUI pages are registered by importing page modules before `ui.run_with(app, ...)`; see `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` for the dashboard launch fix.
+
 | Page | Description |
 |------|-------------|
 | `/dashboard` | Group overview, greenhouse cards, zone status, alerts, AI summary |
