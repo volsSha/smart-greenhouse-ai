@@ -45,16 +45,20 @@ class TelemetryIngestion:
     Parameters:
         acceptance_window: How far a reading's timestamp may deviate
             from "now" before being rejected.
+        influx_client: Optional InfluxDB client for persisting readings.
+            When provided, validated readings are written to InfluxDB.
     """
 
     def __init__(
         self,
         acceptance_window: timedelta = timedelta(minutes=5),
+        influx_client=None,
     ) -> None:
         self._validator = TelemetryValidator(window=acceptance_window)
         self._seen_ids: OrderedDict[str, datetime] = OrderedDict()
         self._processed_count = 0
         self._error_count = 0
+        self._influx_client = influx_client
 
     # ------------------------------------------------------------------
     # Public API
@@ -191,16 +195,33 @@ class TelemetryIngestion:
             self._seen_ids.popitem(last=False)
 
     async def _store(self, reading: TelemetryReading) -> None:
-        """Persist a validated reading.
+        """Persist a validated reading to InfluxDB.
 
-        Currently a no-op stub. U5 will add InfluxDB storage here.
+        Uses the InfluxDB client provided at construction time.
+        Falls back to a debug log if no client is configured.
         """
-        logger.debug(
-            "Stored reading: %s/%s/%s sensor=%s metric=%s value=%.2f",
-            reading.group_id,
-            reading.greenhouse_id,
-            reading.zone_id,
-            reading.sensor_id,
-            reading.metric,
-            reading.value,
-        )
+        if self._influx_client is not None:
+            from app.repositories.telemetry_repository import TelemetryRepository
+
+            repo = TelemetryRepository(self._influx_client)
+            repo.write_telemetry(reading)
+            logger.debug(
+                "Stored reading in InfluxDB: %s/%s/%s sensor=%s metric=%s value=%.2f",
+                reading.group_id,
+                reading.greenhouse_id,
+                reading.zone_id,
+                reading.sensor_id,
+                reading.metric,
+                reading.value,
+            )
+        else:
+            logger.debug(
+                "No InfluxDB client configured -- skipping storage: "
+                "%s/%s/%s sensor=%s metric=%s value=%.2f",
+                reading.group_id,
+                reading.greenhouse_id,
+                reading.zone_id,
+                reading.sensor_id,
+                reading.metric,
+                reading.value,
+            )

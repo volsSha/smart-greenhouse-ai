@@ -23,6 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.config import Settings
 from app.dependencies import create_db_engine, create_influx_client
+from app.services.influx_client import InfluxClient
+from app.repositories.telemetry_repository import TelemetryRepository
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,14 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     # --- InfluxDB ---
     influx_client = create_influx_client(settings)
     fastapi_app.state.influx_client = influx_client
+    influx_wrapper = InfluxClient(
+        url=settings.influxdb.url,
+        token=settings.influxdb.token,
+        org=settings.influxdb.org,
+        bucket=settings.influxdb.bucket,
+    )
+    telemetry_repo = TelemetryRepository(influx_wrapper)
+    fastapi_app.state.telemetry_repository = telemetry_repo
     logger.info("InfluxDB client initialized")
 
     # --- MQTT ---
@@ -58,6 +68,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
 
     # --- Shutdown ---
     await db_engine.dispose()
+    influx_wrapper.close()
     influx_client.close()
     logger.info("Infrastructure resources shut down")
 
@@ -71,8 +82,10 @@ app = FastAPI(
 
 # --- Register API routers ---
 from app.api.health import router as health_router  # noqa: E402
+from app.api.telemetry import router as telemetry_router  # noqa: E402
 
 app.include_router(health_router)
+app.include_router(telemetry_router)
 
 # --- Register NiceGUI pages ---
 # Importing the page modules registers their @ui.page() decorators
