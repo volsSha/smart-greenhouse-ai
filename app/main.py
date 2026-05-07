@@ -88,6 +88,7 @@ from app.api.greenhouses import router as greenhouses_router  # noqa: E402
 from app.api.devices import router as devices_router  # noqa: E402
 from app.api.plants import router as plants_router  # noqa: E402
 from app.api.commands import router as commands_router  # noqa: E402
+from app.api.ai_chat import router as ai_chat_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(telemetry_router)
@@ -96,6 +97,7 @@ app.include_router(greenhouses_router)
 app.include_router(devices_router)
 app.include_router(plants_router)
 app.include_router(commands_router)
+app.include_router(ai_chat_router)
 
 # --- Register NiceGUI pages ---
 # Importing the page modules registers their @ui.page() decorators
