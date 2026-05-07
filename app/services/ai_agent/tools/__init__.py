@@ -9,6 +9,7 @@ from app.services.ai_agent.tools.greenhouse_tools import (
 )
 from app.services.ai_agent.tools.group_tools import get_group_overview
 from app.services.ai_agent.tools.plant_tools import get_plant_batches, get_plant_profile
+from app.services.ai_agent.tools.rag_tools import search_plant_knowledge
 from app.services.ai_agent.tools.telemetry_tools import (
     get_latest_readings,
     get_today_greenhouse_summary,
@@ -33,6 +34,7 @@ ALL_TOOLS = [
     get_latest_readings,
     get_active_alerts,
     get_recent_commands,
+    search_plant_knowledge,
 ]
 
 __all__ = [
@@ -52,4 +54,5 @@ __all__ = [
     "get_latest_readings",
     "get_active_alerts",
     "get_recent_commands",
+    "search_plant_knowledge",
 ]

@@ -644,9 +644,9 @@ async def test_get_recent_commands_empty() -> None:
 # ---------------------------------------------------------------------------
 
 def test_all_tools_list_has_expected_count() -> None:
-    """ALL_TOOLS should contain 14 tool functions."""
+    """ALL_TOOLS should contain 15 tool functions."""
     from app.services.ai_agent.tools import ALL_TOOLS
-    assert len(ALL_TOOLS) == 14
+    assert len(ALL_TOOLS) == 15
 
 
 def test_all_tools_are_callable() -> None:

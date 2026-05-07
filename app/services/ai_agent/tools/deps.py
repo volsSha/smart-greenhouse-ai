@@ -21,9 +21,11 @@ if TYPE_CHECKING:
         PlantBatchRepository,
         PlantProfileRepository,
     )
+    from app.repositories.rag_repository import RAGRepository
     from app.repositories.telemetry_repository import TelemetryRepository
     from app.repositories.zone_repository import ZoneRepository
     from app.services.ai_agent.tool_logging import ToolCallLogger
+    from app.config import Settings
 
 
 @dataclass
@@ -41,3 +43,5 @@ class ToolDeps:
     sensor_repo: SensorRepository = field(repr=False)
     actuator_repo: ActuatorRepository = field(repr=False)
     tool_logger: ToolCallLogger = field(repr=False)
+    rag_repo: RAGRepository | None = field(default=None, repr=False)
+    settings: Settings | None = field(default=None, repr=False)
