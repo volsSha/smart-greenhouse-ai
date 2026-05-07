@@ -6,7 +6,7 @@ import json
 import uuid
 from typing import Any
 
-from pydantic_ai import Agent
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,9 +14,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import Settings, get_settings
 from app.repositories.ai_conversation_repository import AIConversationRepository
 from app.repositories.ai_tool_log_repository import AIToolLogRepository
+from app.repositories.alert_repository import AlertRepository
+from app.repositories.command_repository import CommandRepository
+from app.repositories.device_repository import ActuatorRepository, SensorRepository
+from app.repositories.greenhouse_repository import GreenhouseRepository
+from app.repositories.group_repository import GroupRepository
+from app.repositories.plant_batch_repository import (
+    PlantBatchRepository,
+    PlantProfileRepository,
+)
+from app.repositories.telemetry_repository import TelemetryRepository
+from app.repositories.zone_repository import ZoneRepository
 from app.services.ai_agent.models import AIResponse, AIScope
 from app.services.ai_agent.prompts import SYSTEM_PROMPT
 from app.services.ai_agent.tool_logging import ToolCallLogger
+from app.services.ai_agent.tools import ALL_TOOLS
+from app.services.ai_agent.tools.deps import ToolDeps
 
 
 class GreenhouseAIAgent:
@@ -26,7 +39,7 @@ class GreenhouseAIAgent:
         self,
         session: AsyncSession,
         settings: Settings | None = None,
-        agent: Agent[None, AIResponse] | None = None,
+        agent: Agent[ToolDeps, AIResponse] | None = None,
     ) -> None:
         self.session = session
         self.settings = settings or get_settings()
@@ -34,20 +47,44 @@ class GreenhouseAIAgent:
         self.tool_log_repository = AIToolLogRepository(session)
         self.tool_logger = ToolCallLogger(self.tool_log_repository)
         self.agent = agent or self._build_agent(self.settings)
+        if agent is None:
+            self.register_tools()
+
+    def _build_deps(self) -> ToolDeps:
+        """Build the dependency container for tool functions."""
+        return ToolDeps(
+            group_repo=GroupRepository(self.session),
+            greenhouse_repo=GreenhouseRepository(self.session),
+            zone_repo=ZoneRepository(self.session),
+            alert_repo=AlertRepository(self.session),
+            command_repo=CommandRepository(self.session),
+            plant_batch_repo=PlantBatchRepository(self.session),
+            plant_profile_repo=PlantProfileRepository(self.session),
+            telemetry_repo=TelemetryRepository(None),  # InfluxDB client injected separately
+            sensor_repo=SensorRepository(self.session),
+            actuator_repo=ActuatorRepository(self.session),
+            tool_logger=self.tool_logger,
+        )
 
     @staticmethod
-    def _build_agent(settings: Settings) -> Agent[None, AIResponse]:
+    def _build_agent(settings: Settings) -> Agent[ToolDeps, AIResponse]:
         """Build an OpenAI-compatible Pydantic AI agent for OpenRouter."""
         provider = OpenAIProvider(
             api_key=settings.openrouter.api_key,
             base_url=settings.openrouter.base_url,
         )
         model = OpenAIChatModel(settings.openrouter.model, provider=provider)
-        return Agent(model, instructions=SYSTEM_PROMPT, output_type=AIResponse)
+        return Agent(
+            model,
+            instructions=SYSTEM_PROMPT,
+            output_type=AIResponse,
+            deps_type=ToolDeps,
+        )
 
     def register_tools(self) -> None:
-        """Tool registration seam for U11 read-only tools."""
-        return None
+        """Register all read-only tools on the Pydantic AI agent."""
+        for tool_func in ALL_TOOLS:
+            self.agent.tool(tool_func)
 
     async def chat(
         self,
@@ -73,7 +110,8 @@ class GreenhouseAIAgent:
         )
 
         prompt = self._build_scoped_prompt(message, scope)
-        result = await self.agent.run(prompt)
+        deps = self._build_deps()
+        result = await self.agent.run(prompt, deps=deps)
         ai_response = result.output
 
         tokens_in, tokens_out = _extract_usage(result)

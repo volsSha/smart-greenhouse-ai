@@ -84,6 +84,8 @@ async def test_tool_log_repository_create() -> None:
 @pytest.mark.asyncio
 async def test_agent_chat_persists_user_and_assistant_messages() -> None:
     """GreenhouseAIAgent persists a chat turn while using TestModel double."""
+    from app.services.ai_agent.tools.deps import ToolDeps
+
     session = _make_mock_session()
     conversation_id = uuid.uuid4()
     fake_conversation = SimpleNamespace(id=conversation_id)
@@ -95,7 +97,11 @@ async def test_agent_chat_persists_user_and_assistant_messages() -> None:
         recommendations=["Register read-only tools before answering live state questions."],
         proposed_actions=[],
     )
-    test_agent = Agent(TestModel(custom_output_args=output), output_type=AIResponse)
+    test_agent = Agent(
+        TestModel(custom_output_args=output),
+        output_type=AIResponse,
+        deps_type=ToolDeps,
+    )
     service = GreenhouseAIAgent(session, settings=_settings(), agent=test_agent)
     service.conversation_repository.create_conversation = AsyncMock(return_value=fake_conversation)
     service.conversation_repository.add_message = AsyncMock()
