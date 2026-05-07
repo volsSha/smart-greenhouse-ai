@@ -1,7 +1,7 @@
 ---
 title: feat: Build greenhouse fleet control system
 type: feat
-status: active
+status: completed
 date: 2026-05-07
 ---
 

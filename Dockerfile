@@ -6,12 +6,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev &
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /build
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
 
 # Copy dependency manifests first for layer caching
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies into a virtual environment
-RUN uv venv /opt/venv && . /opt/venv/bin/activate && uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-install-project
 
 # ---- Stage 2: Runtime ----
 FROM python:3.13-slim AS runtime

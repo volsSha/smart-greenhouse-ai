@@ -20,23 +20,22 @@ def main_layout() -> None:
         ui.label("Fleet Control System").classes("text-sm opacity-70")
 
     # --- Sidebar ---
-    with ui.column().classes("w-full"):
-        with ui.sidebar():
-            ui.label("Menu").classes("text-md font-bold mb-4")
+    with ui.left_drawer().classes("p-4"):
+        ui.label("Menu").classes("text-md font-bold mb-4")
 
-            # Operations group
-            ui.label("Operations").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-            ui.link("Dashboard", "/dashboard")
-            ui.link("Simulator", "/simulator")
-            ui.link("Plants", "/plants")
-            ui.link("Control", "/control")
+        # Operations group
+        ui.label("Operations").classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link("Dashboard", "/dashboard")
+        ui.link("Simulator", "/simulator")
+        ui.link("Plants", "/plants")
+        ui.link("Control", "/control")
 
-            # Intelligence group
-            ui.label("Intelligence").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-            ui.link("AI Chat", "/ai-chat")
-            ui.link("RAG", "/rag")
-            ui.link("Logs", "/logs")
+        # Intelligence group
+        ui.label("Intelligence").classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link("AI Chat", "/ai-chat")
+        ui.link("RAG", "/rag")
+        ui.link("Logs", "/logs")
 
-            # System group
-            ui.label("System").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-            ui.link("Settings", "/settings")
+        # System group
+        ui.label("System").classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link("Settings", "/settings")

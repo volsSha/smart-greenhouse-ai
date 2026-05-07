@@ -19,6 +19,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.config import Settings
@@ -101,30 +102,26 @@ app.include_router(commands_router)
 app.include_router(ai_chat_router)
 app.include_router(rag_router)
 
+
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    return RedirectResponse("/dashboard")
+
+
 # --- Register NiceGUI pages ---
 # Importing the page modules registers their @ui.page() decorators
 # with NiceGUI's internal router. The pages are not accessible until
 # NiceGUI is mounted via ui.run_with() or ui.run().
 from app.ui.pages import dashboard, settings, control, logs, ai_chat, rag  # noqa: E402, F401
+from nicegui import ui  # noqa: E402
+
+ui.run_with(
+    app,
+    title="Smart Greenhouse Fleet",
+    storage_secret="",
+)
 
 logger.info("API routers and UI pages registered")
-
-
-def run() -> None:
-    """Start the application server with NiceGUI mounted.
-
-    This is the intended entry point for running the app directly::
-
-        python -m app.main
-    """
-    from nicegui import ui
-
-    ui.run_with(
-        app,
-        title="Smart Greenhouse Fleet",
-        storage_secret="",  # set via APP_SECRET env in production
-        reload=False,
-    )
 
 
 # Convenience alias for uvicorn:

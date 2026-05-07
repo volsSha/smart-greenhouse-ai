@@ -1,11 +1,8 @@
 services:
   mosquitto:
-    image: eclipse-mosquitto:2.7
+    image: eclipse-mosquitto:2.1.2-alpine
     container_name: greenhouse-mosquitto
     restart: unless-stopped
-    ports:
-      - "1883:1883"
-      - "9001:9001"
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
@@ -21,17 +18,16 @@ services:
       start_period: 5s
 
   postgres:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:0.8.2-pg17-trixie
     container_name: greenhouse-postgres
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-greenhouse_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       POSTGRES_DB: ${POSTGRES_DB:-greenhouse_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
     networks:
       - greenhouse-net
     healthcheck:
@@ -42,11 +38,9 @@ services:
       start_period: 10s
 
   influxdb:
-    image: influxdb:2.7
+    image: influxdb:2.7.12
     container_name: greenhouse-influxdb
     restart: unless-stopped
-    ports:
-      - "8086:8086"
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: greenhouse_admin
@@ -57,7 +51,6 @@ services:
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-your-influxdb-token}
     volumes:
       - influxdb_data:/var/lib/influxdb2
-      - influxdb_config:/etc/influxdb2
     networks:
       - greenhouse-net
     healthcheck:
@@ -68,11 +61,9 @@ services:
       start_period: 15s
 
   grafana:
-    image: grafana/grafana:11.4.0
+    image: grafana/grafana:13.0.1
     container_name: greenhouse-grafana
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -82,6 +73,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - greenhouse-net
     depends_on:
@@ -90,7 +82,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "grafana-cli healthcheck || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/health >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -102,13 +94,11 @@ services:
       dockerfile: Dockerfile
     container_name: greenhouse-app
     restart: unless-stopped
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
     environment:
       POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-your-influxdb-token}
       MQTT_HOST: mosquitto
     volumes:
       - ./app:/app/app:ro
@@ -122,7 +112,7 @@ services:
       mosquitto:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/health\")' || exit 1"]
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/api/health/live\")' || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
