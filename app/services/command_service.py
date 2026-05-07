@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.command import CommandLog
 from app.repositories.command_repository import CommandRepository
 from app.schemas.commands import CommandPropose
+from app.services.command_publisher import CommandPublisher
 from app.services.safety_validator import SafetyValidator, ValidationResult
 
 logger = logging.getLogger(__name__)
@@ -86,10 +87,15 @@ def _check_transition(current: str, target: str) -> None:
 class CommandService:
     """Service for managing command lifecycle."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        publisher: CommandPublisher | None = None,
+    ) -> None:
         self.session = session
         self.repo = CommandRepository(session)
         self.validator = SafetyValidator()
+        self.publisher = publisher
 
     async def propose(
         self,
@@ -163,6 +169,7 @@ class CommandService:
         command_id: uuid.UUID,
         current_readings: dict | None = None,
         recent_commands: list | None = None,
+        execute: bool = False,
     ) -> CommandLog:
         """Approve a proposed or validated command.
 
@@ -197,6 +204,8 @@ class CommandService:
                 CommandStatus.APPROVED,
             )
             logger.info("Command %s approved", command.id)
+            if execute:
+                command = await self.execute(command.id, command=command)
         else:
             _check_transition(command.status, CommandStatus.REJECTED)
             command = await self.repo.update_status(
@@ -252,34 +261,48 @@ class CommandService:
 
         return expired
 
-    async def execute(self, command_id: uuid.UUID) -> CommandLog:
-        """Execute an approved command.
-
-        Transitions to EXECUTING, then to EXECUTED. MQTT publishing is
-        stubbed for now -- U14 will add the real execution.
-
-        Raises CommandError if the command is not found or not in APPROVED state.
-        """
-        command = await self.repo.get_by_id(command_id)
+    async def execute(
+        self,
+        command_id: uuid.UUID,
+        command: CommandLog | None = None,
+    ) -> CommandLog:
+        """Execute an approved command through the configured MQTT publisher."""
+        command = command or await self.repo.get_by_id(command_id)
         if command is None:
             raise CommandError(f"Command {command_id} not found")
 
+        if command.status == CommandStatus.EXECUTED:
+            return command
         if command.status != CommandStatus.APPROVED:
             raise CommandError(
                 f"Cannot execute command in '{command.status}' state"
             )
+        if self.publisher is None:
+            raise CommandError("Command publisher is not configured")
 
-        # Transition to EXECUTING
         _check_transition(command.status, CommandStatus.EXECUTING)
         command = await self.repo.update_status(command.id, CommandStatus.EXECUTING)
         logger.info("Command %s executing", command.id)
 
-        # Stub: transition to EXECUTED immediately
-        # In U14, this is where MQTT publishing happens.
-        _check_transition(command.status, CommandStatus.EXECUTED)
-        command = await self.repo.update_status(command.id, CommandStatus.EXECUTED)
-        logger.info("Command %s executed (stub)", command.id)
+        try:
+            publish_result = await self.publisher.publish(command)
+        except Exception as exc:
+            _check_transition(command.status, CommandStatus.FAILED)
+            failed = await self.repo.update_status(
+                command.id,
+                CommandStatus.FAILED,
+                validation_errors={"errors": [f"MQTT publish failed: {exc}"]},
+            )
+            logger.warning("Command %s failed during MQTT publish", command.id, exc_info=True)
+            return failed
 
+        _check_transition(command.status, CommandStatus.EXECUTED)
+        command = await self.repo.update_status(
+            command.id,
+            CommandStatus.EXECUTED,
+            validation_errors={"publish": publish_result},
+        )
+        logger.info("Command %s executed", command.id)
         return command
 
     async def get_recent(

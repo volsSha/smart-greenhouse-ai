@@ -7,8 +7,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db_session
-from app.schemas.commands import CommandApproval, CommandPropose, CommandResponse
+from app.dependencies import get_command_publisher, get_db_session
+from app.schemas.commands import CommandPropose, CommandResponse
+from app.services.command_publisher import CommandPublisher
 from app.services.command_service import CommandError, CommandService
 
 router = APIRouter(prefix="/api/commands", tags=["commands"])
@@ -34,14 +35,12 @@ async def propose_command(
 async def approve_command(
     command_id: UUID,
     session: AsyncSession = Depends(get_db_session),
+    publisher: CommandPublisher = Depends(get_command_publisher),
 ) -> CommandResponse:
-    """Approve a proposed or validated command.
-
-    Re-validates at approval time. Transitions to 'approved' or 'rejected'.
-    """
-    service = CommandService(session)
+    """Approve, revalidate, and execute a proposed or validated command."""
+    service = CommandService(session, publisher=publisher)
     try:
-        command = await service.approve(command_id)
+        command = await service.approve(command_id, execute=True)
         await session.commit()
         return CommandResponse.model_validate(command)
     except CommandError as e:

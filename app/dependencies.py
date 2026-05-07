@@ -9,6 +9,7 @@ dependency overrides.
 from collections.abc import AsyncGenerator
 
 import aiomqtt
+from fastapi import Request
 from influxdb_client import InfluxDBClient
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -18,6 +19,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.config import Settings
+from app.services.command_publisher import CommandPublisher
 
 
 def get_settings() -> Settings:
@@ -106,3 +108,9 @@ async def get_mqtt_client() -> AsyncGenerator[aiomqtt.Client, None]:
 
     settings: Settings = Request.app.state.settings
     yield create_mqtt_client(settings)
+
+
+async def get_command_publisher(request: Request) -> AsyncGenerator[CommandPublisher, None]:
+    """Yield the MQTT command publisher built from app settings."""
+    settings: Settings = request.app.state.settings
+    yield CommandPublisher(settings.mqtt)

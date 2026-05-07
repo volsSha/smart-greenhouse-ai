@@ -16,7 +16,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.commands import router as commands_router, get_db_session
+from app.api.commands import get_command_publisher, get_db_session, router as commands_router
 
 
 # --- Build a minimal test app with just the commands router ---
@@ -49,6 +49,12 @@ def _make_fake_command(**overrides) -> SimpleNamespace:
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
+
+
+async def _publisher_override():
+    publisher = MagicMock()
+    publisher.publish = AsyncMock(return_value={"topic": "commands", "payload": {}})
+    yield publisher
 
 
 def _make_mock_session() -> MagicMock:
@@ -94,6 +100,7 @@ class TestProposeEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(
@@ -140,6 +147,7 @@ class TestProposeEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(
@@ -186,12 +194,17 @@ class TestApproveEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(
                 "app.services.command_service.CommandRepository.update_status",
                 new_callable=AsyncMock,
-                return_value=_make_fake_command(status="approved"),
+                side_effect=[
+                    _make_fake_command(status="approved"),
+                    _make_fake_command(status="executing"),
+                    _make_fake_command(status="executed"),
+                ],
             ),
         ):
             transport = ASGITransport(app=cmd_test_app)
@@ -204,7 +217,7 @@ class TestApproveEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "approved"
+        assert data["status"] == "executed"
 
     @pytest.mark.anyio
     async def test_approve_nonexistent_returns_409(self) -> None:
@@ -216,6 +229,7 @@ class TestApproveEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         transport = ASGITransport(app=cmd_test_app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -242,6 +256,7 @@ class TestCancelEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(
@@ -273,6 +288,7 @@ class TestCancelEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         transport = ASGITransport(app=cmd_test_app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -302,6 +318,7 @@ class TestRecentCommandsEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(
@@ -332,6 +349,7 @@ class TestRecentCommandsEndpoint:
             yield mock_session
 
         cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
             patch(

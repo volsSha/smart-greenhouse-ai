@@ -391,7 +391,9 @@ class TestExecute:
     @pytest.mark.asyncio
     async def test_execute_approved_command(self) -> None:
         session = _make_mock_session()
-        service = CommandService(session)
+        publisher = MagicMock()
+        publisher.publish = AsyncMock(return_value={"topic": "commands", "payload": {}})
+        service = CommandService(session, publisher=publisher)
 
         fake_cmd = _make_command_log(status="approved")
         session.get = AsyncMock(return_value=fake_cmd)

@@ -7,6 +7,7 @@ the display-only rendering with status indication.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from nicegui import ui
@@ -28,7 +29,11 @@ def _status_badge(status: str) -> None:
     ui.badge(config["label"], color=config["color"]).props("outline")
 
 
-def proposed_action_card(action: dict[str, Any]) -> None:
+def proposed_action_card(
+    action: dict[str, Any],
+    on_approve: Callable[[str], Any] | None = None,
+    on_reject: Callable[[str], Any] | None = None,
+) -> None:
     """Render a card displaying a proposed physical action.
 
     Parameters:
@@ -86,3 +91,17 @@ def proposed_action_card(action: dict[str, Any]) -> None:
             with ui.row().classes("items-start gap-1 mt-2"):
                 ui.icon("psychology", size="0.8rem").classes("opacity-40 mt-0.5")
                 ui.label(reason).classes("text-xs opacity-70")
+
+        command_id = action.get("command_id") or action.get("id")
+        if status in {"pending", "proposed", "validated"} and command_id:
+            with ui.row().classes("gap-2 mt-3"):
+                ui.button(
+                    "Approve and Execute",
+                    color="positive",
+                    on_click=lambda command_id=str(command_id): on_approve(command_id) if on_approve else None,
+                ).props("dense")
+                ui.button(
+                    "Reject",
+                    color="negative",
+                    on_click=lambda command_id=str(command_id): on_reject(command_id) if on_reject else None,
+                ).props("dense outline")
