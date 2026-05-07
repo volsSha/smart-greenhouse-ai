@@ -1,0 +1,36 @@
+[project]
+name = "smart-greenhouse-ai"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "nicegui",
+    "pydantic",
+    "pydantic-settings",
+    "sqlalchemy",
+    "alembic",
+    "asyncpg",
+    "psycopg[binary]",
+    "pgvector",
+    "influxdb-client",
+    "paho-mqtt",
+    "aiomqtt",
+    "numpy",
+    "pandas",
+    "plotly",
+    "python-dotenv",
+    "httpx",
+    "pydantic-ai",
+    "tiktoken",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

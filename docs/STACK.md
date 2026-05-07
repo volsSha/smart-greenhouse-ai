@@ -2,37 +2,39 @@
 
 ## Core Stack
 
-| Layer         | Technology                | Purpose                                                      |
-|---------------|---------------------------|--------------------------------------------------------------|
-| UI            | **NiceGUI**               | Web interface, dashboard, chat, sensor emulator              |
-| Backend API   | **FastAPI**               | REST, WebSocket, tool endpoints, safety layer                |
-| MQTT broker   | **Mosquitto**             | Telemetry and command exchange                               |
-| Time-series   | **InfluxDB**              | Temperature, humidity, CO2, light, soil moisture             |
-| Relational DB | **PostgreSQL**            | Users, greenhouses, plants, settings, commands, AI logs      |
-| Vector search | **pgvector**              | RAG for plant knowledge, care rules, documentation           |
-| LLM provider  | **OpenRouter**            | LLM, tool calling, agent workflow                            |
-| Control       | **Python PID/Fuzzy**      | Automatic control (simple-pid, scikit-fuzzy)                 |
-| Containers    | **Docker Compose**        | Single repository, single startup                            |
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| UI | **NiceGUI** | Group dashboard, greenhouse/zone views, chat, simulator, controls |
+| Backend API | **FastAPI** | REST, WebSocket, AI tools, command routing, safety layer |
+| MQTT broker | **Mosquitto** | Scoped telemetry and command exchange |
+| Time-series | **InfluxDB** | Microclimate telemetry across groups, greenhouses, zones, sensors |
+| Relational DB | **PostgreSQL** | Groups, greenhouses, zones, devices, plants, settings, commands, AI logs |
+| Vector search | **pgvector** | RAG for plant knowledge, care rules, system docs |
+| LLM provider | **OpenRouter** | LLM reasoning, explanations, proposed actions |
+| Agent framework | **Pydantic AI** | Tool calling, structured output, deferred/approval-required proposed action tools |
+| Control | **Python rules first; PID/Fuzzy later** | Baseline observer/proposer; advanced autonomous tuning deferred |
+| Containers | **Docker Compose** | Single repository, single startup |
 
 ## Component Roles
 
-| Component         | Role                                                                 |
-|-------------------|----------------------------------------------------------------------|
-| NiceGUI           | Human-machine interface                                              |
-| FastAPI           | Central logic, API, tools, safety validation                         |
-| Mosquitto         | Telemetry/command transport                                          |
-| InfluxDB          | Sensor time-series                                                   |
-| PostgreSQL        | System structure, plants, users, commands, logs                      |
-| pgvector          | RAG memory for agronomic knowledge                                   |
-| OpenRouter        | LLM reasoning, tool calling, explanations, proposed actions          |
-| Control Engine    | Autonomous PID/Fuzzy loop                                            |
-| Simulator         | Virtual ESP32                                                        |
+| Component | Role |
+|-----------|------|
+| NiceGUI | Human-machine interface for group, greenhouse, and zone operations |
+| FastAPI | Central logic, API, tools, safety validation, command routing |
+| Mosquitto | Telemetry/command transport with topic ACLs |
+| InfluxDB | Scoped time-series telemetry |
+| PostgreSQL | Fleet structure, devices, plant batches, policies, commands, logs |
+| pgvector | RAG memory for agronomic knowledge |
+| OpenRouter | LLM reasoning and explanations |
+| Pydantic AI | Agent loop, tool approval, structured responses, deterministic tests |
+| Control Engine | Rule-based observer/proposer for zone and group conditions |
+| Simulator | Virtual edge nodes for multiple greenhouses/zones |
 
 ## Python Dependencies
 
 ### Base
 
-```
+```text
 fastapi
 uvicorn[standard]
 nicegui
@@ -49,27 +51,79 @@ aiomqtt
 numpy
 pandas
 plotly
-simple-pid
-scikit-fuzzy
 python-dotenv
 httpx
-openrouter
 pytest
 pytest-asyncio
 ```
 
 ### AI / RAG
 
-```
+```text
+pydantic-ai
 tiktoken
-sentence-transformers
 ```
+
+OpenRouter is used as an OpenAI-compatible API endpoint through Pydantic AI / HTTP client configuration, so the default dependency path does **not** require the standalone `openrouter` package. If implementation chooses the standalone OpenRouter SDK instead of Pydantic AI provider configuration, add `openrouter` deliberately and update the agent plan.
+
+Embedding dependency depends on the chosen provider:
+- API embeddings with 1536 dimensions: no local `sentence-transformers` dependency required
+- local embeddings: add `sentence-transformers` and update pgvector dimensions before first migration
+
+## Install with uv
+
+### Runtime dependencies
+
+```bash
+uv add fastapi 'uvicorn[standard]' nicegui pydantic pydantic-settings sqlalchemy alembic asyncpg 'psycopg[binary]' pgvector influxdb-client paho-mqtt aiomqtt numpy pandas plotly python-dotenv httpx pydantic-ai tiktoken
+```
+
+### Test dependencies
+
+```bash
+uv add --dev pytest pytest-asyncio
+```
+
+### Optional local embeddings
+
+Only run this if choosing local embeddings instead of API embeddings:
+
+```bash
+uv add sentence-transformers
+```
+
+### Deferred advanced control
+
+Only run this when implementing PID/fuzzy autonomous control:
+
+```bash
+uv add simple-pid scikit-fuzzy
+```
+
+### Standalone OpenRouter SDK alternative
+
+Only run this if not using Pydantic AI's OpenAI-compatible provider configuration for OpenRouter:
+
+```bash
+uv add openrouter
+```
+
+### Deferred / Later
+
+```text
+simple-pid
+scikit-fuzzy
+```
+
+Add these only when implementing advanced autonomous control. The initial system uses rule-based observation and proposed actions.
 
 ## Infrastructure Images
 
-| Service       | Image                          | Port  |
-|---------------|--------------------------------|-------|
-| Mosquitto     | eclipse-mosquitto:2            | 1883, 9001 |
-| PostgreSQL    | pgvector/pgvector:pg16         | 5432  |
-| InfluxDB      | influxdb:2.7                   | 8086  |
-| Grafana       | grafana/grafana                | 3000  |
+| Service | Image | Port |
+|---------|-------|------|
+| Mosquitto | eclipse-mosquitto:2 | 1883, 9001 |
+| PostgreSQL | pgvector/pgvector:pg16 | 5432 |
+| InfluxDB | influxdb:2.7.x | 8086 |
+| Grafana | grafana/grafana | 3000 |
+
+Pin exact image tags in Docker Compose. Do not use floating `latest` for stateful services.

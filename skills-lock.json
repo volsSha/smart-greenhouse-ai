@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "building-pydantic-ai-agents": {
+      "source": "pydantic/skills",
+      "sourceType": "github",
+      "skillPath": "skills/building-pydantic-ai-agents/SKILL.md",
+      "computedHash": "3c89db85a2d130adc79be0477d1186025af5acd2eae87cb579c3e83107202606"
+    },
+    "docker-compose-orchestration": {
+      "source": "manutej/luxor-claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/luxor-devops-suite/skills/docker-compose-orchestration/SKILL.md",
+      "computedHash": "01831d0723a2ac491e233bd9bfdffdac8c0ae5500f140a3ca0382ac5f4a26159"
+    },
+    "docker-expert": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/docker-expert/SKILL.md",
+      "computedHash": "7be30b1c18b91628dcd8437a89e7e20acce76bae4349533e4ebdeb376a660bcb"
+    },
+    "fastapi-python": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "fastapi-python/SKILL.md",
+      "computedHash": "4521c6090735152b7b8df670cefe5c1c6d1dcaa115de67bb96e74ebf802d4f24"
+    },
+    "logfire-instrumentation": {
+      "source": "pydantic/skills",
+      "sourceType": "github",
+      "skillPath": "skills/logfire-instrumentation/SKILL.md",
+      "computedHash": "b6d3eb85ebe1d5d4387e199599307d606dea0de349869e11fa720b8c68dce22a"
+    },
+    "logfire-query": {
+      "source": "pydantic/skills",
+      "sourceType": "github",
+      "skillPath": "skills/logfire-query/SKILL.md",
+      "computedHash": "4d14dbfea8eca59aa2419531750c1a9b305b29e0840044ca515deabc98401512"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
+      "computedHash": "8e41c7417894e6f394614ee7ca3ee5322b1e58d890255d441f42dea98732597f"
+    }
+  }
+}
