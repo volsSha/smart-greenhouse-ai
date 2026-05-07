@@ -87,6 +87,7 @@ from app.api.groups import router as groups_router  # noqa: E402
 from app.api.greenhouses import router as greenhouses_router  # noqa: E402
 from app.api.devices import router as devices_router  # noqa: E402
 from app.api.plants import router as plants_router  # noqa: E402
+from app.api.commands import router as commands_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(telemetry_router)
@@ -94,12 +95,13 @@ app.include_router(groups_router)
 app.include_router(greenhouses_router)
 app.include_router(devices_router)
 app.include_router(plants_router)
+app.include_router(commands_router)
 
 # --- Register NiceGUI pages ---
 # Importing the page modules registers their @ui.page() decorators
 # with NiceGUI's internal router. The pages are not accessible until
 # NiceGUI is mounted via ui.run_with() or ui.run().
-from app.ui.pages import dashboard, settings  # noqa: E402, F401
+from app.ui.pages import dashboard, settings, control, logs  # noqa: E402, F401
 
 logger.info("API routers and UI pages registered")
 
