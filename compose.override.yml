@@ -1,0 +1,31 @@
+# Local development overrides
+# This file is automatically loaded by Docker Compose when running
+# `docker compose up` in development. It binds all ports to localhost only.
+
+services:
+  mosquitto:
+    ports:
+      - "127.0.0.1:1883:1883"
+      - "127.0.0.1:9001:9001"
+
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  influxdb:
+    ports:
+      - "127.0.0.1:8086:8086"
+
+  grafana:
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  app:
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      # Mount source for live-reload during development
+      - ./app:/app/app
+      - ./tests:/app/tests
+    environment:
+      DEBUG: "true"
