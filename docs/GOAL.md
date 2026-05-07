@@ -1,56 +1,85 @@
-# Smart Greenhouse AI - Project Goal
+# Smart Greenhouse Fleet Control System - Project Goal
 
 ## What
 
-An explainable AI-IoT control system for a small greenhouse that combines sensor telemetry, rule-based control, LLM reasoning, and RAG knowledge to help users monitor and manage their plants through natural language.
+An intelligent cyber-physical system for monitoring and controlling the microclimate of a group of small greenhouses. The system combines IoT telemetry, MQTT communication, time-series analytics, structured greenhouse metadata, rule-based safety validation, LLM reasoning, and RAG knowledge to help users manage multiple greenhouse objects through dashboards and natural language.
+
+Academic formulation:
+
+> Intelligent cyber-physical system for monitoring and controlling the microclimate of a group of greenhouses using IoT, MQTT, time-series analytics, and an LLM interface.
+
+Short Ukrainian formulation:
+
+> Кіберфізична система керування групою теплиць.
+
+Full Ukrainian formulation:
+
+> Інтелектуальна кіберфізична система моніторингу та керування мікрокліматом групи теплиць із використанням IoT, MQTT, time-series аналітики та LLM-інтерфейсу.
 
 ## Why
 
 Most greenhouse systems either:
-- Are purely automation (no intelligence, no explanations)
-- Are simple dashboards (no reasoning, no recommendations)
-- Have AI that hallucinates (no grounding in real data)
+- monitor one greenhouse in isolation
+- automate devices without explanations
+- show dashboards without cross-greenhouse reasoning
+- use AI that can hallucinate because it is not grounded in real telemetry
 
-This system bridges the gap: AI that reasons over **actual** sensor data, knows plant-specific thresholds, searches domain knowledge, and proposes actions through a safety-validated pipeline.
+This system bridges the gap for a small greenhouse fleet: it understands greenhouse groups, individual greenhouses, zones, sensors, actuators, plants, alerts, command history, and agronomic knowledge. The AI can analyze one zone, one greenhouse, or the whole group and explain where attention is needed.
 
 ## Key Differentiator
 
-**AI does not fabricate answers.** Every claim is backed by:
-- Real telemetry from InfluxDB
-- Plant profiles from PostgreSQL
-- Historical command data
+**AI does not fabricate answers and does not directly control actuators.** Every claim is backed by:
+- real telemetry from InfluxDB scoped by group, greenhouse, zone, sensor, and metric
+- greenhouse, zone, plant batch, sensor, and actuator metadata from PostgreSQL
+- plant profiles and control policies
+- historical command data
 - RAG-sourced agronomic knowledge
-- Active alerts
+- active alerts at zone, greenhouse, and group level
 
-All tool calls are logged and visible to the user.
+All tool calls are logged and visible to the user. All physical actions are proposed as structured commands and pass through backend safety validation and user approval before MQTT execution.
+
+## Domain Model
+
+```text
+GreenhouseGroup
+  ├── Greenhouse
+  │   ├── GreenhouseZone
+  │   │   ├── Sensor
+  │   │   ├── Actuator
+  │   │   ├── PlantBatch
+  │   │   └── ControlSetpoint
+  │   ├── EdgeNode
+  │   ├── Alert
+  │   ├── Command
+  │   └── Telemetry
+  └── GroupPolicy
+```
+
+The primary domain entity is `GreenhouseGroup`, not a single greenhouse. A group contains multiple greenhouses, each greenhouse contains zones, and each zone owns its sensor, actuator, plant, setpoint, alert, and telemetry context.
 
 ## Scientific Value
 
 Demonstrates:
-- Cyber-physical architecture
-- Event-driven MQTT communication
-- Time-series analysis
-- Rule-based / PID / Fuzzy control
-- LLM tool usage
-- RAG for domain knowledge
-- Safety validation
-- Audit logging
-- Physical environment simulation
+- multi-greenhouse cyber-physical architecture
+- event-driven MQTT communication with scoped topics
+- fleet and zone-level time-series analysis
+- rule-based safety validation
+- LLM tool usage across group, greenhouse, and zone contexts
+- RAG for agronomic knowledge
+- command approval and audit logging
+- physical environment simulation with multiple edge nodes
+- aggregated group-level state and problem prioritization
 
 ## Practical Value
 
 Users can ask:
-- "How are my plants?"
-- "Why is humidity dropping?"
-- "Should I water today?"
-- "What happened with temperature last night?"
-- "Explain the last alert."
-- "Suggest a regime for tomatoes."
+- "How are my greenhouses?"
+- "Which greenhouse has problems today?"
+- "How are the tomatoes in greenhouse 2, zone 1?"
+- "Compare greenhouse 1 and greenhouse 2."
+- "Why did soil moisture drop in zone 2?"
+- "Should I water the tomato zone today?"
+- "What happened with temperature last night across the group?"
+- "Prioritize active alerts across all greenhouses."
 
-And get answers grounded in real data, not hallucinations.
-
-## Academic Formulation
-
-> The work proposes an extended Python-oriented monorepo architecture for an intelligent small greenhouse control system. The architecture combines MQTT broker Mosquitto for event-based telemetry exchange, FastAPI as the central backend, NiceGUI as the web interface for monitoring and control, InfluxDB for sensor time-series storage, PostgreSQL for structured system data, pgvector for RAG-based domain knowledge retrieval, and an OpenRouter-based LLM Agent for natural language interaction.
->
-> The intelligent agent has no direct access to actuators. It uses tool calling to retrieve factual data, analyzes plant state, generates explanations, and creates structured control intents. All potential actions pass through backend-level validation and safety rules, after which they can be confirmed by the user and sent to the MQTT broker as actuator commands.
+And get answers grounded in real group, greenhouse, and zone data rather than hallucinations.
