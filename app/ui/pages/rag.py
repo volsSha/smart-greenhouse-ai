@@ -1,7 +1,9 @@
 """RAG knowledge base management page."""
 
+import httpx
 from nicegui import ui
 
+from app.ui.api_client import api_client, response_error
 from app.ui.layouts.main_layout import main_layout
 
 
@@ -15,6 +17,11 @@ async def rag_page() -> None:
         "Manage agronomic knowledge documents for AI-powered search."
     ).classes("text-sm opacity-70 mt-2")
 
+    def notify(notification, message: str, kind: str) -> None:
+        notification.set_message(message)
+        notification.set_type(kind)
+        notification.open()
+
     # --- Document list ---
     with ui.card().classes("w-full mt-6"):
         ui.label("Documents").classes("text-lg font-bold")
@@ -27,10 +34,8 @@ async def rag_page() -> None:
             with document_list:
                 ui.spinner(size="lg")
             try:
-                import httpx
-
-                async with httpx.AsyncClient() as client:
-                    response = await client.get("http://localhost:8000/api/rag/documents")
+                async with api_client() as client:
+                    response = await client.get("/api/rag/documents")
                     if response.status_code == 200:
                         documents = response.json()
                         document_list.clear()
@@ -87,19 +92,13 @@ async def rag_page() -> None:
         async def add_document() -> None:
             """Submit a new document to the knowledge base."""
             if not title_input.value or not content_input.value:
-                notification.set_message(
-                    "Title and content are required."
-                )
-                notification.set_type("warning")
-                notification.open()
+                notify(notification, "Title and content are required.", "warning")
                 return
 
             try:
-                import httpx
-
-                async with httpx.AsyncClient() as client:
+                async with api_client() as client:
                     response = await client.post(
-                        "http://localhost:8000/api/rag/documents",
+                        "/api/rag/documents",
                         json={
                             "title": title_input.value,
                             "source_type": source_type_input.value,
@@ -107,21 +106,14 @@ async def rag_page() -> None:
                         },
                     )
                     if response.status_code == 201:
-                        notification.set_message("Document added successfully!")
-                        notification.set_type("positive")
-                        notification.open()
+                        notify(notification, "Document added successfully!", "positive")
                         title_input.set_value("")
                         content_input.set_value("")
                         await load_documents()
                     else:
-                        detail = response.json().get("detail", "Unknown error")
-                        notification.set_message(f"Failed: {detail}")
-                        notification.set_type("negative")
-                        notification.open()
-            except Exception as e:
-                notification.set_message(f"Error: {e}")
-                notification.set_type("negative")
-                notification.open()
+                        notify(notification, f"Failed: {response_error(response)}", "negative")
+            except httpx.HTTPError as e:
+                notify(notification, f"Error: {e}", "negative")
 
         ui.button("Add Document", on_click=add_document).props("color=primary")
 
@@ -137,29 +129,24 @@ async def rag_page() -> None:
         async def reindex_all() -> None:
             """Trigger reindexing of all documents."""
             try:
-                import httpx
-
-                async with httpx.AsyncClient(timeout=120.0) as client:
-                    response = await client.post(
-                        "http://localhost:8000/api/rag/reindex"
-                    )
+                async with api_client(timeout=120.0) as client:
+                    response = await client.post("/api/rag/reindex")
                     if response.status_code == 200:
                         data = response.json()
                         total = len(data.get("results", []))
-                        reindex_notification.set_message(
-                            f"Reindex complete: {total} documents processed."
+                        notify(
+                            reindex_notification,
+                            f"Reindex complete: {total} documents processed.",
+                            "positive",
                         )
-                        reindex_notification.set_type("positive")
                     else:
-                        reindex_notification.set_message(
-                            f"Reindex failed: {response.text}"
+                        notify(
+                            reindex_notification,
+                            f"Reindex failed: {response_error(response)}",
+                            "negative",
                         )
-                        reindex_notification.set_type("negative")
-                    reindex_notification.open()
-            except Exception as e:
-                reindex_notification.set_message(f"Reindex error: {e}")
-                reindex_notification.set_type("negative")
-                reindex_notification.open()
+            except httpx.HTTPError as e:
+                notify(reindex_notification, f"Reindex error: {e}", "negative")
 
         ui.button("Reindex All Documents", on_click=reindex_all).props(
             "color=secondary"
@@ -189,11 +176,9 @@ async def rag_page() -> None:
                 ui.spinner(size="lg")
 
             try:
-                import httpx
-
-                async with httpx.AsyncClient(timeout=60.0) as client:
+                async with api_client(timeout=60.0) as client:
                     response = await client.get(
-                        "http://localhost:8000/api/rag/search",
+                        "/api/rag/search",
                         params={"query": search_input.value, "limit": 10},
                     )
                     if response.status_code == 200:
@@ -221,10 +206,10 @@ async def rag_page() -> None:
                     else:
                         search_results.clear()
                         with search_results:
-                            ui.label("Search failed.").classes(
+                            ui.label(f"Search failed: {response_error(response)}").classes(
                                 "text-sm text-red-500"
                             )
-            except Exception as e:
+            except httpx.HTTPError as e:
                 search_results.clear()
                 with search_results:
                     ui.label(f"Search error: {e}").classes("text-sm text-red-500")

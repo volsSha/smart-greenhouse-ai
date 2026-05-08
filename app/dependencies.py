@@ -65,48 +65,28 @@ def create_mqtt_client(settings: Settings) -> aiomqtt.Client:
     )
 
 
-async def get_db_engine() -> AsyncGenerator[AsyncEngine, None]:
-    """Yield the async database engine from app state.
-
-    The engine is created during lifespan startup and stored on
-    app.state.db_engine.
-    """
-    from fastapi import Request
-
-    engine: AsyncEngine = Request.app.state.db_engine
+async def get_db_engine(request: Request) -> AsyncGenerator[AsyncEngine, None]:
+    """Yield the async database engine from app state."""
+    engine: AsyncEngine = request.app.state.db_engine
     yield engine
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Yield an async database session.
-
-    The session is created from the engine stored in app state and
-    automatically closed after the request.
-    """
-    from fastapi import Request
-
-    session_factory: async_sessionmaker[AsyncSession] = Request.app.state.session_factory
+async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
+    """Yield an async database session."""
+    session_factory: async_sessionmaker[AsyncSession] = request.app.state.session_factory
     async with session_factory() as session:
         yield session
 
 
-async def get_influx_client() -> AsyncGenerator[InfluxDBClient, None]:
+async def get_influx_client(request: Request) -> AsyncGenerator[InfluxDBClient, None]:
     """Yield the InfluxDB client from app state."""
-    from fastapi import Request
-
-    client: InfluxDBClient = Request.app.state.influx_client
+    client: InfluxDBClient = request.app.state.influx_client
     yield client
 
 
-async def get_mqtt_client() -> AsyncGenerator[aiomqtt.Client, None]:
-    """Yield the MQTT client from app state.
-
-    The MQTT client is created fresh on each call since aiomqtt
-    clients manage their own connection lifecycle.
-    """
-    from fastapi import Request
-
-    settings: Settings = Request.app.state.settings
+async def get_mqtt_client(request: Request) -> AsyncGenerator[aiomqtt.Client, None]:
+    """Yield the MQTT client from app state."""
+    settings: Settings = request.app.state.settings
     yield create_mqtt_client(settings)
 
 

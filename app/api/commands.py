@@ -5,6 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_command_publisher, get_db_session
@@ -26,9 +27,16 @@ async def propose_command(
     if safe, or 'proposed' with validation_errors if unsafe.
     """
     service = CommandService(session)
-    command = await service.propose(body)
-    await session.commit()
-    return CommandResponse.model_validate(command)
+    try:
+        command = await service.propose(body)
+        await session.commit()
+        return CommandResponse.model_validate(command)
+    except IntegrityError as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Command scope does not exist. Check group, greenhouse, and zone IDs.",
+        ) from exc
 
 
 @router.post("/{command_id}/approve", response_model=CommandResponse)

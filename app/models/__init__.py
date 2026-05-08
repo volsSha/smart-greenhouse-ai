@@ -4,6 +4,7 @@ from app.models.alert import Alert
 from app.models.ai import AIConversation, AIMessage, AIToolCall
 from app.models.base import Base
 from app.models.command import CommandLog
+from app.models.debug_log import DebugLog
 from app.models.device import Actuator, EdgeNode, Sensor
 from app.models.greenhouse import Greenhouse
 from app.models.group import GreenhouseGroup
@@ -18,6 +19,7 @@ __all__ = [
     "AIMessage",
     "AIToolCall",
     "CommandLog",
+    "DebugLog",
     "Actuator",
     "EdgeNode",
     "Sensor",

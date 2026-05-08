@@ -15,16 +15,20 @@ Usage::
 """
 
 import logging
+import time
+import traceback
+import uuid
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.config import Settings
 from app.dependencies import create_db_engine, create_influx_client
 from app.services.influx_client import InfluxClient
+from app.repositories.debug_log_repository import create_debug_log_best_effort
 from app.repositories.telemetry_repository import TelemetryRepository
 
 logger = logging.getLogger(__name__)
@@ -81,6 +85,72 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+async def _write_request_log(
+    request: Request,
+    *,
+    level: str,
+    event_type: str,
+    message: str,
+    status_code: int | None,
+    duration_ms: float,
+    error: Exception | None = None,
+) -> None:
+    session_factory = getattr(request.app.state, "session_factory", None)
+    if session_factory is None:
+        logger.warning("Debug log skipped because database session factory is unavailable")
+        return
+
+    await create_debug_log_best_effort(
+        session_factory,
+        level=level,
+        event_type=event_type,
+        component="api",
+        message=message,
+        path=request.url.path,
+        method=request.method,
+        status_code=status_code,
+        duration_ms=duration_ms,
+        request_id=request.headers.get("x-request-id") or str(uuid.uuid4()),
+        error_type=type(error).__name__ if error else None,
+        stack_trace="".join(traceback.format_exception(error)) if error else None,
+        metadata={
+            "query_params": dict(request.query_params),
+            "client_host": request.client.host if request.client else None,
+        },
+    )
+
+
+@app.middleware("http")
+async def debug_log_middleware(request: Request, call_next):
+    started_at = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        duration_ms = (time.perf_counter() - started_at) * 1000
+        await _write_request_log(
+            request,
+            level="error",
+            event_type="unhandled_exception",
+            message=str(exc),
+            status_code=500,
+            duration_ms=duration_ms,
+            error=exc,
+        )
+        raise
+
+    duration_ms = (time.perf_counter() - started_at) * 1000
+    if response.status_code >= 500:
+        await _write_request_log(
+            request,
+            level="error",
+            event_type="http_5xx",
+            message=f"HTTP {response.status_code}",
+            status_code=response.status_code,
+            duration_ms=duration_ms,
+        )
+    return response
+
+
 # --- Register API routers ---
 from app.api.health import router as health_router  # noqa: E402
 from app.api.telemetry import router as telemetry_router  # noqa: E402
@@ -91,6 +161,7 @@ from app.api.plants import router as plants_router  # noqa: E402
 from app.api.commands import router as commands_router  # noqa: E402
 from app.api.ai_chat import router as ai_chat_router  # noqa: E402
 from app.api.rag import router as rag_router  # noqa: E402
+from app.api.simulator import router as simulator_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(telemetry_router)
@@ -101,6 +172,7 @@ app.include_router(plants_router)
 app.include_router(commands_router)
 app.include_router(ai_chat_router)
 app.include_router(rag_router)
+app.include_router(simulator_router)
 
 
 @app.get("/", include_in_schema=False)
@@ -112,7 +184,7 @@ async def root() -> RedirectResponse:
 # Importing the page modules registers their @ui.page() decorators
 # with NiceGUI's internal router. The pages are not accessible until
 # NiceGUI is mounted via ui.run_with() or ui.run().
-from app.ui.pages import dashboard, settings, control, logs, ai_chat, rag  # noqa: E402, F401
+from app.ui.pages import dashboard, settings, control, logs, ai_chat, rag, simulator, plants  # noqa: E402, F401
 from nicegui import ui  # noqa: E402
 
 ui.run_with(

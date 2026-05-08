@@ -76,7 +76,7 @@ class TelemetryRepository:
 
         Returns the most recent value per metric/sensor combination.
         """
-        filters = [f'r.group_id == "{group_id}"']
+        filters = [f'r.group_id == "{group_id}"', 'r._field == "value"']
         if greenhouse_id:
             filters.append(f'r.greenhouse_id == "{greenhouse_id}"')
         if zone_id:
@@ -248,31 +248,20 @@ class TelemetryRepository:
         self,
         group_id: str,
     ) -> list[dict[str, Any]]:
-        """Simple threshold-based anomaly detection.
-
-        Returns readings where values deviate significantly from the
-        group mean (more than 3 standard deviations) for each metric.
-        """
+        """Detect readings outside safe greenhouse operating ranges."""
         flux = f"""
-        data = from(bucket: "{self._client.bucket}")
+        from(bucket: "{self._client.bucket}")
           |> range(start: -24h)
           |> filter(fn: (r) => r.group_id == "{group_id}" and r._field == "value")
-          |> group(columns: ["metric"])
-
-        mean_val = data |> mean(column: "_value")
-        std_val = data |> stddev(column: "_value")
-
-        anomalies = data
-          |> join(
-              tables: {{m: mean_val, s: std_val}},
-              on: ["metric"],
-              method: "inner"
-          )
           |> filter(fn: (r) =>
-              r._value_m != 0.0 and
-              math.abs(x: (r._value - r._value_m) / r._value_s) > 3.0
+              (r.metric == "temperature" and (r._value < 10.0 or r._value > 35.0)) or
+              (r.metric == "air_humidity" and (r._value < 30.0 or r._value > 90.0)) or
+              (r.metric == "soil_moisture" and (r._value < 20.0 or r._value > 85.0)) or
+              (r.metric == "co2" and (r._value < 250.0 or r._value > 2000.0)) or
+              (r.metric == "light" and r._value > 1200.0)
           )
-          |> yield(name: "anomalies")
+          |> sort(columns: ["_time"], desc: true)
+          |> limit(n: 100)
         """
         return self._client.query_data(flux)
 

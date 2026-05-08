@@ -6,14 +6,14 @@ import json
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db_session
 from app.repositories.ai_conversation_repository import AIConversationRepository
 from app.repositories.ai_tool_log_repository import AIToolLogRepository
-from app.services.ai_agent.agent import GreenhouseAIAgent
+from app.services.ai_agent.agent import AIConfigurationError, GreenhouseAIAgent
 from app.services.ai_agent.models import AIResponse, AIScope
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
@@ -75,10 +75,18 @@ class AIToolCallResponse(BaseModel):
 @router.post("/chat", response_model=AIResponse)
 async def chat(
     body: AIChatRequest,
+    request: Request,
     session: AsyncSession = Depends(get_db_session),
 ) -> AIResponse:
     """Send one scoped chat message and return a structured AI response."""
-    service = GreenhouseAIAgent(session)
+    try:
+        service = GreenhouseAIAgent(
+            session,
+            telemetry_repository=getattr(request.app.state, "telemetry_repository", None),
+        )
+    except AIConfigurationError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     response = await service.chat(
         message=body.message,
         conversation_id=body.conversation_id,

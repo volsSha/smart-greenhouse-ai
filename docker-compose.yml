@@ -100,6 +100,10 @@ services:
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: ${INFLUX_TOKEN:-your-influxdb-token}
       MQTT_HOST: mosquitto
+      API_BASE_URL: ${API_BASE_URL:-http://127.0.0.1:8080}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-anthropic/claude-sonnet-4}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
     volumes:
       - ./app:/app/app:ro
     networks:

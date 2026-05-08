@@ -5,16 +5,23 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
+import httpx
 from nicegui import ui
 
 from app.schemas.commands import CommandPropose
-from app.services.command_service import CommandError, CommandService
+from app.services.command_service import CommandStatus
+from app.ui.api_client import api_client, response_error
 from app.ui.components.proposed_action_card import proposed_action_card
 from app.ui.layouts.main_layout import main_layout
 
 _SAMPLE_GROUP_ID = "00000000-0000-0000-0000-000000000001"
 _SAMPLE_GREENHOUSE_ID = "00000000-0000-0000-0000-000000000002"
 _SAMPLE_ZONE_ID = "00000000-0000-0000-0000-000000000003"
+_PENDING_STATUSES = {
+    CommandStatus.PROPOSED,
+    CommandStatus.VALIDATED,
+    CommandStatus.APPROVED,
+}
 
 
 @ui.page("/control")
@@ -26,6 +33,8 @@ async def control() -> None:
     ui.label("Propose, validate, approve, and execute actuator commands.").classes(
         "text-sm opacity-70 mt-2"
     )
+
+    notification = ui.notification(position="top", timeout=5)
 
     with ui.card().classes("w-full mt-6"):
         ui.label("Propose Command").classes("text-lg font-semibold")
@@ -50,19 +59,7 @@ async def control() -> None:
         ui.button(
             "Propose",
             color="primary",
-            on_click=lambda: ui.notify(
-                _proposal_preview(
-                    group_id.value,
-                    greenhouse_id.value,
-                    zone_id.value,
-                    actuator.value,
-                    action.value,
-                    value.value,
-                    duration.value,
-                    reason.value,
-                ),
-                type="info",
-            ),
+            on_click=lambda: propose_command(),
         )
 
     with ui.card().classes("w-full mt-6"):
@@ -70,76 +67,154 @@ async def control() -> None:
         ui.label(
             "Validated and AI-generated proposals require approval before MQTT execution."
         ).classes("text-sm opacity-70 mt-2")
-        proposed_action_card(
-            {
-                "command_id": "pending-command-id",
-                "group_id": _SAMPLE_GROUP_ID,
-                "greenhouse_id": _SAMPLE_GREENHOUSE_ID,
-                "zone_id": _SAMPLE_ZONE_ID,
-                "actuator": "pump",
-                "action": "on",
-                "duration_seconds": 30,
-                "reason": "Soil moisture below configured threshold.",
-                "status": "validated",
-            },
-            on_approve=lambda command_id: ui.notify(
-                f"Approve {command_id} via /api/commands/{{id}}/approve", type="positive"
-            ),
-            on_reject=lambda command_id: ui.notify(
-                f"Reject {command_id} via /api/commands/{{id}}/cancel", type="warning"
-            ),
-        )
+        pending_commands = ui.column().classes("w-full gap-2 mt-4")
 
     with ui.card().classes("w-full mt-6"):
         ui.label("Recent Commands").classes("text-lg font-semibold")
-        ui.label("Executed, rejected, failed, and expired commands appear in the logs page.").classes(
+        ui.label("Executed, rejected, failed, and expired commands appear here.").classes(
             "text-sm opacity-70 mt-2"
         )
+        recent_commands = ui.column().classes("w-full gap-2 mt-4")
+
+    def notify(message: str, kind: str = "info") -> None:
+        notification.set_message(message)
+        notification.set_type(kind)
+        notification.open()
+
+    def build_proposal() -> dict[str, Any] | None:
+        try:
+            proposal = CommandPropose(
+                group_id=UUID(group_id.value or ""),
+                greenhouse_id=UUID(greenhouse_id.value or ""),
+                zone_id=UUID(zone_id.value or ""),
+                actuator=str(actuator.value),
+                action=str(action.value),
+                value=value.value,
+                duration_seconds=int(duration.value) if duration.value is not None else None,
+                reason=reason.value,
+                source="manual",
+            )
+        except (TypeError, ValueError) as exc:
+            notify(f"Invalid command form: {exc}", "warning")
+            return None
+        return proposal.model_dump(mode="json")
+
+    async def post_command_action(
+        endpoint: str,
+        *,
+        expected_status: int,
+        success_message: str,
+        failure_prefix: str,
+        payload: dict[str, Any] | None = None,
+        timeout: float = 10.0,
+        success_type: str = "positive",
+    ) -> bool:
+        try:
+            async with api_client(timeout=timeout) as client:
+                response = await client.post(endpoint, json=payload)
+                if response.status_code != expected_status:
+                    notify(f"{failure_prefix}: {response_error(response)}", "negative")
+                    return False
+        except httpx.HTTPError as exc:
+            notify(f"{failure_prefix}: {exc}", "negative")
+            return False
+        notify(success_message, success_type)
+        await refresh_commands()
+        return True
+
+    async def propose_command() -> None:
+        payload = build_proposal()
+        if payload is None:
+            return
+        await post_command_action(
+            "/api/commands/propose",
+            expected_status=201,
+            success_message="Command proposed",
+            failure_prefix="Propose failed",
+            payload=payload,
+        )
+
+    async def approve_command(command_id: str) -> None:
+        await post_command_action(
+            f"/api/commands/{command_id}/approve",
+            expected_status=200,
+            success_message="Command approved",
+            failure_prefix="Approve failed",
+            timeout=15.0,
+        )
+
+    async def reject_command(command_id: str) -> None:
+        await post_command_action(
+            f"/api/commands/{command_id}/cancel",
+            expected_status=200,
+            success_message="Command rejected",
+            failure_prefix="Reject failed",
+            success_type="warning",
+        )
+
+    async def refresh_commands() -> None:
+        pending_commands.clear()
+        recent_commands.clear()
+        try:
+            UUID(group_id.value or "")
+        except ValueError:
+            with pending_commands:
+                ui.label("Enter a valid Group ID to load commands.").classes("text-sm opacity-60")
+            return
+
+        try:
+            async with api_client(timeout=10.0) as client:
+                response = await client.get(f"/api/commands/groups/{group_id.value}/recent")
+                if response.status_code != 200:
+                    with pending_commands:
+                        ui.label(f"Failed to load commands: {response_error(response)}").classes("text-sm text-red-500")
+                    return
+                commands = response.json()
+        except httpx.HTTPError as exc:
+            with pending_commands:
+                ui.label(f"Failed to load commands: {exc}").classes("text-sm text-red-500")
+            return
+
+        pending: list[dict[str, Any]] = []
+        completed: list[dict[str, Any]] = []
+        for command in commands:
+            if command.get("status") in _PENDING_STATUSES:
+                pending.append(command)
+                continue
+            completed.append(command)
+
+        with pending_commands:
+            if not pending:
+                ui.label("No pending commands.").classes("text-sm opacity-60")
+            for command in pending:
+                proposed_action_card(
+                    command_to_action(command),
+                    on_approve=lambda command_id: approve_command(command_id),
+                    on_reject=lambda command_id: reject_command(command_id),
+                )
+
+        with recent_commands:
+            if not completed:
+                ui.label("No recent completed commands.").classes("text-sm opacity-60")
+            for command in completed[:10]:
+                with ui.row().classes("w-full items-center justify-between p-2 border border-gray-200 rounded"):
+                    ui.label(f"{command['actuator_name']} -> {command['action']}").classes("font-medium")
+                    ui.badge(command["status"], color="blue")
+
+    await refresh_commands()
 
 
-def _proposal_preview(
-    group_id: str,
-    greenhouse_id: str,
-    zone_id: str,
-    actuator: str,
-    action: str,
-    value: float | None,
-    duration_seconds: float | int | None,
-    reason: str,
-) -> str:
-    proposal = CommandPropose(
-        group_id=UUID(group_id),
-        greenhouse_id=UUID(greenhouse_id),
-        zone_id=UUID(zone_id),
-        actuator=actuator,
-        action=action,
-        value=value,
-        duration_seconds=int(duration_seconds) if duration_seconds is not None else None,
-        reason=reason,
-        source="manual",
-    )
-    return f"Proposal ready: {proposal.actuator} {proposal.action} for {proposal.duration_seconds}s"
-
-
-def command_to_action(command: Any) -> dict[str, Any]:
+def command_to_action(command: dict[str, Any]) -> dict[str, Any]:
     return {
-        "command_id": str(command.id),
-        "group_id": str(command.group_id),
-        "greenhouse_id": str(command.greenhouse_id),
-        "zone_id": str(command.zone_id),
-        "actuator": command.actuator_name,
-        "action": command.action,
-        "value": command.value,
-        "duration_seconds": command.duration_seconds,
-        "reason": command.reason,
-        "status": command.status,
-        "validation_errors": command.validation_errors,
+        "command_id": str(command["id"]),
+        "group_id": str(command["group_id"]),
+        "greenhouse_id": str(command["greenhouse_id"]),
+        "zone_id": str(command["zone_id"]),
+        "actuator": command["actuator_name"],
+        "action": command["action"],
+        "value": command.get("value"),
+        "duration_seconds": command.get("duration_seconds"),
+        "reason": command.get("reason"),
+        "status": command.get("status"),
+        "validation_errors": command.get("validation_errors"),
     }
-
-
-async def approve_command_for_ui(service: CommandService, command_id: UUID) -> dict[str, Any]:
-    try:
-        command = await service.approve(command_id, execute=True)
-    except CommandError as exc:
-        return {"status": "failed", "error": exc.message}
-    return command_to_action(command)

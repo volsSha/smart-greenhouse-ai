@@ -32,6 +32,7 @@ EXPECTED_TABLES = {
     "ai_tool_calls",
     "rag_documents",
     "rag_chunks",
+    "debug_log",
 }
 
 

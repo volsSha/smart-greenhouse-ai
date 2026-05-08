@@ -56,6 +56,8 @@ class EmbeddingClient:
         """
         if not texts:
             return []
+        if not self.api_key.strip():
+            raise EmbeddingError("OpenRouter API key is not configured")
 
         url = f"{self.base_url}/embeddings"
         headers = {

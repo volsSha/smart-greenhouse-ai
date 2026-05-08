@@ -7,12 +7,15 @@ each AI response.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from typing import Any
 
 import httpx
 from nicegui import ui
+
+from app.ui.api_client import api_client, response_error
 
 from app.ui.components.chat_message import (
     assistant_message_bubble,
@@ -211,7 +214,7 @@ async def ai_chat() -> None:
     async def load_conversations() -> None:
         """Fetch and populate the conversation selector."""
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with api_client(timeout=10.0) as client:
                 resp = await client.get("/api/ai/conversations")
                 resp.raise_for_status()
                 conversations = resp.json()
@@ -231,15 +234,14 @@ async def ai_chat() -> None:
         """Fetch messages and tool calls for a conversation and render them."""
         chat_area.clear()
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                # Fetch messages
-                detail_resp = await client.get(f"/api/ai/conversations/{conversation_id}")
+            async with api_client(timeout=10.0) as client:
+                detail_resp, tools_resp = await asyncio.gather(
+                    client.get(f"/api/ai/conversations/{conversation_id}"),
+                    client.get(f"/api/ai/tool-calls/{conversation_id}"),
+                )
                 detail_resp.raise_for_status()
-                detail = detail_resp.json()
-
-                # Fetch tool calls
-                tools_resp = await client.get(f"/api/ai/tool-calls/{conversation_id}")
                 tools_resp.raise_for_status()
+                detail = detail_resp.json()
                 tool_calls = tools_resp.json()
 
             messages = detail.get("messages", [])
@@ -304,7 +306,7 @@ async def ai_chat() -> None:
             if selected_conversation_id["value"]:
                 payload["conversation_id"] = selected_conversation_id["value"]
 
-            async with httpx.AsyncClient(timeout=60.0) as client:
+            async with api_client(timeout=60.0) as client:
                 resp = await client.post("/api/ai/chat", json=payload)
                 resp.raise_for_status()
                 ai_response = resp.json()
@@ -351,7 +353,8 @@ async def ai_chat() -> None:
             error_container.set_visibility(True)
             with error_container:
                 ui.label("Request failed").classes("text-red-500 font-semibold")
-                ui.label(str(exc)).classes("text-sm text-red-400")
+                detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
+                ui.label(detail).classes("text-sm text-red-400")
                 ui.button(
                     "Retry",
                     icon="refresh",

@@ -32,6 +32,10 @@ from app.services.ai_agent.tools import ALL_TOOLS
 from app.services.ai_agent.tools.deps import ToolDeps
 
 
+class AIConfigurationError(Exception):
+    """Raised when the AI provider is not configured."""
+
+
 class GreenhouseAIAgent:
     """Service wrapper around Pydantic AI with persistence seams."""
 
@@ -40,9 +44,11 @@ class GreenhouseAIAgent:
         session: AsyncSession,
         settings: Settings | None = None,
         agent: Agent[ToolDeps, AIResponse] | None = None,
+        telemetry_repository: TelemetryRepository | None = None,
     ) -> None:
         self.session = session
         self.settings = settings or get_settings()
+        self.telemetry_repository = telemetry_repository
         self.conversation_repository = AIConversationRepository(session)
         self.tool_log_repository = AIToolLogRepository(session)
         self.tool_logger = ToolCallLogger(self.tool_log_repository)
@@ -60,7 +66,7 @@ class GreenhouseAIAgent:
             command_repo=CommandRepository(self.session),
             plant_batch_repo=PlantBatchRepository(self.session),
             plant_profile_repo=PlantProfileRepository(self.session),
-            telemetry_repo=TelemetryRepository(None),  # InfluxDB client injected separately
+            telemetry_repo=self.telemetry_repository or TelemetryRepository(None),
             sensor_repo=SensorRepository(self.session),
             actuator_repo=ActuatorRepository(self.session),
             tool_logger=self.tool_logger,
@@ -69,6 +75,8 @@ class GreenhouseAIAgent:
     @staticmethod
     def _build_agent(settings: Settings) -> Agent[ToolDeps, AIResponse]:
         """Build an OpenAI-compatible Pydantic AI agent for OpenRouter."""
+        if not settings.openrouter.api_key.strip():
+            raise AIConfigurationError("OpenRouter API key is not configured")
         provider = OpenAIProvider(
             api_key=settings.openrouter.api_key,
             base_url=settings.openrouter.base_url,

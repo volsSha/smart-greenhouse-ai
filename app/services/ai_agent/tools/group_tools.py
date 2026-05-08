@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic_ai import RunContext
 
 from app.services.ai_agent.tools.deps import ToolDeps
@@ -28,4 +30,35 @@ async def get_group_overview(ctx: RunContext[ToolDeps]) -> list[dict]:
             "greenhouse_count": len(greenhouses),
             "zone_count": zone_count,
         })
-    return overview
+    if overview:
+        return overview
+
+    latest = ctx.deps.telemetry_repo.get_latest("group-001")
+    return _group_overview_from_telemetry(latest)
+
+
+def _group_overview_from_telemetry(readings: list[dict[str, Any]]) -> list[dict]:
+    groups: dict[str, dict[str, set[str]]] = {}
+    for reading in readings:
+        group_id = reading.get("group_id")
+        greenhouse_id = reading.get("greenhouse_id")
+        zone_id = reading.get("zone_id")
+        if not group_id:
+            continue
+        groups.setdefault(group_id, {"greenhouses": set(), "zones": set()})
+        if greenhouse_id:
+            groups[group_id]["greenhouses"].add(greenhouse_id)
+        if zone_id:
+            groups[group_id]["zones"].add(zone_id)
+
+    return [
+        {
+            "group_id": group_id,
+            "name": group_id,
+            "location": None,
+            "greenhouse_count": len(data["greenhouses"]),
+            "zone_count": len(data["zones"]),
+            "source": "telemetry",
+        }
+        for group_id, data in sorted(groups.items())
+    ]

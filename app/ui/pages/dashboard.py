@@ -6,12 +6,15 @@ and an alert panel. Handles loading, empty, and error states explicitly.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import httpx
 from nicegui import ui
+
+from app.ui.api_client import api_client
 
 from app.ui.components.alert_panel import alert_panel
 from app.ui.components.telemetry_cards import (
@@ -138,19 +141,14 @@ async def dashboard() -> None:
         content_area.clear()
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                # Fetch latest readings
-                latest_resp = await client.get(
-                    f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/latest"
+            async with api_client(timeout=10.0) as client:
+                latest_resp, anomalies_resp = await asyncio.gather(
+                    client.get(f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/latest"),
+                    client.get(f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/anomalies"),
                 )
                 latest_resp.raise_for_status()
-                latest_data = latest_resp.json()
-
-                # Fetch anomalies
-                anomalies_resp = await client.get(
-                    f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/anomalies"
-                )
                 anomalies_resp.raise_for_status()
+                latest_data = latest_resp.json()
                 anomalies_data = anomalies_resp.json()
 
         except httpx.HTTPError as exc:
@@ -188,13 +186,10 @@ async def dashboard() -> None:
         ui.label("Greenhouses").classes("text-lg font-bold mt-2")
         with ui.row().classes("w-full gap-4 flex-wrap"):
             for gh_id, gh_data in greenhouses.items():
-                with ui.column().classes("w-64 cursor-pointer"):
-                    card = greenhouse_card(gh_data)
-                    # Make card clickable to show zone detail
-                    card.parent_slot.parent.on(
-                        "click",
-                        lambda gh=gh_id: select_greenhouse(gh),
-                    )
+                column = ui.column().classes("w-64 cursor-pointer")
+                column.on("click", lambda gh=gh_id: select_greenhouse(gh))
+                with column:
+                    greenhouse_card(gh_data)
 
         # --- Zone detail area (hidden initially) ---
         zone_detail_container = ui.column().classes("w-full gap-4 mt-4")
@@ -225,7 +220,7 @@ async def dashboard() -> None:
                 ui.label("Zone Charts").classes("text-lg font-bold mt-2")
 
             try:
-                async with httpx.AsyncClient(timeout=10.0) as client:
+                async with api_client(timeout=10.0) as client:
                     now = datetime.now(timezone.utc)
                     start = (now - timedelta(hours=6)).isoformat()
                     end = now.isoformat()

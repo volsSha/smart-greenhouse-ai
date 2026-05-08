@@ -12,6 +12,7 @@ from typing import Any
 import httpx
 from nicegui import ui
 
+from app.ui.api_client import api_client, response_error
 from app.ui.layouts.main_layout import main_layout
 
 logger = logging.getLogger(__name__)
@@ -134,22 +135,6 @@ async def simulator() -> None:
                 "Interval (seconds)", value=5, min=1, max=300
             ).classes("w-48")
 
-    # --- Control buttons ---
-    with ui.row().classes("w-full gap-4 mt-6"):
-        start_btn = ui.button(
-            "Start Simulator",
-            icon="play_arrow",
-            color="positive",
-            on_click=start_simulator,
-        ).classes("px-6")
-
-        stop_btn = ui.button(
-            "Stop Simulator",
-            icon="stop",
-            color="negative",
-            on_click=stop_simulator,
-        ).props('disable')
-
     # --- Result display ---
     result_label = ui.label("").classes("text-sm mt-4")
 
@@ -182,7 +167,7 @@ async def simulator() -> None:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with api_client(timeout=10.0) as client:
                 resp = await client.post("/api/simulator/start", json=config)
                 resp.raise_for_status()
                 result = resp.json()
@@ -199,14 +184,15 @@ async def simulator() -> None:
         except httpx.HTTPError as exc:
             state["running"] = False
             _update_status()
-            result_label.set_text(f"Failed to start: {exc}")
+            detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
+            result_label.set_text(f"Failed to start: {detail}")
             result_label.style("color: #f44336")
             ui.notify("Failed to start simulator", type="negative")
 
     async def stop_simulator() -> None:
         """Attempt to stop the simulator via the API."""
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with api_client(timeout=10.0) as client:
                 resp = await client.post("/api/simulator/stop")
                 resp.raise_for_status()
                 result = resp.json()
@@ -220,7 +206,8 @@ async def simulator() -> None:
             ui.notify("Simulator stopped", type="warning")
 
         except httpx.HTTPError as exc:
-            result_label.set_text(f"Failed to stop: {exc}")
+            detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
+            result_label.set_text(f"Failed to stop: {detail}")
             result_label.style("color: #f44336")
             ui.notify("Failed to stop simulator", type="negative")
 
@@ -244,3 +231,19 @@ async def simulator() -> None:
             last_publish_label.set_text(str(state["last_publish"])[:19])
         else:
             last_publish_label.set_text("--")
+
+    # --- Control buttons ---
+    with ui.row().classes("w-full gap-4 mt-6"):
+        start_btn = ui.button(
+            "Start Simulator",
+            icon="play_arrow",
+            color="positive",
+            on_click=start_simulator,
+        ).classes("px-6")
+
+        stop_btn = ui.button(
+            "Stop Simulator",
+            icon="stop",
+            color="negative",
+            on_click=stop_simulator,
+        ).props("disable")

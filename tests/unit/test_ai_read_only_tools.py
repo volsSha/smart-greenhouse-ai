@@ -188,11 +188,36 @@ async def test_get_group_overview_returns_shape() -> None:
 async def test_get_group_overview_empty() -> None:
     """get_group_overview returns empty list when no groups."""
     deps = _make_deps(group_repo=AsyncMock(list=AsyncMock(return_value=[])))
+    deps.telemetry_repo.get_latest.return_value = []
     ctx = _ctx(deps)
 
     result = await get_group_overview(ctx)
 
     assert result == []
+
+
+@pytest.mark.asyncio
+async def test_get_group_overview_uses_telemetry_when_registry_empty() -> None:
+    """get_group_overview derives group data from telemetry when registry is empty."""
+    deps = _make_deps(group_repo=AsyncMock(list=AsyncMock(return_value=[])))
+    deps.telemetry_repo.get_latest.return_value = [
+        {"group_id": "group-001", "greenhouse_id": "gh-001", "zone_id": "zone-01"},
+        {"group_id": "group-001", "greenhouse_id": "gh-002", "zone_id": "zone-02"},
+    ]
+    ctx = _ctx(deps)
+
+    result = await get_group_overview(ctx)
+
+    assert result == [
+        {
+            "group_id": "group-001",
+            "name": "group-001",
+            "location": None,
+            "greenhouse_count": 2,
+            "zone_count": 2,
+            "source": "telemetry",
+        }
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -219,6 +244,41 @@ async def test_get_greenhouse_list_returns_shape() -> None:
     assert entry["name"] == "GH-1"
     assert "location" in entry
     assert entry["zone_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_get_greenhouse_list_uses_telemetry_ids() -> None:
+    """get_greenhouse_list supports simulator IDs from telemetry."""
+    deps = _make_deps()
+    deps.telemetry_repo.get_latest.return_value = [
+        {"greenhouse_id": "gh-001", "zone_id": "zone-01"},
+        {"greenhouse_id": "gh-001", "zone_id": "zone-02"},
+        {"greenhouse_id": "gh-002", "zone_id": "zone-01"},
+    ]
+    ctx = _ctx(deps)
+
+    result = await get_greenhouse_list(ctx, group_id="group-001")
+
+    assert [item["greenhouse_id"] for item in result] == ["gh-001", "gh-002"]
+    assert result[0]["zone_count"] == 2
+    assert result[0]["source"] == "telemetry"
+
+
+@pytest.mark.asyncio
+async def test_get_greenhouse_state_uses_telemetry_ids() -> None:
+    """get_greenhouse_state supports simulator IDs from telemetry."""
+    deps = _make_deps()
+    deps.telemetry_repo.get_latest.return_value = [
+        {"zone_id": "zone-01", "metric": "temperature", "_value": 24.0},
+        {"zone_id": "zone-01", "metric": "soil_moisture", "_value": 58.0},
+    ]
+    ctx = _ctx(deps)
+
+    result = await get_greenhouse_state(ctx, "group-001", "gh-001")
+
+    assert result["greenhouse_id"] == "gh-001"
+    assert result["source"] == "telemetry"
+    assert result["zones"][0]["latest_metrics"]["temperature"] == 24.0
 
 
 @pytest.mark.asyncio
