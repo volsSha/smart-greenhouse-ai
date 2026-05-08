@@ -33,6 +33,8 @@ EXPECTED_TABLES = {
     "rag_documents",
     "rag_chunks",
     "debug_log",
+    "model_settings",
+    "openrouter_model_catalog",
 }
 
 

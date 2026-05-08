@@ -6,3 +6,4 @@ __pycache__/
 .env
 .venv/
 /dogfood-output/
+/docs/brainstorms/

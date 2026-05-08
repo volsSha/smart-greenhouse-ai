@@ -35,10 +35,14 @@ async def search_plant_knowledge(
     settings = ctx.deps.settings if hasattr(ctx.deps, "settings") else None
     api_key = settings.openrouter.api_key if settings else ""
     base_url = settings.openrouter.base_url if settings else "https://openrouter.ai/api/v1"
+    embedding_model = settings.openrouter.embedding_model if settings else "text-embedding-3-small"
+    embedding_dimension = settings.openrouter.embedding_dimension if settings else 1536
 
     embedding_client = EmbeddingClient(
         api_key=api_key,
         base_url=base_url,
+        model=embedding_model,
+        dimension=embedding_dimension,
     )
 
     query_embeddings = await embedding_client.embed([query])

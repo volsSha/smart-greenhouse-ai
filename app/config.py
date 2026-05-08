@@ -56,6 +56,8 @@ class OpenRouterSettings(BaseSettings):
     api_key: str = ""
     model: str = "anthropic/claude-sonnet-4"
     base_url: str = "https://openrouter.ai/api/v1"
+    embedding_model: str = "openai/text-embedding-3-small"
+    embedding_dimension: int = 1536
 
 
 class AppSettings(BaseSettings):

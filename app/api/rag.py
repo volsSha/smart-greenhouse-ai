@@ -29,6 +29,8 @@ def _build_embedding_client() -> EmbeddingClient:
     return EmbeddingClient(
         api_key=settings.openrouter.api_key,
         base_url=settings.openrouter.base_url,
+        model=settings.openrouter.embedding_model,
+        dimension=settings.openrouter.embedding_dimension,
     )
 
 

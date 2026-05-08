@@ -9,6 +9,7 @@ from app.models.device import Actuator, EdgeNode, Sensor
 from app.models.greenhouse import Greenhouse
 from app.models.group import GreenhouseGroup
 from app.models.plant_batch import ControlSetpoint, GroupControlPolicy, PlantBatch, PlantProfile
+from app.models.model_settings import ModelSettings, OpenRouterModelCatalog
 from app.models.rag import RAGChunk, RAGDocument
 from app.models.zone import GreenhouseZone
 
@@ -32,4 +33,6 @@ __all__ = [
     "RAGChunk",
     "RAGDocument",
     "GreenhouseZone",
+    "ModelSettings",
+    "OpenRouterModelCatalog",
 ]

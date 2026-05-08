@@ -36,6 +36,17 @@ uv run python -m services.simulator.main --once
 - RAG worker: `uv run python -m services.worker.main --job rag-reindex`
 - Baseline control observer: `uv run python -m services.control_engine.main --group-id <uuid> --greenhouse-id <uuid> --zone-id <uuid> --soil-moisture 18`
 
+## Model Settings
+
+The application includes a model settings page at `/settings` where you can:
+
+- **Select Chat Model**: Choose from the OpenRouter model catalog for AI chat
+- **View Embedding Configuration**: See the fixed embedding model (changing requires RAG reindex)
+- **Manage Catalog**: Refresh the OpenRouter model catalog, search/filter by provider and capability
+- **View Pricing**: See prompt and completion prices per million tokens for each model
+
+The selected chat model is stored in the database and used for all AI chat requests. If the selected model becomes unavailable, the AI will block with a clear error message.
+
 ## Safety model
 
 AI and the control engine may create scoped command proposals only. Physical actuator commands are published to MQTT only after user approval, deterministic safety revalidation, and transition through `CommandService` and `CommandPublisher`.

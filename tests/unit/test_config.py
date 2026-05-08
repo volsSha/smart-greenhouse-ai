@@ -109,6 +109,19 @@ class TestOpenRouterSettings:
         assert settings.api_key == ""
         assert settings.model == "anthropic/claude-sonnet-4"
         assert settings.base_url == "https://openrouter.ai/api/v1"
+        assert settings.embedding_model == "openai/text-embedding-3-small"
+        assert settings.embedding_dimension == 1536
+
+    def test_embedding_model_from_env(self) -> None:
+        """Embedding model and dimension can be configured via env vars."""
+        env = {
+            "OPENROUTER_EMBEDDING_MODEL": "openai/text-embedding-3-large",
+            "OPENROUTER_EMBEDDING_DIMENSION": "3072",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            settings = OpenRouterSettings()
+        assert settings.embedding_model == "openai/text-embedding-3-large"
+        assert settings.embedding_dimension == 3072
 
 
 class TestAppSettings:

@@ -19,6 +19,7 @@ from app.repositories.command_repository import CommandRepository
 from app.repositories.device_repository import ActuatorRepository, SensorRepository
 from app.repositories.greenhouse_repository import GreenhouseRepository
 from app.repositories.group_repository import GroupRepository
+from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.repositories.plant_batch_repository import (
     PlantBatchRepository,
     PlantProfileRepository,
@@ -52,7 +53,7 @@ class GreenhouseAIAgent:
         self.conversation_repository = AIConversationRepository(session)
         self.tool_log_repository = AIToolLogRepository(session)
         self.tool_logger = ToolCallLogger(self.tool_log_repository)
-        self.agent = agent or self._build_agent(self.settings)
+        self.agent = agent or self._build_agent(self.settings, self.session)
         if agent is None:
             self.register_tools()
 
@@ -73,20 +74,62 @@ class GreenhouseAIAgent:
         )
 
     @staticmethod
-    def _build_agent(settings: Settings) -> Agent[ToolDeps, AIResponse]:
+    def _build_agent(settings: Settings, model_id: str | None = None) -> Agent[ToolDeps, AIResponse]:
         """Build an OpenAI-compatible Pydantic AI agent for OpenRouter."""
         if not settings.openrouter.api_key.strip():
             raise AIConfigurationError("OpenRouter API key is not configured")
+
         provider = OpenAIProvider(
             api_key=settings.openrouter.api_key,
             base_url=settings.openrouter.base_url,
         )
-        model = OpenAIChatModel(settings.openrouter.model, provider=provider)
+
+        # Use provided model_id or fall back to env var
+        model_to_use = model_id or settings.openrouter.model
+        model = OpenAIChatModel(model_to_use, provider=provider)
         return Agent(
             model,
             instructions=SYSTEM_PROMPT,
             output_type=AIResponse,
             deps_type=ToolDeps,
+        )
+
+    async def _ensure_agent_uses_selected_model(self) -> None:
+        """Ensure the agent is using the selected model from the database.
+
+        Rebuilds the agent if the selected model differs from the current one.
+
+        Raises:
+            AIConfigurationError: If no model is selected or the selected model is unavailable.
+        """
+        settings_repo = ModelSettingsRepository(self.session)
+
+        # Bootstrap settings if they don't exist
+        app_settings = await settings_repo.bootstrap_settings(
+            embedding_model=self.settings.openrouter.embedding_model,
+            embedding_dimension=self.settings.openrouter.embedding_dimension,
+        )
+
+        # Check if a model is selected and available
+        if app_settings.selected_chat_model:
+            if app_settings.selected_model_available:
+                # Rebuild agent if model changed
+                if self.agent._model.name != app_settings.selected_chat_model:
+                    self.agent = self._build_agent(self.settings, app_settings.selected_chat_model)
+                    self.register_tools()
+                return
+            else:
+                raise AIConfigurationError(
+                    f"The selected chat model '{app_settings.selected_chat_model}' is not available in the current catalog. "
+                    f"Please refresh the catalog or select a different model in the admin settings."
+                )
+
+        # Fall back to env var for backward compatibility
+        if self.settings.openrouter.model:
+            return
+
+        raise AIConfigurationError(
+            "No chat model is selected. Please select a model in the admin settings first."
         )
 
     def register_tools(self) -> None:
@@ -101,6 +144,9 @@ class GreenhouseAIAgent:
         scope: AIScope | None = None,
     ) -> AIResponse:
         """Run an AI chat turn and persist user/assistant messages."""
+        # Ensure we're using the selected model from database
+        await self._ensure_agent_uses_selected_model()
+
         scope = scope or AIScope()
         conversation = None
         if conversation_id is not None:
@@ -123,11 +169,15 @@ class GreenhouseAIAgent:
         ai_response = result.output
 
         tokens_in, tokens_out = _extract_usage(result)
+
+        # Get the actual model being used
+        actual_model = self.agent._model.name if hasattr(self.agent, "_model") else self.settings.openrouter.model
+
         await self.conversation_repository.add_message(
             conversation.id,
             role="assistant",
             content=ai_response.model_dump_json(),
-            model=self.settings.openrouter.model,
+            model=actual_model,
             tokens_in=tokens_in,
             tokens_out=tokens_out,
         )

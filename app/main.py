@@ -162,6 +162,7 @@ from app.api.commands import router as commands_router  # noqa: E402
 from app.api.ai_chat import router as ai_chat_router  # noqa: E402
 from app.api.rag import router as rag_router  # noqa: E402
 from app.api.simulator import router as simulator_router  # noqa: E402
+from app.api.settings import router as settings_router  # noqa: E402
 
 app.include_router(health_router)
 app.include_router(telemetry_router)
@@ -173,6 +174,7 @@ app.include_router(commands_router)
 app.include_router(ai_chat_router)
 app.include_router(rag_router)
 app.include_router(simulator_router)
+app.include_router(settings_router)
 
 
 @app.get("/", include_in_schema=False)

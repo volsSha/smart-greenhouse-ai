@@ -82,6 +82,15 @@
 | POST | `/api/rag/reindex` | Rebuild embeddings |
 | GET | `/api/rag/search` | Semantic search in knowledge base |
 
+## Model Settings
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/settings` | Get current model settings (selected chat model, embedding config, refresh status) |
+| PUT | `/api/settings` | Update selected chat model (must exist in catalog) |
+| GET | `/api/settings/catalog` | List OpenRouter model catalog with optional search/provider/capability filters |
+| POST | `/api/settings/catalog/refresh` | Refresh catalog from OpenRouter API |
+
 ## NiceGUI Pages
 
 `/` redirects to `/dashboard`. NiceGUI pages are registered by importing page modules before `ui.run_with(app, ...)`; see `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` for the dashboard launch fix.
