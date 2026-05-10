@@ -14,6 +14,7 @@ from typing import Any
 import httpx
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.api_client import api_client
 
 from app.ui.components.alert_panel import alert_panel
@@ -130,7 +131,7 @@ async def dashboard() -> None:
     """Render the fleet dashboard page."""
     main_layout()
 
-    ui.label("Dashboard").classes("text-2xl font-bold mt-6")
+    ui.label(_("Dashboard")).classes("text-2xl font-bold mt-6")
 
     # State containers
     content_area = ui.column().classes("w-full gap-4 mt-4")
@@ -152,9 +153,9 @@ async def dashboard() -> None:
                 anomalies_data = anomalies_resp.json()
 
         except httpx.HTTPError as exc:
-            ui.label(f"Error loading data: {exc}").classes("text-red-500 text-sm")
+            ui.label(_("Error loading data: {error}", error=exc)).classes("text-red-500 text-sm")
             ui.label(
-                "Make sure the API is running and InfluxDB is available."
+                _("Make sure the API is running and InfluxDB is available.")
             ).classes("text-xs opacity-50 mt-1")
             return
 
@@ -164,9 +165,9 @@ async def dashboard() -> None:
         if not readings:
             with ui.column().classes("w-full items-center gap-4 mt-20"):
                 ui.icon("sensors_off", size="4rem").classes("opacity-30")
-                ui.label("No telemetry data available").classes("text-lg opacity-50")
+                ui.label(_("No telemetry data available")).classes("text-lg opacity-50")
                 ui.label(
-                    "Start the simulator to generate data and see it here."
+                    _("Start the simulator to generate data and see it here.")
                 ).classes("text-sm opacity-40")
             return
 
@@ -183,7 +184,7 @@ async def dashboard() -> None:
                 alert_panel(anomalies)
 
         # --- Greenhouse cards ---
-        ui.label("Greenhouses").classes("text-lg font-bold mt-2")
+        ui.label(_("Greenhouses")).classes("text-lg font-bold mt-2")
         with ui.row().classes("w-full gap-4 flex-wrap"):
             for gh_id, gh_data in greenhouses.items():
                 column = ui.column().classes("w-64 cursor-pointer")
@@ -201,12 +202,12 @@ async def dashboard() -> None:
             zone_detail_container.clear()
             zone_detail_container.set_visibility(True)
 
-            ui.label(f"Greenhouse: {gh_id}").classes("text-lg font-bold")
+            ui.label(_("Greenhouse: {greenhouse_id}", greenhouse_id=gh_id)).classes("text-lg font-bold")
 
             zones = transform_latest_to_zones(readings, gh_id)
 
             if not zones:
-                ui.label("No zone data available").classes("text-sm opacity-50")
+                ui.label(_("No zone data available")).classes("text-sm opacity-50")
                 return
 
             # Zone detail cards
@@ -217,7 +218,7 @@ async def dashboard() -> None:
             # Zone charts -- fetch historical data
             with content_area:
                 ui.separator().classes("w-full mt-2")
-                ui.label("Zone Charts").classes("text-lg font-bold mt-2")
+                ui.label(_("Zone Charts")).classes("text-lg font-bold mt-2")
 
             try:
                 async with api_client(timeout=10.0) as client:
@@ -265,10 +266,10 @@ async def dashboard() -> None:
                         with ui.row().classes("w-full mt-4"):
                             multi_metric_chart(range_readings)
                     else:
-                        ui.label("No historical data for charts").classes("text-sm opacity-50")
+                        ui.label(_("No historical data for charts")).classes("text-sm opacity-50")
 
             except httpx.HTTPError as exc:
-                ui.label(f"Error loading chart data: {exc}").classes("text-red-500 text-xs")
+                ui.label(_("Error loading chart data: {error}", error=exc)).classes("text-red-500 text-xs")
 
     # Initial load
     await load_data()

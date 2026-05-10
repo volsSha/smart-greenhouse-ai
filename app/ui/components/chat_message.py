@@ -11,6 +11,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 def _format_timestamp(ts: Any) -> str:
     """Format a timestamp value into a human-readable string."""
@@ -32,7 +34,7 @@ def _render_observations(observations: list[str]) -> None:
     if not observations:
         return
     with ui.column().classes("gap-1 mt-2"):
-        ui.label("Observations").classes("text-xs font-semibold opacity-60")
+        ui.label(_("Observations")).classes("text-xs font-semibold opacity-60")
         for obs in observations:
             with ui.row().classes("items-start gap-1"):
                 ui.icon("visibility", size="0.8rem").classes("opacity-40 mt-0.5")
@@ -44,7 +46,7 @@ def _render_recommendations(recommendations: list[str]) -> None:
     if not recommendations:
         return
     with ui.column().classes("gap-1 mt-2"):
-        ui.label("Recommendations").classes("text-xs font-semibold opacity-60")
+        ui.label(_("Recommendations")).classes("text-xs font-semibold opacity-60")
         for rec in recommendations:
             with ui.row().classes("items-start gap-1"):
                 ui.icon("lightbulb", size="0.8rem").classes("opacity-40 mt-0.5")
@@ -54,8 +56,8 @@ def _render_recommendations(recommendations: list[str]) -> None:
 def _status_badge(status: str) -> None:
     """Render a small status indicator badge for assistant responses."""
     config: dict[str, dict[str, str]] = {
-        "ok": {"icon": "check_circle", "color": "#4caf50", "label": "OK"},
-        "insufficient_data": {"icon": "help", "color": "#ff9800", "label": "Limited Data"},
+        "ok": {"icon": "check_circle", "color": "#4caf50", "label": _("OK")},
+        "insufficient_data": {"icon": "help", "color": "#ff9800", "label": _("Limited Data")},
     }
     entry = config.get(status, config["ok"])
     with ui.row().classes("items-center gap-1"):
@@ -105,7 +107,7 @@ def assistant_message_bubble(
                 ui.icon("smart_toy", size="1.5rem").classes("opacity-40 mt-1")
                 with ui.column().classes("gap-1 flex-1"):
                     with ui.row().classes("items-center gap-2 w-full"):
-                        ui.label("Assistant").classes("text-xs font-semibold opacity-50")
+                        ui.label(_("Assistant")).classes("text-xs font-semibold opacity-50")
                         _status_badge(status)
                         if timestamp:
                             ui.label(_format_timestamp(timestamp)).classes(

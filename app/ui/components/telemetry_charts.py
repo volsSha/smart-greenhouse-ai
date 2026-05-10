@@ -10,6 +10,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 # ---------------------------------------------------------------------------
 # Color palette for metrics
@@ -38,6 +40,21 @@ _METRIC_UNITS: dict[str, str] = {
     "heater_power": "%",
     "lamp_state": "",
 }
+
+
+def _metric_label(metric_name: str) -> str:
+    labels = {
+        "temperature": _("Temperature"),
+        "air_humidity": _("Air Humidity"),
+        "soil_moisture": _("Soil Moisture"),
+        "co2": _("CO2"),
+        "light": _("Light"),
+        "fan_power": _("Fan"),
+        "pump_state": _("Pump"),
+        "heater_power": _("Heater"),
+        "lamp_state": _("Lamp"),
+    }
+    return labels.get(metric_name, metric_name.replace("_", " ").title())
 
 
 def _parse_readings(readings: list[dict[str, Any]]) -> tuple[list[str], list[float]]:
@@ -138,9 +155,9 @@ def temperature_chart(readings: list[dict[str, Any]]) -> ui.echart:
     """
     timestamps, values = _parse_readings(readings)
     option = _build_line_option(
-        title="Temperature",
+        title=_("Temperature"),
         timestamps=timestamps,
-        series_data=[{"name": "Temperature", "data": values, "color": _METRIC_COLORS["temperature"]}],
+        series_data=[{"name": _("Temperature"), "data": values, "color": _METRIC_COLORS["temperature"]}],
         y_unit="C",
     )
     return ui.echart(option).classes("w-full h-64")
@@ -157,9 +174,9 @@ def humidity_chart(readings: list[dict[str, Any]]) -> ui.echart:
     """
     timestamps, values = _parse_readings(readings)
     option = _build_line_option(
-        title="Air Humidity",
+        title=_("Air Humidity"),
         timestamps=timestamps,
-        series_data=[{"name": "Humidity", "data": values, "color": _METRIC_COLORS["air_humidity"]}],
+        series_data=[{"name": _("Humidity"), "data": values, "color": _METRIC_COLORS["air_humidity"]}],
         y_unit="%",
     )
     return ui.echart(option).classes("w-full h-64")
@@ -176,9 +193,9 @@ def soil_moisture_chart(readings: list[dict[str, Any]]) -> ui.echart:
     """
     timestamps, values = _parse_readings(readings)
     option = _build_line_option(
-        title="Soil Moisture",
+        title=_("Soil Moisture"),
         timestamps=timestamps,
-        series_data=[{"name": "Soil Moisture", "data": values, "color": _METRIC_COLORS["soil_moisture"]}],
+        series_data=[{"name": _("Soil Moisture"), "data": values, "color": _METRIC_COLORS["soil_moisture"]}],
         y_unit="%",
     )
     return ui.echart(option).classes("w-full h-64")
@@ -202,7 +219,7 @@ def multi_metric_chart(
         The EChart element for later updates.
     """
     if not readings:
-        return ui.echart({"title": {"text": "No data"}}).classes("w-full h-64")
+        return ui.echart({"title": {"text": _("No data")}}).classes("w-full h-64")
 
     # Group readings by metric
     grouped: dict[str, list[dict[str, Any]]] = {}
@@ -221,13 +238,13 @@ def multi_metric_chart(
         if ts and not all_timestamps:
             all_timestamps = ts
         series_data.append({
-            "name": metric_name.replace("_", " ").title(),
+            "name": _metric_label(metric_name),
             "data": vals,
             "color": _METRIC_COLORS.get(metric_name, "#95a5a6"),
         })
 
     option = _build_line_option(
-        title="Metrics Overview",
+        title=_("Metrics Overview"),
         timestamps=all_timestamps,
         series_data=series_data,
     )

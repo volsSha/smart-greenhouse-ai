@@ -2,6 +2,7 @@
 
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.layouts.main_layout import main_layout
 
 
@@ -17,17 +18,17 @@ async def logs() -> None:
     """
     main_layout()
 
-    ui.label("Command Logs").classes("text-2xl font-bold mt-6")
+    ui.label(_("Command Logs")).classes("text-2xl font-bold mt-6")
     ui.label(
-        "Audit log of all actuator commands with filtering and search."
+        _("Audit log of all actuator commands with filtering and search.")
     ).classes("text-sm opacity-70 mt-2")
 
     with ui.card().classes("w-full mt-6"):
-        ui.label("Filters").classes("text-lg font-semibold")
+        ui.label(_("Filters")).classes("text-lg font-semibold")
 
         with ui.row().classes("w-full gap-4 mt-4"):
             ui.select(
-                label="Status",
+                label=_("Status"),
                 options=[
                     "all",
                     "proposed",
@@ -43,23 +44,23 @@ async def logs() -> None:
                 value="all",
             ).classes("w-48")
             ui.select(
-                label="Actuator",
+                label=_("Actuator"),
                 options=["all", "pump", "fan", "heater", "lamp"],
                 value="all",
             ).classes("w-48")
             ui.select(
-                label="Source",
+                label=_("Source"),
                 options=["all", "manual", "control_engine", "ai_agent", "safety_override"],
                 value="all",
             ).classes("w-48")
-            ui.button("Refresh", icon="refresh", color="primary")
+            ui.button(_("Refresh"), icon="refresh", color="primary")
 
     with ui.card().classes("w-full mt-6"):
-        ui.label("Command History").classes("text-lg font-semibold")
-        ui.label("Command log entries will appear here.").classes(
+        ui.label(_("Command History")).classes("text-lg font-semibold")
+        ui.label(_("Command log entries will appear here.")).classes(
             "text-sm opacity-70 mt-2"
         )
 
-    ui.label("Placeholder -- full logs UI will be implemented in a later unit.").classes(
+    ui.label(_("Placeholder -- full logs UI will be implemented in a later unit.")).classes(
         "text-xs italic mt-4"
     )

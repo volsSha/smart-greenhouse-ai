@@ -27,6 +27,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "babel",
     "pytest",
     "pytest-asyncio",
 ]

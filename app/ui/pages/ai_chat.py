@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 
 from app.ui.components.chat_message import (
@@ -86,9 +87,9 @@ def _render_conversation_messages(
     if not messages:
         with ui.column().classes("w-full items-center gap-4 mt-20"):
             ui.icon("forum", size="4rem").classes("opacity-30")
-            ui.label("No messages yet").classes("text-lg opacity-50")
+            ui.label(_("No messages yet")).classes("text-lg opacity-50")
             ui.label(
-                "Ask a question about your greenhouses, zones, or sensor data."
+                _("Ask a question about your greenhouses, zones, or sensor data.")
             ).classes("text-sm opacity-40")
         return
 
@@ -130,7 +131,7 @@ def _render_conversation_messages(
                 proposed_actions = parsed.get("proposed_actions", [])
                 if proposed_actions:
                     with ui.column().classes("w-full gap-2 mt-2"):
-                        ui.label("Proposed Actions").classes("text-xs font-semibold opacity-60")
+                        ui.label(_("Proposed Actions")).classes("text-xs font-semibold opacity-60")
                         for action in proposed_actions:
                             proposed_action_card(action)
             elif role == "system":
@@ -142,7 +143,7 @@ async def ai_chat() -> None:
     """Render the AI chat page with conversation management."""
     main_layout()
 
-    ui.label("AI Assistant").classes("text-2xl font-bold mt-6")
+    ui.label(_("AI Assistant")).classes("text-2xl font-bold mt-6")
 
     # --- State ---
     selected_conversation_id: dict[str, str | None] = {"value": None}
@@ -157,26 +158,26 @@ async def ai_chat() -> None:
     with ui.row().classes("w-full gap-4 mt-4 items-center flex-wrap"):
         # Conversation selector
         conversation_select = ui.select(
-            label="Conversation",
+            label=_("Conversation"),
             options={},
             on_change=lambda e: select_conversation(e.value),
         ).classes("flex-1 min-w-[200px]")
 
         # Scope selectors
         with ui.row().classes("items-center gap-2"):
-            ui.label("Scope:").classes("text-sm opacity-60")
+            ui.label(_("Scope:")).classes("text-sm opacity-60")
             group_input = ui.input(
-                label="Group ID",
+                label=_("Group ID"),
                 placeholder="group-001",
                 on_change=lambda e: scope_state.update({"group_id": e.value or None}),
             ).classes("w-32")
             greenhouse_input = ui.input(
-                label="Greenhouse",
+                label=_("Greenhouse"),
                 placeholder="gh-001",
                 on_change=lambda e: scope_state.update({"greenhouse_id": e.value or None}),
             ).classes("w-32")
             zone_input = ui.input(
-                label="Zone",
+                label=_("Zone"),
                 placeholder="zone-01",
                 on_change=lambda e: scope_state.update({"zone_id": e.value or None}),
             ).classes("w-32")
@@ -194,17 +195,17 @@ async def ai_chat() -> None:
     # --- Message input ---
     with ui.row().classes("w-full gap-2 mt-4 items-end sticky bottom-0 bg-white py-2"):
         message_input = ui.textarea(
-            placeholder="Ask about your greenhouses...",
+            placeholder=_("Ask about your greenhouses..."),
         ).classes("flex-1").props('rows=1 autogrow outlined dense')
         send_button = ui.button(
-            "Send",
+            _("Send"),
             icon="send",
             on_click=lambda: send_message(),
         ).props("color=primary")
 
     # --- New conversation button ---
     ui.button(
-        "New Conversation",
+        _("New Conversation"),
         icon="add",
         on_click=lambda: start_new_conversation(),
     ).classes("mt-2").props("flat color=grey")
@@ -248,7 +249,7 @@ async def ai_chat() -> None:
             _render_conversation_messages(messages, tool_calls)
 
         except httpx.HTTPError as exc:
-            ui.label(f"Error loading conversation: {exc}").classes("text-red-500 text-sm")
+            ui.label(_("Error loading conversation: {error}", error=exc)).classes("text-red-500 text-sm")
 
     def select_conversation(conversation_id: str | None) -> None:
         """Handle conversation selection change."""
@@ -286,7 +287,7 @@ async def ai_chat() -> None:
         loading_container.set_visibility(True)
         with loading_container:
             ui.spinner("dots", size="2rem")
-            ui.label("Thinking...").classes("text-sm opacity-50")
+            ui.label(_("Thinking...")).classes("text-sm opacity-50")
 
         # Hide error
         error_container.clear()
@@ -336,7 +337,7 @@ async def ai_chat() -> None:
                 # Proposed action cards
                 if proposed_actions:
                     with ui.column().classes("w-full gap-2 mt-2"):
-                        ui.label("Proposed Actions").classes(
+                        ui.label(_("Proposed Actions")).classes(
                             "text-xs font-semibold opacity-60"
                         )
                         for action in proposed_actions:
@@ -352,11 +353,11 @@ async def ai_chat() -> None:
             error_container.clear()
             error_container.set_visibility(True)
             with error_container:
-                ui.label("Request failed").classes("text-red-500 font-semibold")
+                ui.label(_("Request failed")).classes("text-red-500 font-semibold")
                 detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
                 ui.label(detail).classes("text-sm text-red-400")
                 ui.button(
-                    "Retry",
+                    _("Retry"),
                     icon="refresh",
                     on_click=lambda: send_message(),
                 ).props("flat color=red size=sm")

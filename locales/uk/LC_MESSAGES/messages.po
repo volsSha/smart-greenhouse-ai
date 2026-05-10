@@ -1,0 +1,1211 @@
+# Ukrainian translations for Smart Greenhouse Fleet Control.
+msgid ""
+msgid ""
+msgstr ""
+"Project-Id-Version: Smart Greenhouse Fleet Control 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-09 00:17+0300\n"
+"PO-Revision-Date: 2026-05-08 00:00+0000\n"
+"Last-Translator: Smart Greenhouse Fleet Control\n"
+"Language: uk\n"
+"Language-Team: Ukrainian\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/ui/components/alert_panel.py:47
+msgid "Unknown Alert"
+msgid "Unknown Alert"
+msgstr "Невідоме попередження"
+
+#: app/ui/components/alert_panel.py:83
+msgid "Active Alerts"
+msgid "Active Alerts"
+msgstr "Активні попередження"
+
+#: app/ui/components/alert_panel.py:86
+msgid "No active alerts"
+msgid "No active alerts"
+msgstr "Немає активних попереджень"
+
+#: app/ui/components/chat_message.py:37
+msgid "Observations"
+msgid "Observations"
+msgstr "Спостереження"
+
+#: app/ui/components/chat_message.py:49
+msgid "Recommendations"
+msgid "Recommendations"
+msgstr "Рекомендації"
+
+#: app/ui/components/chat_message.py:59
+msgid "OK"
+msgid "OK"
+msgstr "Добре"
+
+#: app/ui/components/chat_message.py:60
+msgid "Limited Data"
+msgid "Limited Data"
+msgstr "Обмежені дані"
+
+#: app/ui/components/chat_message.py:110
+msgid "Assistant"
+msgid "Assistant"
+msgstr "Асистент"
+
+#: app/ui/components/language_switcher.py:20
+msgid "Ukrainian"
+msgid "Ukrainian"
+msgstr "Українська"
+
+#: app/ui/components/language_switcher.py:20
+msgid "English"
+msgid "English"
+msgstr "Англійська"
+
+#: app/ui/components/proposed_action_card.py:30
+msgid "Pending Approval"
+msgid "Pending Approval"
+msgstr "Очікує затвердження"
+
+#: app/ui/components/proposed_action_card.py:31
+msgid "Approved"
+msgid "Approved"
+msgstr "Затверджено"
+
+#: app/ui/components/proposed_action_card.py:32
+msgid "Rejected"
+msgid "Rejected"
+msgstr "Відхилено"
+
+#: app/ui/components/proposed_action_card.py:33
+msgid "Executed"
+msgid "Executed"
+msgstr "Виконано"
+
+#: app/ui/components/proposed_action_card.py:34
+msgid "Expired"
+msgid "Expired"
+msgstr "Прострочено"
+
+#: app/ui/components/proposed_action_card.py:35
+msgid "Failed"
+msgid "Failed"
+msgstr "Помилка"
+
+#: app/ui/components/proposed_action_card.py:87
+#, python-brace-format
+msgid "for {duration}s"
+msgid "for {duration}s"
+msgstr "на {duration} с"
+
+#: app/ui/components/proposed_action_card.py:113
+msgid "Approve and Execute"
+msgid "Approve and Execute"
+msgstr "Затвердити й виконати"
+
+#: app/ui/components/proposed_action_card.py:118
+msgid "Reject"
+msgid "Reject"
+msgstr "Відхилити"
+
+#: app/ui/components/telemetry_cards.py:80
+#, python-brace-format
+msgid "{label}:"
+msgid "{label}:"
+msgstr "{label}:"
+
+#: app/ui/components/telemetry_cards.py:107
+#, python-brace-format
+msgid "{count} greenhouses"
+msgid "{count} greenhouses"
+msgstr "{count} теплиць"
+
+#: app/ui/components/telemetry_cards.py:131
+#, python-brace-format
+msgid "{count} zones"
+msgid "{count} zones"
+msgstr "{count} зон"
+
+#: app/ui/components/telemetry_cards.py:138
+msgid "Temp"
+msgid "Temp"
+msgstr "Темп."
+
+#: app/ui/components/telemetry_cards.py:139
+#: app/ui/components/telemetry_cards.py:181
+#: app/ui/components/telemetry_charts.py:179
+msgid "Humidity"
+msgid "Humidity"
+msgstr "Вологість"
+
+#: app/ui/components/telemetry_cards.py:140
+msgid "Soil"
+msgid "Soil"
+msgstr "Ґрунт"
+
+#: app/ui/components/telemetry_cards.py:147
+#: app/ui/components/telemetry_cards.py:196
+msgid "No recent data"
+msgid "No recent data"
+msgstr "Немає нещодавніх даних"
+
+#: app/ui/components/telemetry_cards.py:180
+#: app/ui/components/telemetry_charts.py:47
+#: app/ui/components/telemetry_charts.py:158
+#: app/ui/components/telemetry_charts.py:160
+msgid "Temperature"
+msgid "Temperature"
+msgstr "Температура"
+
+#: app/ui/components/telemetry_cards.py:182
+#: app/ui/components/telemetry_charts.py:49
+#: app/ui/components/telemetry_charts.py:196
+#: app/ui/components/telemetry_charts.py:198
+msgid "Soil Moisture"
+msgid "Soil Moisture"
+msgstr "Вологість ґрунту"
+
+#: app/ui/components/telemetry_cards.py:183
+#: app/ui/components/telemetry_charts.py:50
+msgid "CO2"
+msgid "CO2"
+msgstr "CO2"
+
+#: app/ui/components/telemetry_cards.py:184
+#: app/ui/components/telemetry_charts.py:51
+msgid "Light"
+msgid "Light"
+msgstr "Освітлення"
+
+#: app/ui/components/telemetry_cards.py:185
+#: app/ui/components/telemetry_charts.py:52
+msgid "Fan"
+msgid "Fan"
+msgstr "Вентилятор"
+
+#: app/ui/components/telemetry_cards.py:186
+#: app/ui/components/telemetry_charts.py:53
+msgid "Pump"
+msgid "Pump"
+msgstr "Насос"
+
+#: app/ui/components/telemetry_cards.py:187
+#: app/ui/components/telemetry_charts.py:54
+msgid "Heater"
+msgid "Heater"
+msgstr "Обігрівач"
+
+#: app/ui/components/telemetry_cards.py:188
+#: app/ui/components/telemetry_charts.py:55
+msgid "Lamp"
+msgid "Lamp"
+msgstr "Лампа"
+
+#: app/ui/components/telemetry_charts.py:48
+#: app/ui/components/telemetry_charts.py:177
+msgid "Air Humidity"
+msgid "Air Humidity"
+msgstr "Вологість повітря"
+
+#: app/ui/components/telemetry_charts.py:222
+msgid "No data"
+msgid "No data"
+msgstr "Немає даних"
+
+#: app/ui/components/telemetry_charts.py:247
+msgid "Metrics Overview"
+msgid "Metrics Overview"
+msgstr "Огляд метрик"
+
+#: app/ui/components/tool_call_trace.py:44
+msgid "Success"
+msgid "Success"
+msgstr "Успішно"
+
+#: app/ui/components/tool_call_trace.py:45
+msgid "Error"
+msgid "Error"
+msgstr "Помилка"
+
+#: app/ui/components/tool_call_trace.py:82
+msgid "Arguments"
+msgid "Arguments"
+msgstr "Аргументи"
+
+#: app/ui/components/tool_call_trace.py:89
+msgid "Result"
+msgid "Result"
+msgstr "Результат"
+
+#: app/ui/components/tool_call_trace.py:113
+#, python-brace-format
+msgid "{count} tool calls"
+msgid "{count} tool calls"
+msgstr "{count} викликів інструментів"
+
+#: app/ui/components/tool_call_trace.py:115
+#, python-brace-format
+msgid "{duration} total"
+msgid "{duration} total"
+msgstr "{duration} загалом"
+
+#: app/ui/components/tool_call_trace.py:117
+#, python-brace-format
+msgid "{count} errors"
+msgid "{count} errors"
+msgstr "{count} помилок"
+
+#: app/ui/components/tool_call_trace.py:122
+#, python-brace-format
+msgid "Tool Calls: {summary}"
+msgid "Tool Calls: {summary}"
+msgstr "Виклики інструментів: {summary}"
+
+#: app/ui/layouts/main_layout.py:21
+msgid "Smart Greenhouse Fleet"
+msgid "Smart Greenhouse Fleet"
+msgstr "Флот розумних теплиць"
+
+#: app/ui/layouts/main_layout.py:23
+msgid "Fleet Control System"
+msgid "Fleet Control System"
+msgstr "Система керування флотом"
+
+#: app/ui/layouts/main_layout.py:28
+msgid "Menu"
+msgid "Menu"
+msgstr "Меню"
+
+#: app/ui/layouts/main_layout.py:31
+msgid "Operations"
+msgid "Operations"
+msgstr "Операції"
+
+#: app/ui/layouts/main_layout.py:32 app/ui/pages/dashboard.py:134
+msgid "Dashboard"
+msgid "Dashboard"
+msgstr "Панель керування"
+
+#: app/ui/layouts/main_layout.py:33 app/ui/pages/simulator.py:91
+msgid "Simulator"
+msgid "Simulator"
+msgstr "Симулятор"
+
+#: app/ui/layouts/main_layout.py:34 app/ui/pages/plants.py:13
+msgid "Plants"
+msgid "Plants"
+msgstr "Рослини"
+
+#: app/ui/layouts/main_layout.py:35
+msgid "Control"
+msgid "Control"
+msgstr "Керування"
+
+#: app/ui/layouts/main_layout.py:38
+msgid "Intelligence"
+msgid "Intelligence"
+msgstr "Інтелект"
+
+#: app/ui/layouts/main_layout.py:39
+msgid "AI Chat"
+msgid "AI Chat"
+msgstr "AI-чат"
+
+#: app/ui/layouts/main_layout.py:40
+msgid "RAG"
+msgid "RAG"
+msgstr "RAG"
+
+#: app/ui/layouts/main_layout.py:41
+msgid "Logs"
+msgid "Logs"
+msgstr "Журнали"
+
+#: app/ui/layouts/main_layout.py:44
+msgid "System"
+msgid "System"
+msgstr "Система"
+
+#: app/ui/layouts/main_layout.py:45
+msgid "Settings"
+msgid "Settings"
+msgstr "Налаштування"
+
+#: app/ui/pages/ai_chat.py:90
+msgid "No messages yet"
+msgid "No messages yet"
+msgstr "Повідомлень ще немає"
+
+#: app/ui/pages/ai_chat.py:92
+msgid "Ask a question about your greenhouses, zones, or sensor data."
+msgid "Ask a question about your greenhouses, zones, or sensor data."
+msgstr "Поставте запитання про теплиці, зони або дані сенсорів."
+
+#: app/ui/pages/ai_chat.py:134 app/ui/pages/ai_chat.py:340
+msgid "Proposed Actions"
+msgid "Proposed Actions"
+msgstr "Запропоновані дії"
+
+#: app/ui/pages/ai_chat.py:146
+msgid "AI Assistant"
+msgid "AI Assistant"
+msgstr "AI-асистент"
+
+#: app/ui/pages/ai_chat.py:161
+msgid "Conversation"
+msgid "Conversation"
+msgstr "Розмова"
+
+#: app/ui/pages/ai_chat.py:168
+msgid "Scope:"
+msgid "Scope:"
+msgstr "Область:"
+
+#: app/ui/pages/ai_chat.py:170 app/ui/pages/control.py:43
+msgid "Group ID"
+msgid "Group ID"
+msgstr "ID групи"
+
+#: app/ui/pages/ai_chat.py:175
+msgid "Greenhouse"
+msgid "Greenhouse"
+msgstr "Теплиця"
+
+#: app/ui/pages/ai_chat.py:180
+msgid "Zone"
+msgid "Zone"
+msgstr "Зона"
+
+#: app/ui/pages/ai_chat.py:198
+msgid "Ask about your greenhouses..."
+msgid "Ask about your greenhouses..."
+msgstr "Запитайте про свої теплиці..."
+
+#: app/ui/pages/ai_chat.py:201
+msgid "Send"
+msgid "Send"
+msgstr "Надіслати"
+
+#: app/ui/pages/ai_chat.py:208
+msgid "New Conversation"
+msgid "New Conversation"
+msgstr "Нова розмова"
+
+#: app/ui/pages/ai_chat.py:252
+#, python-brace-format
+msgid "Error loading conversation: {error}"
+msgid "Error loading conversation: {error}"
+msgstr "Помилка завантаження розмови: {error}"
+
+#: app/ui/pages/ai_chat.py:290
+msgid "Thinking..."
+msgid "Thinking..."
+msgstr "Думаю..."
+
+#: app/ui/pages/ai_chat.py:356
+msgid "Request failed"
+msgid "Request failed"
+msgstr "Запит не виконано"
+
+#: app/ui/pages/ai_chat.py:360 app/ui/pages/settings.py:257
+msgid "Retry"
+msgid "Retry"
+msgstr "Повторити"
+
+#: app/ui/pages/control.py:33
+msgid "Actuator Control"
+msgid "Actuator Control"
+msgstr "Керування виконавчими пристроями"
+
+#: app/ui/pages/control.py:34
+msgid "Propose, validate, approve, and execute actuator commands."
+msgstr "Propose, validate, approve, and execute actuator commands."
+"Пропонуйте, перевіряйте, затверджуйте та виконуйте команди виконавчих "
+"пристроїв."
+
+#: app/ui/pages/control.py:41
+msgid "Propose Command"
+msgid "Propose Command"
+msgstr "Запропонувати команду"
+
+#: app/ui/pages/control.py:44
+msgid "Greenhouse ID"
+msgid "Greenhouse ID"
+msgstr "ID теплиці"
+
+#: app/ui/pages/control.py:45
+msgid "Zone ID"
+msgid "Zone ID"
+msgstr "ID зони"
+
+#: app/ui/pages/control.py:48 app/ui/pages/logs.py:47
+msgid "Actuator"
+msgid "Actuator"
+msgstr "Виконавчий пристрій"
+
+#: app/ui/pages/control.py:53
+msgid "Action"
+msgid "Action"
+msgstr "Дія"
+
+#: app/ui/pages/control.py:57
+msgid "Value"
+msgid "Value"
+msgstr "Значення"
+
+#: app/ui/pages/control.py:58
+msgid "Duration (s)"
+msgid "Duration (s)"
+msgstr "Тривалість (с)"
+
+#: app/ui/pages/control.py:59
+msgid "Reason"
+msgid "Reason"
+msgstr "Причина"
+
+#: app/ui/pages/control.py:59
+msgid "Manual greenhouse adjustment"
+msgid "Manual greenhouse adjustment"
+msgstr "Ручне налаштування теплиці"
+
+#: app/ui/pages/control.py:61
+msgid "Propose"
+msgid "Propose"
+msgstr "Запропонувати"
+
+#: app/ui/pages/control.py:67
+msgid "Pending Commands"
+msgid "Pending Commands"
+msgstr "Команди в очікуванні"
+
+#: app/ui/pages/control.py:69
+msgid ""
+"Validated and AI-generated proposals require approval before MQTT "
+"execution."
+msgstr "Validated and AI-generated proposals require approval before MQTT execution."
+"Перевірені та згенеровані AI пропозиції потребують затвердження перед "
+"виконанням через MQTT."
+
+#: app/ui/pages/control.py:74
+msgid "Recent Commands"
+msgid "Recent Commands"
+msgstr "Нещодавні команди"
+
+#: app/ui/pages/control.py:75
+msgid "Executed, rejected, failed, and expired commands appear here."
+msgid "Executed, rejected, failed, and expired commands appear here."
+msgstr "Виконані, відхилені, невдалі та прострочені команди з’являються тут."
+
+#: app/ui/pages/control.py:99
+#, python-brace-format
+msgid "Invalid command form: {error}"
+msgid "Invalid command form: {error}"
+msgstr "Некоректна форма команди: {error}"
+
+#: app/ui/pages/control.py:117 app/ui/pages/control.py:120
+#, python-brace-format
+msgid "{prefix}: {error}"
+msgid "{prefix}: {error}"
+msgstr "{prefix}: {error}"
+
+#: app/ui/pages/control.py:133
+msgid "Command proposed"
+msgid "Command proposed"
+msgstr "Команду запропоновано"
+
+#: app/ui/pages/control.py:134
+msgid "Propose failed"
+msgid "Propose failed"
+msgstr "Не вдалося запропонувати"
+
+#: app/ui/pages/control.py:142
+msgid "Command approved"
+msgid "Command approved"
+msgstr "Команду затверджено"
+
+#: app/ui/pages/control.py:143
+msgid "Approve failed"
+msgid "Approve failed"
+msgstr "Не вдалося затвердити"
+
+#: app/ui/pages/control.py:151
+msgid "Command rejected"
+msgid "Command rejected"
+msgstr "Команду відхилено"
+
+#: app/ui/pages/control.py:152
+msgid "Reject failed"
+msgid "Reject failed"
+msgstr "Не вдалося відхилити"
+
+#: app/ui/pages/control.py:163
+msgid "Enter a valid Group ID to load commands."
+msgid "Enter a valid Group ID to load commands."
+msgstr "Введіть коректний ID групи, щоб завантажити команди."
+
+#: app/ui/pages/control.py:171 app/ui/pages/control.py:176
+#, python-brace-format
+msgid "Failed to load commands: {error}"
+msgid "Failed to load commands: {error}"
+msgstr "Не вдалося завантажити команди: {error}"
+
+#: app/ui/pages/control.py:189
+msgid "No pending commands."
+msgid "No pending commands."
+msgstr "Немає команд в очікуванні."
+
+#: app/ui/pages/control.py:199
+msgid "No recent completed commands."
+msgid "No recent completed commands."
+msgstr "Немає нещодавно завершених команд."
+
+#: app/ui/pages/dashboard.py:156
+#, python-brace-format
+msgid "Error loading data: {error}"
+msgid "Error loading data: {error}"
+msgstr "Помилка завантаження даних: {error}"
+
+#: app/ui/pages/dashboard.py:158
+msgid "Make sure the API is running and InfluxDB is available."
+msgid "Make sure the API is running and InfluxDB is available."
+msgstr "Переконайтеся, що API працює, а InfluxDB доступний."
+
+#: app/ui/pages/dashboard.py:168
+msgid "No telemetry data available"
+msgid "No telemetry data available"
+msgstr "Немає доступних телеметричних даних"
+
+#: app/ui/pages/dashboard.py:170
+msgid "Start the simulator to generate data and see it here."
+msgid "Start the simulator to generate data and see it here."
+msgstr "Запустіть симулятор, щоб згенерувати дані та побачити їх тут."
+
+#: app/ui/pages/dashboard.py:187
+msgid "Greenhouses"
+msgid "Greenhouses"
+msgstr "Теплиці"
+
+#: app/ui/pages/dashboard.py:205
+#, python-brace-format
+msgid "Greenhouse: {greenhouse_id}"
+msgid "Greenhouse: {greenhouse_id}"
+msgstr "Теплиця: {greenhouse_id}"
+
+#: app/ui/pages/dashboard.py:210
+msgid "No zone data available"
+msgid "No zone data available"
+msgstr "Немає доступних даних зон"
+
+#: app/ui/pages/dashboard.py:221
+msgid "Zone Charts"
+msgid "Zone Charts"
+msgstr "Графіки зон"
+
+#: app/ui/pages/dashboard.py:269
+msgid "No historical data for charts"
+msgid "No historical data for charts"
+msgstr "Немає історичних даних для графіків"
+
+#: app/ui/pages/dashboard.py:272
+#, python-brace-format
+msgid "Error loading chart data: {error}"
+msgid "Error loading chart data: {error}"
+msgstr "Помилка завантаження даних графіка: {error}"
+
+#: app/ui/pages/logs.py:21
+msgid "Command Logs"
+msgid "Command Logs"
+msgstr "Журнали команд"
+
+#: app/ui/pages/logs.py:23
+msgid "Audit log of all actuator commands with filtering and search."
+msgid "Audit log of all actuator commands with filtering and search."
+msgstr "Журнал аудиту всіх команд виконавчих пристроїв із фільтрацією та пошуком."
+
+#: app/ui/pages/logs.py:27
+msgid "Filters"
+msgid "Filters"
+msgstr "Фільтри"
+
+#: app/ui/pages/logs.py:31 app/ui/pages/simulator.py:107
+msgid "Status"
+msgid "Status"
+msgstr "Статус"
+
+#: app/ui/pages/logs.py:52
+msgid "Source"
+msgid "Source"
+msgstr "Джерело"
+
+#: app/ui/pages/logs.py:56 app/ui/pages/rag.py:77
+msgid "Refresh"
+msgid "Refresh"
+msgstr "Оновити"
+
+#: app/ui/pages/logs.py:59
+msgid "Command History"
+msgid "Command History"
+msgstr "Історія команд"
+
+#: app/ui/pages/logs.py:60
+msgid "Command log entries will appear here."
+msgid "Command log entries will appear here."
+msgstr "Записи журналу команд з’являться тут."
+
+#: app/ui/pages/logs.py:64
+msgid "Placeholder -- full logs UI will be implemented in a later unit."
+msgid "Placeholder -- full logs UI will be implemented in a later unit."
+msgstr "Заповнювач -- повний інтерфейс журналів буде реалізовано пізніше."
+
+#: app/ui/pages/plants.py:14
+msgid "Plant batches, profiles, growth stages, and zone assignments."
+msgid "Plant batches, profiles, growth stages, and zone assignments."
+msgstr "Партії рослин, профілі, стадії росту та призначення зон."
+
+#: app/ui/pages/plants.py:21
+msgid "Plant Profiles"
+msgid "Plant Profiles"
+msgstr "Профілі рослин"
+
+#: app/ui/pages/plants.py:23
+msgid "Manage reusable environmental condition profiles for different crops."
+msgid "Manage reusable environmental condition profiles for different crops."
+msgstr "Керуйте багаторазовими профілями умов середовища для різних культур."
+
+#: app/ui/pages/plants.py:25
+msgid "Placeholder -- profiles management will appear here."
+msgid "Placeholder -- profiles management will appear here."
+msgstr "Заповнювач -- керування профілями з’явиться тут."
+
+#: app/ui/pages/plants.py:31
+msgid "Plant Batches"
+msgid "Plant Batches"
+msgstr "Партії рослин"
+
+#: app/ui/pages/plants.py:33
+msgid "Track growing batches across greenhouse zones."
+msgid "Track growing batches across greenhouse zones."
+msgstr "Відстежуйте партії вирощування в зонах теплиць."
+
+#: app/ui/pages/plants.py:35
+msgid "Placeholder -- batch management will appear here."
+msgid "Placeholder -- batch management will appear here."
+msgstr "Заповнювач -- керування партіями з’явиться тут."
+
+#: app/ui/pages/plants.py:39
+msgid "Placeholder -- full plant management UI will be implemented."
+msgid "Placeholder -- full plant management UI will be implemented."
+msgstr "Заповнювач -- повний інтерфейс керування рослинами буде реалізовано."
+
+#: app/ui/pages/rag.py:16
+msgid "Knowledge Base"
+msgid "Knowledge Base"
+msgstr "База знань"
+
+#: app/ui/pages/rag.py:18
+msgid "Manage agronomic knowledge documents for AI-powered search."
+msgid "Manage agronomic knowledge documents for AI-powered search."
+msgstr "Керуйте агрономічними документами знань для пошуку з AI."
+
+#: app/ui/pages/rag.py:28
+msgid "Documents"
+msgid "Documents"
+msgstr "Документи"
+
+#: app/ui/pages/rag.py:45
+msgid "No documents yet."
+msgid "No documents yet."
+msgstr "Документів ще немає."
+
+#: app/ui/pages/rag.py:59
+#, python-brace-format
+msgid "{source_type} | {count} chars"
+msgid "{source_type} | {count} chars"
+msgstr "{source_type} | {count} символів"
+
+#: app/ui/pages/rag.py:71
+msgid "Failed to load documents."
+msgid "Failed to load documents."
+msgstr "Не вдалося завантажити документи."
+
+#: app/ui/pages/rag.py:81 app/ui/pages/rag.py:122
+msgid "Add Document"
+msgid "Add Document"
+msgstr "Додати документ"
+
+#: app/ui/pages/rag.py:83
+msgid "Title"
+msgid "Title"
+msgstr "Назва"
+
+#: app/ui/pages/rag.py:85
+msgid "Source Type"
+msgid "Source Type"
+msgstr "Тип джерела"
+
+#: app/ui/pages/rag.py:90
+msgid "Content"
+msgid "Content"
+msgstr "Вміст"
+
+#: app/ui/pages/rag.py:91
+msgid "Paste or type the agronomic knowledge content here..."
+msgid "Paste or type the agronomic knowledge content here..."
+msgstr "Вставте або введіть агрономічний вміст знань тут..."
+
+#: app/ui/pages/rag.py:99
+msgid "Title and content are required."
+msgid "Title and content are required."
+msgstr "Назва та вміст обов’язкові."
+
+#: app/ui/pages/rag.py:113
+msgid "Document added successfully!"
+msgid "Document added successfully!"
+msgstr "Документ успішно додано!"
+
+#: app/ui/pages/rag.py:118
+#, python-brace-format
+msgid "Failed: {error}"
+msgid "Failed: {error}"
+msgstr "Помилка: {error}"
+
+#: app/ui/pages/rag.py:120
+#, python-brace-format
+msgid "Error: {error}"
+msgid "Error: {error}"
+msgstr "Помилка: {error}"
+
+#: app/ui/pages/rag.py:126
+msgid "Reindex"
+msgid "Reindex"
+msgstr "Переіндексувати"
+
+#: app/ui/pages/rag.py:128
+msgid ""
+"Re-chunk and re-embed all documents. Use after changing the embedding "
+"model."
+msgstr "Re-chunk and re-embed all documents. Use after changing the embedding model."
+"Повторно розбийте та переіндексуйте всі документи. Використовуйте після "
+"зміни моделі ембедингів."
+
+#: app/ui/pages/rag.py:143
+#, python-brace-format
+msgid "Reindex complete: {total} documents processed."
+msgid "Reindex complete: {total} documents processed."
+msgstr "Переіндексацію завершено: оброблено документів: {total}."
+
+#: app/ui/pages/rag.py:149
+#, python-brace-format
+msgid "Reindex failed: {error}"
+msgid "Reindex failed: {error}"
+msgstr "Переіндексація не вдалася: {error}"
+
+#: app/ui/pages/rag.py:153
+#, python-brace-format
+msgid "Reindex error: {error}"
+msgid "Reindex error: {error}"
+msgstr "Помилка переіндексації: {error}"
+
+#: app/ui/pages/rag.py:155
+msgid "Reindex All Documents"
+msgid "Reindex All Documents"
+msgstr "Переіндексувати всі документи"
+
+#: app/ui/pages/rag.py:161
+msgid "Search Knowledge Base"
+msgid "Search Knowledge Base"
+msgstr "Пошук у базі знань"
+
+#: app/ui/pages/rag.py:164
+msgid "Search Query"
+msgid "Search Query"
+msgstr "Пошуковий запит"
+
+#: app/ui/pages/rag.py:165
+msgid "e.g. tomato wilting, CO2 optimal levels..."
+msgid "e.g. tomato wilting, CO2 optimal levels..."
+msgstr "наприклад, в’янення томатів, оптимальні рівні CO2..."
+
+#: app/ui/pages/rag.py:175
+msgid "Enter a search query."
+msgid "Enter a search query."
+msgstr "Введіть пошуковий запит."
+
+#: app/ui/pages/rag.py:193
+msgid "No results found."
+msgid "No results found."
+msgstr "Результатів не знайдено."
+
+#: app/ui/pages/rag.py:204
+#, python-brace-format
+msgid "Score: {score:.4f}"
+msgid "Score: {score:.4f}"
+msgstr "Оцінка: {score:.4f}"
+
+#: app/ui/pages/rag.py:213
+#, python-brace-format
+msgid "Search failed: {error}"
+msgid "Search failed: {error}"
+msgstr "Пошук не вдався: {error}"
+
+#: app/ui/pages/rag.py:219
+#, python-brace-format
+msgid "Search error: {error}"
+msgid "Search error: {error}"
+msgstr "Помилка пошуку: {error}"
+
+#: app/ui/pages/rag.py:221
+msgid "Search"
+msgid "Search"
+msgstr "Пошук"
+
+#: app/ui/pages/rag.py:224
+msgid "Search on Enter"
+msgid "Search on Enter"
+msgstr "Пошук при Enter"
+
+#: app/ui/pages/settings.py:22
+msgid "Model Settings"
+msgid "Model Settings"
+msgstr "Налаштування моделі"
+
+#: app/ui/pages/settings.py:24
+msgid "Configure the AI chat model and manage the OpenRouter model catalog."
+msgid "Configure the AI chat model and manage the OpenRouter model catalog."
+msgstr "Налаштуйте модель AI-чату та керуйте каталогом моделей OpenRouter."
+
+#: app/ui/pages/settings.py:28
+msgid "Current Settings"
+msgid "Current Settings"
+msgstr "Поточні налаштування"
+
+#: app/ui/pages/settings.py:34
+msgid "Loading settings..."
+msgid "Loading settings..."
+msgstr "Завантаження налаштувань..."
+
+#: app/ui/pages/settings.py:38
+msgid "Embedding Model"
+msgid "Embedding Model"
+msgstr "Модель ембедингів"
+
+#: app/ui/pages/settings.py:41
+msgid ""
+"The embedding model is fixed by configuration. Changing it requires "
+"reindexing all RAG documents."
+msgstr "The embedding model is fixed by configuration. Changing it requires reindexing all RAG documents."
+"Модель ембедингів зафіксована конфігурацією. Її зміна потребує "
+"переіндексації всіх RAG-документів."
+
+#: app/ui/pages/settings.py:45
+msgid "Loading..."
+msgid "Loading..."
+msgstr "Завантаження..."
+
+#: app/ui/pages/settings.py:48
+msgid "OpenRouter Model Catalog"
+msgid "OpenRouter Model Catalog"
+msgstr "Каталог моделей OpenRouter"
+
+#: app/ui/pages/settings.py:53
+msgid "Search models..."
+msgid "Search models..."
+msgstr "Пошук моделей..."
+
+#: app/ui/pages/settings.py:58 app/ui/pages/settings.py:83
+msgid "Provider"
+msgid "Provider"
+msgstr "Постачальник"
+
+#: app/ui/pages/settings.py:59 app/ui/pages/settings.py:65
+msgid "All"
+msgid "All"
+msgstr "Усі"
+
+#: app/ui/pages/settings.py:64
+msgid "Capability"
+msgid "Capability"
+msgstr "Можливість"
+
+#: app/ui/pages/settings.py:70
+msgid "Refresh Catalog"
+msgid "Refresh Catalog"
+msgstr "Оновити каталог"
+
+#: app/ui/pages/settings.py:82
+msgid "Model"
+msgid "Model"
+msgstr "Модель"
+
+#: app/ui/pages/settings.py:84
+msgid "Prompt $/M"
+msgid "Prompt $/M"
+msgstr "Промпт $/M"
+
+#: app/ui/pages/settings.py:85
+msgid "Completion $/M"
+msgid "Completion $/M"
+msgstr "Завершення $/M"
+
+#: app/ui/pages/settings.py:86
+msgid "Context"
+msgid "Context"
+msgstr "Контекст"
+
+#: app/ui/pages/settings.py:96
+msgid "Selected:"
+msgid "Selected:"
+msgstr "Вибрано:"
+
+#: app/ui/pages/settings.py:97 app/ui/pages/settings.py:162
+msgid "None"
+msgid "None"
+msgstr "Немає"
+
+#: app/ui/pages/settings.py:99
+msgid "Use Selected Model"
+msgid "Use Selected Model"
+msgstr "Використати вибрану модель"
+
+#: app/ui/pages/settings.py:131
+msgid "Chat Model:"
+msgid "Chat Model:"
+msgstr "Модель чату:"
+
+#: app/ui/pages/settings.py:133
+msgid "Not selected"
+msgid "Not selected"
+msgstr "Не вибрано"
+
+#: app/ui/pages/settings.py:137
+msgid "(Unavailable)"
+msgid "(Unavailable)"
+msgstr "(Недоступно)"
+
+#: app/ui/pages/settings.py:140
+#, python-brace-format
+msgid "Last refresh: {timestamp}"
+msgid "Last refresh: {timestamp}"
+msgstr "Останнє оновлення: {timestamp}"
+
+#: app/ui/pages/settings.py:147 app/ui/pages/settings.py:255
+#, python-brace-format
+msgid "Refresh failed: {error}"
+msgid "Refresh failed: {error}"
+msgstr "Оновлення не вдалося: {error}"
+
+#: app/ui/pages/settings.py:155
+#, python-brace-format
+msgid "{model} ({dimension} dimensions)"
+msgid "{model} ({dimension} dimensions)"
+msgstr "{model} ({dimension} вимірів)"
+
+#: app/ui/pages/settings.py:156
+msgid "Not configured"
+msgid "Not configured"
+msgstr "Не налаштовано"
+
+#: app/ui/pages/settings.py:169
+msgid "Failed to load settings"
+msgid "Failed to load settings"
+msgstr "Не вдалося завантажити налаштування"
+
+#: app/ui/pages/settings.py:221
+msgid "Refreshing catalog..."
+msgid "Refreshing catalog..."
+msgstr "Оновлення каталогу..."
+
+#: app/ui/pages/settings.py:237
+#, python-brace-format
+msgid "Catalog refreshed: {count} models loaded"
+msgid "Catalog refreshed: {count} models loaded"
+msgstr "Каталог оновлено: завантажено моделей: {count}"
+
+#: app/ui/pages/settings.py:244
+msgid "Refresh failed"
+msgid "Refresh failed"
+msgstr "Оновлення не вдалося"
+
+#: app/ui/pages/settings.py:279
+msgid "Never"
+msgid "Never"
+msgstr "Ніколи"
+
+#: app/ui/pages/settings.py:284
+msgid "Unknown"
+msgid "Unknown"
+msgstr "Невідомо"
+
+#: app/ui/pages/simulator.py:61 app/ui/pages/simulator.py:120
+msgid "Normal"
+msgid "Normal"
+msgstr "Нормальний"
+
+#: app/ui/pages/simulator.py:62
+msgid "Dry Soil"
+msgid "Dry Soil"
+msgstr "Сухий ґрунт"
+
+#: app/ui/pages/simulator.py:63
+msgid "Overheating"
+msgid "Overheating"
+msgstr "Перегрів"
+
+#: app/ui/pages/simulator.py:64
+msgid "Low Light"
+msgid "Low Light"
+msgstr "Мало світла"
+
+#: app/ui/pages/simulator.py:65
+msgid "Sensor Fault"
+msgid "Sensor Fault"
+msgstr "Несправність сенсора"
+
+#: app/ui/pages/simulator.py:72 app/ui/pages/simulator.py:124
+msgid "Stable conditions within optimal ranges"
+msgid "Stable conditions within optimal ranges"
+msgstr "Стабільні умови в оптимальних діапазонах"
+
+#: app/ui/pages/simulator.py:73
+msgid "Low soil moisture across all zones"
+msgid "Low soil moisture across all zones"
+msgstr "Низька вологість ґрунту в усіх зонах"
+
+#: app/ui/pages/simulator.py:74
+msgid "Rising temperatures above safe thresholds"
+msgid "Rising temperatures above safe thresholds"
+msgstr "Зростання температур понад безпечні пороги"
+
+#: app/ui/pages/simulator.py:75
+msgid "Insufficient light levels for photosynthesis"
+msgid "Insufficient light levels for photosynthesis"
+msgstr "Недостатній рівень світла для фотосинтезу"
+
+#: app/ui/pages/simulator.py:76
+msgid "Erratic readings from one or more sensors"
+msgid "Erratic readings from one or more sensors"
+msgstr "Нестабільні показники від одного або кількох сенсорів"
+
+#: app/ui/pages/simulator.py:93
+msgid "Control the telemetry data simulator for testing and demos."
+msgid "Control the telemetry data simulator for testing and demos."
+msgstr "Керуйте симулятором телеметричних даних для тестування та демонстрацій."
+
+#: app/ui/pages/simulator.py:108 app/ui/pages/simulator.py:246
+msgid "Stopped"
+msgid "Stopped"
+msgstr "Зупинено"
+
+#: app/ui/pages/simulator.py:111
+msgid "Messages published:"
+msgid "Messages published:"
+msgstr "Опубліковано повідомлень:"
+
+#: app/ui/pages/simulator.py:114
+msgid "Last publish:"
+msgid "Last publish:"
+msgstr "Остання публікація:"
+
+#: app/ui/pages/simulator.py:119
+msgid "Active Scenario"
+msgid "Active Scenario"
+msgstr "Активний сценарій"
+
+#: app/ui/pages/simulator.py:129
+msgid "Select Scenario"
+msgid "Select Scenario"
+msgstr "Виберіть сценарій"
+
+#: app/ui/pages/simulator.py:142
+msgid "Configuration"
+msgid "Configuration"
+msgstr "Конфігурація"
+
+#: app/ui/pages/simulator.py:146
+msgid "Groups"
+msgid "Groups"
+msgstr "Групи"
+
+#: app/ui/pages/simulator.py:150
+msgid "Greenhouses per Group"
+msgid "Greenhouses per Group"
+msgstr "Теплиць у групі"
+
+#: app/ui/pages/simulator.py:154
+msgid "Zones per Greenhouse"
+msgid "Zones per Greenhouse"
+msgstr "Зон у теплиці"
+
+#: app/ui/pages/simulator.py:158
+msgid "Interval (seconds)"
+msgid "Interval (seconds)"
+msgstr "Інтервал (секунди)"
+
+#: app/ui/pages/simulator.py:178
+#, python-brace-format
+msgid "Scenario changed to {scenario}"
+msgid "Scenario changed to {scenario}"
+msgstr "Сценарій змінено на {scenario}"
+
+#: app/ui/pages/simulator.py:203
+msgid "Simulator started successfully"
+msgid "Simulator started successfully"
+msgstr "Симулятор успішно запущено"
+
+#: app/ui/pages/simulator.py:205
+msgid "Simulator started"
+msgid "Simulator started"
+msgstr "Симулятор запущено"
+
+#: app/ui/pages/simulator.py:211
+#, python-brace-format
+msgid "Failed to start: {detail}"
+msgid "Failed to start: {detail}"
+msgstr "Не вдалося запустити: {detail}"
+
+#: app/ui/pages/simulator.py:213
+msgid "Failed to start simulator"
+msgid "Failed to start simulator"
+msgstr "Не вдалося запустити симулятор"
+
+#: app/ui/pages/simulator.py:227 app/ui/pages/simulator.py:229
+msgid "Simulator stopped"
+msgid "Simulator stopped"
+msgstr "Симулятор зупинено"
+
+#: app/ui/pages/simulator.py:233
+#, python-brace-format
+msgid "Failed to stop: {detail}"
+msgid "Failed to stop: {detail}"
+msgstr "Не вдалося зупинити: {detail}"
+
+#: app/ui/pages/simulator.py:235
+msgid "Failed to stop simulator"
+msgid "Failed to stop simulator"
+msgstr "Не вдалося зупинити симулятор"
+
+#: app/ui/pages/simulator.py:240
+msgid "Running"
+msgid "Running"
+msgstr "Запущено"
+
+#: app/ui/pages/simulator.py:261
+msgid "Start Simulator"
+msgid "Start Simulator"
+msgstr "Запустити симулятор"
+
+#: app/ui/pages/simulator.py:268
+msgid "Stop Simulator"
+msgid "Stop Simulator"
+msgstr "Зупинити симулятор"
+
+#~ msgid "label"
+#~ msgstr ""
+
+#~ msgid "description"
+#~ msgstr ""
+

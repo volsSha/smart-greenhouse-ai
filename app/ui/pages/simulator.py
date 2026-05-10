@@ -12,6 +12,7 @@ from typing import Any
 import httpx
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 from app.ui.layouts.main_layout import main_layout
 
@@ -55,6 +56,28 @@ SCENARIOS: dict[str, dict[str, Any]] = {
 }
 
 
+def _scenario_label(scenario_key: str) -> str:
+    labels = {
+        "normal": _("Normal"),
+        "dry_soil": _("Dry Soil"),
+        "overheating": _("Overheating"),
+        "low_light": _("Low Light"),
+        "sensor_fault": _("Sensor Fault"),
+    }
+    return labels.get(scenario_key, scenario_key)
+
+
+def _scenario_description(scenario_key: str) -> str:
+    descriptions = {
+        "normal": _("Stable conditions within optimal ranges"),
+        "dry_soil": _("Low soil moisture across all zones"),
+        "overheating": _("Rising temperatures above safe thresholds"),
+        "low_light": _("Insufficient light levels for photosynthesis"),
+        "sensor_fault": _("Erratic readings from one or more sensors"),
+    }
+    return descriptions.get(scenario_key, "")
+
+
 # ---------------------------------------------------------------------------
 # Simulator page
 # ---------------------------------------------------------------------------
@@ -65,9 +88,9 @@ async def simulator() -> None:
     """Render the simulator control page."""
     main_layout()
 
-    ui.label("Simulator").classes("text-2xl font-bold mt-6")
+    ui.label(_("Simulator")).classes("text-2xl font-bold mt-6")
     ui.label(
-        "Control the telemetry data simulator for testing and demos."
+        _("Control the telemetry data simulator for testing and demos.")
     ).classes("text-sm opacity-70 mt-1")
 
     # State
@@ -81,34 +104,34 @@ async def simulator() -> None:
     # --- Status indicator ---
     with ui.card().classes("w-full mt-4"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.label("Status").classes("text-lg font-bold")
-            status_badge = ui.badge("Stopped", color="grey")
+            ui.label(_("Status")).classes("text-lg font-bold")
+            status_badge = ui.badge(_("Stopped"), color="grey")
 
         with ui.row().classes("items-center gap-6 mt-2"):
-            ui.label("Messages published:").classes("text-sm opacity-70")
+            ui.label(_("Messages published:")).classes("text-sm opacity-70")
             msg_count_label = ui.label("0").classes("text-sm font-mono font-bold")
             ui.separator().props("vertical")
-            ui.label("Last publish:").classes("text-sm opacity-70")
+            ui.label(_("Last publish:")).classes("text-sm opacity-70")
             last_publish_label = ui.label("--").classes("text-sm font-mono")
 
     # --- Active scenario ---
     with ui.card().classes("w-full mt-4"):
-        ui.label("Active Scenario").classes("text-lg font-bold")
-        active_scenario_label = ui.label("Normal").classes(
+        ui.label(_("Active Scenario")).classes("text-lg font-bold")
+        active_scenario_label = ui.label(_("Normal")).classes(
             "text-md mt-1 font-semibold"
         ).style("color: #4caf50")
         scenario_desc = ui.label(
-            "Stable conditions within optimal ranges"
+            _("Stable conditions within optimal ranges")
         ).classes("text-sm opacity-60 mt-1")
 
     # --- Scenario selection ---
     with ui.card().classes("w-full mt-4"):
-        ui.label("Select Scenario").classes("text-lg font-bold")
+        ui.label(_("Select Scenario")).classes("text-lg font-bold")
 
         with ui.row().classes("w-full gap-3 mt-3 flex-wrap"):
             for key, scenario in SCENARIOS.items():
                 btn = ui.button(
-                    scenario["label"],
+                    _scenario_label(key),
                     icon=scenario["icon"],
                     on_click=lambda k=key: select_scenario(k),
                 )
@@ -116,23 +139,23 @@ async def simulator() -> None:
 
     # --- Configuration ---
     with ui.card().classes("w-full mt-4"):
-        ui.label("Configuration").classes("text-lg font-bold")
+        ui.label(_("Configuration")).classes("text-lg font-bold")
 
         with ui.row().classes("w-full gap-4 mt-3"):
             groups_input = ui.number(
-                "Groups", value=1, min=1, max=10
+                _("Groups"), value=1, min=1, max=10
             ).classes("w-32")
 
             greenhouses_input = ui.number(
-                "Greenhouses per Group", value=3, min=1, max=20
+                _("Greenhouses per Group"), value=3, min=1, max=20
             ).classes("w-48")
 
             zones_input = ui.number(
-                "Zones per Greenhouse", value=4, min=1, max=20
+                _("Zones per Greenhouse"), value=4, min=1, max=20
             ).classes("w-48")
 
             interval_input = ui.number(
-                "Interval (seconds)", value=5, min=1, max=300
+                _("Interval (seconds)"), value=5, min=1, max=300
             ).classes("w-48")
 
     # --- Result display ---
@@ -147,12 +170,12 @@ async def simulator() -> None:
         scenario = SCENARIOS[scenario_key]
         state["scenario"] = scenario_key
 
-        active_scenario_label.set_text(scenario["label"])
+        active_scenario_label.set_text(_scenario_label(scenario_key))
         active_scenario_label.style(f"color: {scenario['color']}")
-        scenario_desc.set_text(scenario["description"])
+        scenario_desc.set_text(_scenario_description(scenario_key))
 
         ui.notify(
-            f"Scenario changed to {scenario['label']}",
+            _("Scenario changed to {scenario}", scenario=_scenario_label(scenario_key)),
             type="info",
         )
 
@@ -177,17 +200,17 @@ async def simulator() -> None:
             state["last_publish"] = result.get("last_publish")
 
             _update_status()
-            result_label.set_text("Simulator started successfully")
+            result_label.set_text(_("Simulator started successfully"))
             result_label.style("color: #4caf50")
-            ui.notify("Simulator started", type="positive")
+            ui.notify(_("Simulator started"), type="positive")
 
         except httpx.HTTPError as exc:
             state["running"] = False
             _update_status()
             detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
-            result_label.set_text(f"Failed to start: {detail}")
+            result_label.set_text(_("Failed to start: {detail}", detail=detail))
             result_label.style("color: #f44336")
-            ui.notify("Failed to start simulator", type="negative")
+            ui.notify(_("Failed to start simulator"), type="negative")
 
     async def stop_simulator() -> None:
         """Attempt to stop the simulator via the API."""
@@ -201,26 +224,26 @@ async def simulator() -> None:
             state["messages_published"] = result.get("messages_published", state["messages_published"])
 
             _update_status()
-            result_label.set_text("Simulator stopped")
+            result_label.set_text(_("Simulator stopped"))
             result_label.style("color: #ff9800")
-            ui.notify("Simulator stopped", type="warning")
+            ui.notify(_("Simulator stopped"), type="warning")
 
         except httpx.HTTPError as exc:
             detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
-            result_label.set_text(f"Failed to stop: {detail}")
+            result_label.set_text(_("Failed to stop: {detail}", detail=detail))
             result_label.style("color: #f44336")
-            ui.notify("Failed to stop simulator", type="negative")
+            ui.notify(_("Failed to stop simulator"), type="negative")
 
     def _update_status() -> None:
         """Refresh the status display to match current state."""
         if state["running"]:
-            status_badge.set_text("Running")
+            status_badge.set_text(_("Running"))
             status_badge._props["color"] = "positive"
             status_badge.update()
             start_btn.props("disable")
             stop_btn.props(remove="disable")
         else:
-            status_badge.set_text("Stopped")
+            status_badge.set_text(_("Stopped"))
             status_badge._props["color"] = "grey"
             status_badge.update()
             start_btn.props(remove="disable")
@@ -235,14 +258,14 @@ async def simulator() -> None:
     # --- Control buttons ---
     with ui.row().classes("w-full gap-4 mt-6"):
         start_btn = ui.button(
-            "Start Simulator",
+            _("Start Simulator"),
             icon="play_arrow",
             color="positive",
             on_click=start_simulator,
         ).classes("px-6")
 
         stop_btn = ui.button(
-            "Stop Simulator",
+            _("Stop Simulator"),
             icon="stop",
             color="negative",
             on_click=stop_simulator,

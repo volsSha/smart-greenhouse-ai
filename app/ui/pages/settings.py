@@ -7,6 +7,7 @@ import httpx
 from datetime import datetime
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 from app.ui.layouts.main_layout import main_layout
 
@@ -18,53 +19,55 @@ async def settings_page() -> None:
     """Render the system settings page with model catalog management."""
     main_layout()
 
-    ui.label("Model Settings").classes("text-2xl font-bold mt-6")
+    ui.label(_("Model Settings")).classes("text-2xl font-bold mt-6")
     ui.label(
-        "Configure the AI chat model and manage the OpenRouter model catalog."
+        _("Configure the AI chat model and manage the OpenRouter model catalog.")
     ).classes("text-sm opacity-70 mt-2")
 
     # --- Current Settings Section ---
-    ui.label("Current Settings").classes("text-lg font-semibold mt-6 mb-2")
+    ui.label(_("Current Settings")).classes("text-lg font-semibold mt-6 mb-2")
 
     settings_container = ui.column().classes("w-full gap-3 p-4 bg-gray-50 rounded-lg")
     settings_loading = ui.column().classes("w-full items-center gap-2")
     with settings_loading:
         ui.spinner("dots")
-        ui.label("Loading settings...").classes("text-sm opacity-60")
+        ui.label(_("Loading settings...")).classes("text-sm opacity-60")
 
     # --- Embedding Model Info ---
     with ui.column().classes("w-full gap-2 mt-4"):
-        ui.label("Embedding Model").classes("text-sm font-semibold")
+        ui.label(_("Embedding Model")).classes("text-sm font-semibold")
         ui.label(
-            "The embedding model is fixed by configuration. "
-            "Changing it requires reindexing all RAG documents."
+            _(
+                "The embedding model is fixed by configuration. "
+                "Changing it requires reindexing all RAG documents."
+            )
         ).classes("text-xs text-amber-600 opacity-80")
-        embedding_info = ui.label("Loading...").classes("text-sm opacity-70")
+        embedding_info = ui.label(_("Loading...")).classes("text-sm opacity-70")
 
     # --- Model Catalog Section ---
-    ui.label("OpenRouter Model Catalog").classes("text-lg font-semibold mt-6 mb-2")
+    ui.label(_("OpenRouter Model Catalog")).classes("text-lg font-semibold mt-6 mb-2")
 
     # Catalog controls
     with ui.row().classes("w-full gap-3 items-center flex-wrap"):
         search_input = ui.input(
-            placeholder="Search models...",
+            placeholder=_("Search models..."),
             on_change=lambda: refresh_catalog_display(),
         ).classes("flex-1 min-w-[200px]").props("debounce=300")
 
         provider_filter = ui.select(
-            label="Provider",
-            options={"All": None},
+            label=_("Provider"),
+            options={_("All"): None},
             on_change=lambda: refresh_catalog_display(),
         ).classes("w-40")
 
         capability_filter = ui.select(
-            label="Capability",
-            options={"All": None},
+            label=_("Capability"),
+            options={_("All"): None},
             on_change=lambda: refresh_catalog_display(),
         ).classes("w-40")
 
         refresh_button = ui.button(
-            "Refresh Catalog",
+            _("Refresh Catalog"),
             icon="refresh",
             on_click=lambda: refresh_catalog_from_api(),
         ).props("color=primary")
@@ -76,11 +79,11 @@ async def settings_page() -> None:
     catalog_table = ui.aggrid(
         {
             "columnDefs": [
-                {"headerName": "Model", "field": "name", "flex": 2},
-                {"headerName": "Provider", "field": "provider", "flex": 1},
-                {"headerName": "Prompt $/M", "field": "prompt_price", "flex": 1},
-                {"headerName": "Completion $/M", "field": "completion_price", "flex": 1},
-                {"headerName": "Context", "field": "context_length", "flex": 1},
+                {"headerName": _("Model"), "field": "name", "flex": 2},
+                {"headerName": _("Provider"), "field": "provider", "flex": 1},
+                {"headerName": _("Prompt $/M"), "field": "prompt_price", "flex": 1},
+                {"headerName": _("Completion $/M"), "field": "completion_price", "flex": 1},
+                {"headerName": _("Context"), "field": "context_length", "flex": 1},
             ],
             "rowData": [],
             "defaultColDef": {"sortable": True, "filter": True, "resizable": True},
@@ -90,10 +93,10 @@ async def settings_page() -> None:
 
     # Select button for selected row
     with ui.row().classes("w-full gap-2 mt-2"):
-        ui.label("Selected:").classes("text-sm opacity-60")
-        selected_model_label = ui.label("None").classes("text-sm font-medium")
+        ui.label(_("Selected:")).classes("text-sm opacity-60")
+        selected_model_label = ui.label(_("None")).classes("text-sm font-medium")
         ui.button(
-            "Use Selected Model",
+            _("Use Selected Model"),
             icon="check",
             on_click=lambda: select_current_model(),
         ).props("color=positive").set_enabled(False)
@@ -125,39 +128,45 @@ async def settings_page() -> None:
             settings_container.clear()
             with settings_container:
                 with ui.row().classes("w-full gap-4 items-center"):
-                    ui.label("Chat Model:").classes("text-sm font-medium")
+                    ui.label(_("Chat Model:")).classes("text-sm font-medium")
                     selected_label = ui.label(
-                        settings_data.get("selected_chat_model") or "Not selected"
+                        settings_data.get("selected_chat_model") or _("Not selected")
                     ).classes("text-sm")
                     if not settings_data.get("selected_model_available"):
                         selected_label.classes("text-sm text-red-500")
-                        ui.label("(Unavailable)").classes("text-xs text-red-500")
+                        ui.label(_("(Unavailable)")).classes("text-xs text-red-500")
 
                 ui.label(
-                    f"Last refresh: {format_timestamp(settings_data.get('last_refresh_at'))}"
+                    _("Last refresh: {timestamp}", timestamp=format_timestamp(settings_data.get('last_refresh_at')))
                 ).classes("text-xs opacity-60")
 
                 refresh_status = settings_data.get("last_refresh_status")
                 if refresh_status == "failed":
                     ui.label(
-                        f"Refresh failed: {settings_data.get('last_refresh_error', 'Unknown error')}"
+                        _(
+                            "Refresh failed: {error}",
+                            error=settings_data.get('last_refresh_error', _('Unknown error')),
+                        )
                     ).classes("text-xs text-red-500")
 
             # Update embedding info
             embedding_info.set_value(
-                f"{catalog_state['embedding_model'] or 'Not configured'} "
-                f"({catalog_state['embedding_dimension'] or '?'} dimensions)"
+                _(
+                    "{model} ({dimension} dimensions)",
+                    model=catalog_state['embedding_model'] or _('Not configured'),
+                    dimension=catalog_state['embedding_dimension'] or '?',
+                )
             )
 
             selected_model_label.set_value(
-                settings_data.get("selected_chat_model") or "None"
+                settings_data.get("selected_chat_model") or _("None")
             )
 
         except httpx.HTTPError as exc:
             logger.error("Failed to load settings: %s", exc)
             settings_container.clear()
             with settings_container:
-                ui.label("Failed to load settings").classes("text-red-500 text-sm")
+                ui.label(_("Failed to load settings")).classes("text-red-500 text-sm")
 
     async def load_catalog() -> None:
         """Load the model catalog from the API."""
@@ -209,7 +218,7 @@ async def settings_page() -> None:
         status_container.clear()
         with status_container:
             ui.spinner("dots", size="1rem")
-            ui.label("Refreshing catalog...").classes("text-sm opacity-60")
+            ui.label(_("Refreshing catalog...")).classes("text-sm opacity-60")
 
         refresh_button.disable()
 
@@ -224,12 +233,15 @@ async def settings_page() -> None:
                 if result.get("status") == "success":
                     ui.icon("check_circle", color="positive").classes("text-sm")
                     ui.label(
-                        f"Catalog refreshed: {result.get('models_added', 0)} models loaded"
+                        _(
+                            "Catalog refreshed: {count} models loaded",
+                            count=result.get('models_added', 0),
+                        )
                     ).classes("text-sm text-green-600")
                 else:
                     ui.icon("error", color="negative").classes("text-sm")
                     ui.label(
-                        result.get("message") or "Refresh failed"
+                        result.get("message") or _("Refresh failed")
                     ).classes("text-sm text-red-500")
 
             # Reload settings and catalog
@@ -240,9 +252,9 @@ async def settings_page() -> None:
             status_container.clear()
             with status_container:
                 ui.icon("error", color="negative").classes("text-sm")
-                ui.label(f"Refresh failed: {response_error(exc)}").classes("text-sm text-red-500")
+                ui.label(_("Refresh failed: {error}", error=response_error(exc))).classes("text-sm text-red-500")
                 ui.button(
-                    "Retry",
+                    _("Retry"),
                     icon="refresh",
                     on_click=lambda: refresh_catalog_from_api(),
                 ).props("flat color=red size=sm")
@@ -264,12 +276,12 @@ async def settings_page() -> None:
     def format_timestamp(ts: str | None) -> str:
         """Format a timestamp for display."""
         if not ts:
-            return "Never"
+            return _("Never")
         try:
             dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
             return dt.strftime("%Y-%m-%d %H:%M")
         except (ValueError, AttributeError):
-            return "Unknown"
+            return _("Unknown")
 
     def format_context_length(length: int | None) -> str:
         """Format context length for display."""

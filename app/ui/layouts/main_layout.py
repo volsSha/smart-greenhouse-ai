@@ -6,6 +6,9 @@ and a sidebar with grouped navigation links.
 
 from nicegui import ui
 
+from app.i18n.core import _
+from app.ui.components.language_switcher import language_switcher
+
 
 def main_layout() -> None:
     """Render the main application layout shell.
@@ -15,27 +18,28 @@ def main_layout() -> None:
     """
     # --- Header ---
     with ui.header():
-        ui.label("Smart Greenhouse Fleet").classes("text-lg font-bold")
+        ui.label(_("Smart Greenhouse Fleet")).classes("text-lg font-bold")
         ui.space()
-        ui.label("Fleet Control System").classes("text-sm opacity-70")
+        ui.label(_("Fleet Control System")).classes("text-sm opacity-70")
+        language_switcher()
 
     # --- Sidebar ---
     with ui.left_drawer().classes("p-4"):
-        ui.label("Menu").classes("text-md font-bold mb-4")
+        ui.label(_("Menu")).classes("text-md font-bold mb-4")
 
         # Operations group
-        ui.label("Operations").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-        ui.link("Dashboard", "/dashboard")
-        ui.link("Simulator", "/simulator")
-        ui.link("Plants", "/plants")
-        ui.link("Control", "/control")
+        ui.label(_("Operations")).classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link(_("Dashboard"), "/dashboard")
+        ui.link(_("Simulator"), "/simulator")
+        ui.link(_("Plants"), "/plants")
+        ui.link(_("Control"), "/control")
 
         # Intelligence group
-        ui.label("Intelligence").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-        ui.link("AI Chat", "/ai-chat")
-        ui.link("RAG", "/rag")
-        ui.link("Logs", "/logs")
+        ui.label(_("Intelligence")).classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link(_("AI Chat"), "/ai-chat")
+        ui.link(_("RAG"), "/rag")
+        ui.link(_("Logs"), "/logs")
 
         # System group
-        ui.label("System").classes("text-xs uppercase opacity-50 mt-4 mb-1")
-        ui.link("Settings", "/settings")
+        ui.label(_("System")).classes("text-xs uppercase opacity-50 mt-4 mb-1")
+        ui.link(_("Settings"), "/settings")

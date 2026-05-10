@@ -11,6 +11,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 _STATUS_CONFIG: dict[str, dict[str, str]] = {
     "ok": {"icon": "check_circle", "color": "#4caf50", "label": "Success"},
@@ -35,6 +37,14 @@ def _format_duration(duration_ms: int | None) -> str:
     if duration_ms < 1000:
         return f"{duration_ms}ms"
     return f"{duration_ms / 1000:.1f}s"
+
+
+def _status_label(status: str) -> str:
+    labels = {
+        "ok": _("Success"),
+        "error": _("Error"),
+    }
+    return labels.get(status, labels["ok"])
 
 
 def tool_call_item(tool_call: dict[str, Any]) -> None:
@@ -63,20 +73,20 @@ def tool_call_item(tool_call: dict[str, Any]) -> None:
         with ui.row().classes("items-center w-full gap-2"):
             ui.icon(config["icon"], size="1rem").style(f"color: {config['color']}")
             ui.label(tool_name).classes("text-sm font-mono font-semibold")
-            ui.label(config["label"]).classes("text-xs").style(f"color: {config['color']}")
+            ui.label(_status_label(status)).classes("text-xs").style(f"color: {config['color']}")
             if duration_ms is not None:
                 ui.label(_format_duration(duration_ms)).classes("text-xs opacity-50 ml-auto")
 
         # Arguments
         if arguments:
-            with ui.expansion("Arguments", icon="code").classes("w-full mt-1"):
+            with ui.expansion(_("Arguments"), icon="code").classes("w-full mt-1"):
                 ui.label(_truncate_value(arguments)).classes(
                     "text-xs font-mono bg-gray-50 p-2 rounded w-full overflow-x-auto"
                 )
 
         # Result
         if result is not None:
-            with ui.expansion("Result", icon="data_object").classes("w-full mt-1"):
+            with ui.expansion(_("Result"), icon="data_object").classes("w-full mt-1"):
                 ui.label(_truncate_value(result)).classes(
                     "text-xs font-mono bg-gray-50 p-2 rounded w-full overflow-x-auto"
                 )
@@ -100,16 +110,16 @@ def tool_call_panel(tool_calls: list[dict[str, Any]]) -> None:
     )
     error_count = sum(1 for tc in tool_calls if tc.get("status") == "error")
 
-    summary_parts = [f"{len(tool_calls)} tool call{'s' if len(tool_calls) != 1 else ''}"]
+    summary_parts = [_("{count} tool calls", count=len(tool_calls))]
     if total_duration:
-        summary_parts.append(f"{_format_duration(total_duration)} total")
+        summary_parts.append(_("{duration} total", duration=_format_duration(total_duration)))
     if error_count:
-        summary_parts.append(f"{error_count} error{'s' if error_count != 1 else ''}")
+        summary_parts.append(_("{count} errors", count=error_count))
 
     summary = ", ".join(summary_parts)
 
     with ui.expansion(
-        f"Tool Calls: {summary}",
+        _("Tool Calls: {summary}", summary=summary),
         icon="construction",
     ).classes("w-full"):
         with ui.column().classes("w-full gap-2"):

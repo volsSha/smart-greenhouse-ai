@@ -12,6 +12,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 _ACTION_STATUS_CONFIG: dict[str, dict[str, str]] = {
     "pending": {"icon": "schedule", "color": "#ff9800", "bg": "#fff3e0", "label": "Pending Approval"},
@@ -23,10 +25,22 @@ _ACTION_STATUS_CONFIG: dict[str, dict[str, str]] = {
 }
 
 
+def _status_label(status: str) -> str:
+    labels = {
+        "pending": _("Pending Approval"),
+        "approved": _("Approved"),
+        "rejected": _("Rejected"),
+        "executed": _("Executed"),
+        "expired": _("Expired"),
+        "failed": _("Failed"),
+    }
+    return labels.get(status, labels["pending"])
+
+
 def _status_badge(status: str) -> None:
     """Render a status badge for a proposed action."""
     config = _ACTION_STATUS_CONFIG.get(status, _ACTION_STATUS_CONFIG["pending"])
-    ui.badge(config["label"], color=config["color"]).props("outline")
+    ui.badge(_status_label(status), color=config["color"]).props("outline")
 
 
 def proposed_action_card(
@@ -70,7 +84,7 @@ def proposed_action_card(
             if value is not None:
                 ui.label(f"= {value}").classes("text-sm font-mono opacity-70")
             if duration is not None:
-                ui.label(f"for {duration}s").classes("text-xs opacity-50")
+                ui.label(_("for {duration}s", duration=duration)).classes("text-xs opacity-50")
             _status_badge(status)
 
         # Scope breadcrumbs
@@ -96,12 +110,12 @@ def proposed_action_card(
         if status in {"pending", "proposed", "validated"} and command_id:
             with ui.row().classes("gap-2 mt-3"):
                 ui.button(
-                    "Approve and Execute",
+                    _("Approve and Execute"),
                     color="positive",
                     on_click=lambda command_id=str(command_id): on_approve(command_id) if on_approve else None,
                 ).props("dense")
                 ui.button(
-                    "Reject",
+                    _("Reject"),
                     color="negative",
                     on_click=lambda command_id=str(command_id): on_reject(command_id) if on_reject else None,
                 ).props("dense outline")

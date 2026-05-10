@@ -10,6 +10,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 _SEVERITY_CONFIG: dict[str, dict[str, str]] = {
     "critical": {"icon": "error", "color": "#f44336", "bg": "#ffebee", "text": "#b71c1c"},
@@ -42,7 +44,7 @@ def alert_item(alert: dict[str, Any]) -> None:
     severity = alert.get("severity", "info").lower()
     config = _SEVERITY_CONFIG.get(severity, _SEVERITY_CONFIG["info"])
 
-    title = alert.get("title", "Unknown Alert")
+    title = alert.get("title", _("Unknown Alert"))
     message = alert.get("message", "")
     timestamp = alert.get("timestamp")
     zone_id = alert.get("zone_id")
@@ -78,10 +80,10 @@ def alert_panel(alerts: list[dict[str, Any]]) -> None:
         alerts: List of alert dicts as described in :func:`alert_item`.
     """
     with ui.card().classes("w-full"):
-        ui.label("Active Alerts").classes("text-lg font-bold")
+        ui.label(_("Active Alerts")).classes("text-lg font-bold")
 
         if not alerts:
-            ui.label("No active alerts").classes("text-sm opacity-50 mt-2")
+            ui.label(_("No active alerts")).classes("text-sm opacity-50 mt-2")
             return
 
         # Sort by severity: critical first, then warning, then info

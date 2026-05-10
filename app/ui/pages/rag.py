@@ -3,6 +3,7 @@
 import httpx
 from nicegui import ui
 
+from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 from app.ui.layouts.main_layout import main_layout
 
@@ -12,9 +13,9 @@ async def rag_page() -> None:
     """Render the RAG knowledge base management page."""
     main_layout()
 
-    ui.label("Knowledge Base").classes("text-2xl font-bold mt-6")
+    ui.label(_("Knowledge Base")).classes("text-2xl font-bold mt-6")
     ui.label(
-        "Manage agronomic knowledge documents for AI-powered search."
+        _("Manage agronomic knowledge documents for AI-powered search.")
     ).classes("text-sm opacity-70 mt-2")
 
     def notify(notification, message: str, kind: str) -> None:
@@ -24,7 +25,7 @@ async def rag_page() -> None:
 
     # --- Document list ---
     with ui.card().classes("w-full mt-6"):
-        ui.label("Documents").classes("text-lg font-bold")
+        ui.label(_("Documents")).classes("text-lg font-bold")
 
         document_list = ui.column().classes("w-full gap-2 mt-4")
 
@@ -41,7 +42,7 @@ async def rag_page() -> None:
                         document_list.clear()
                         with document_list:
                             if not documents:
-                                ui.label("No documents yet.").classes(
+                                ui.label(_("No documents yet.")).classes(
                                     "text-sm opacity-60"
                                 )
                             for doc in documents:
@@ -54,8 +55,11 @@ async def rag_page() -> None:
                                             "font-medium"
                                         )
                                         ui.label(
-                                            f"{doc.get('source_type', 'N/A')} | "
-                                            f"{len(doc.get('content', ''))} chars"
+                                            _(
+                                                "{source_type} | {count} chars",
+                                                source_type=doc.get('source_type', 'N/A'),
+                                                count=len(doc.get('content', '')),
+                                            )
                                         ).classes("text-xs opacity-60")
                                     ui.badge(
                                         doc.get("source_type", "manual"),
@@ -64,27 +68,27 @@ async def rag_page() -> None:
             except Exception:
                 document_list.clear()
                 with document_list:
-                    ui.label("Failed to load documents.").classes(
+                    ui.label(_("Failed to load documents.")).classes(
                         "text-sm text-red-500"
                     )
 
         await load_documents()
 
-        ui.button("Refresh", on_click=load_documents).props("flat color=primary")
+        ui.button(_("Refresh"), on_click=load_documents).props("flat color=primary")
 
     # --- Add document form ---
     with ui.card().classes("w-full mt-6"):
-        ui.label("Add Document").classes("text-lg font-bold")
+        ui.label(_("Add Document")).classes("text-lg font-bold")
 
-        title_input = ui.input(label="Title").classes("w-full")
+        title_input = ui.input(label=_("Title")).classes("w-full")
         source_type_input = ui.select(
-            label="Source Type",
+            label=_("Source Type"),
             options=["manual", "url", "file", "documentation"],
             value="manual",
         ).classes("w-full")
         content_input = ui.textarea(
-            label="Content",
-            placeholder="Paste or type the agronomic knowledge content here...",
+            label=_("Content"),
+            placeholder=_("Paste or type the agronomic knowledge content here..."),
         ).classes("w-full").props('rows="8"')
 
         notification = ui.notification(position="top", timeout=5)
@@ -92,7 +96,7 @@ async def rag_page() -> None:
         async def add_document() -> None:
             """Submit a new document to the knowledge base."""
             if not title_input.value or not content_input.value:
-                notify(notification, "Title and content are required.", "warning")
+                notify(notification, _("Title and content are required."), "warning")
                 return
 
             try:
@@ -106,22 +110,22 @@ async def rag_page() -> None:
                         },
                     )
                     if response.status_code == 201:
-                        notify(notification, "Document added successfully!", "positive")
+                        notify(notification, _("Document added successfully!"), "positive")
                         title_input.set_value("")
                         content_input.set_value("")
                         await load_documents()
                     else:
-                        notify(notification, f"Failed: {response_error(response)}", "negative")
+                        notify(notification, _("Failed: {error}", error=response_error(response)), "negative")
             except httpx.HTTPError as e:
-                notify(notification, f"Error: {e}", "negative")
+                notify(notification, _("Error: {error}", error=e), "negative")
 
-        ui.button("Add Document", on_click=add_document).props("color=primary")
+        ui.button(_("Add Document"), on_click=add_document).props("color=primary")
 
     # --- Reindex ---
     with ui.card().classes("w-full mt-6"):
-        ui.label("Reindex").classes("text-lg font-bold")
+        ui.label(_("Reindex")).classes("text-lg font-bold")
         ui.label(
-            "Re-chunk and re-embed all documents. Use after changing the embedding model."
+            _("Re-chunk and re-embed all documents. Use after changing the embedding model.")
         ).classes("text-sm opacity-70 mt-1")
 
         reindex_notification = ui.notification(position="top", timeout=5)
@@ -136,29 +140,29 @@ async def rag_page() -> None:
                         total = len(data.get("results", []))
                         notify(
                             reindex_notification,
-                            f"Reindex complete: {total} documents processed.",
+                            _("Reindex complete: {total} documents processed.", total=total),
                             "positive",
                         )
                     else:
                         notify(
                             reindex_notification,
-                            f"Reindex failed: {response_error(response)}",
+                            _("Reindex failed: {error}", error=response_error(response)),
                             "negative",
                         )
             except httpx.HTTPError as e:
-                notify(reindex_notification, f"Reindex error: {e}", "negative")
+                notify(reindex_notification, _("Reindex error: {error}", error=e), "negative")
 
-        ui.button("Reindex All Documents", on_click=reindex_all).props(
+        ui.button(_("Reindex All Documents"), on_click=reindex_all).props(
             "color=secondary"
         )
 
     # --- Search ---
     with ui.card().classes("w-full mt-6"):
-        ui.label("Search Knowledge Base").classes("text-lg font-bold")
+        ui.label(_("Search Knowledge Base")).classes("text-lg font-bold")
 
         search_input = ui.input(
-            label="Search Query",
-            placeholder="e.g. tomato wilting, CO2 optimal levels...",
+            label=_("Search Query"),
+            placeholder=_("e.g. tomato wilting, CO2 optimal levels..."),
         ).classes("w-full")
 
         search_results = ui.column().classes("w-full gap-2 mt-4")
@@ -168,7 +172,7 @@ async def rag_page() -> None:
             if not search_input.value:
                 search_results.clear()
                 with search_results:
-                    ui.label("Enter a search query.").classes("text-sm opacity-60")
+                    ui.label(_("Enter a search query.")).classes("text-sm opacity-60")
                 return
 
             search_results.clear()
@@ -186,7 +190,7 @@ async def rag_page() -> None:
                         search_results.clear()
                         with search_results:
                             if not results:
-                                ui.label("No results found.").classes(
+                                ui.label(_("No results found.")).classes(
                                     "text-sm opacity-60"
                                 )
                             for r in results:
@@ -197,7 +201,7 @@ async def rag_page() -> None:
                                         ui.label(r["document_title"]).classes(
                                             "font-medium text-sm"
                                         )
-                                        ui.label(f"Score: {r['score']:.4f}").classes(
+                                        ui.label(_("Score: {score:.4f}", score=r['score'])).classes(
                                             "text-xs opacity-60"
                                         )
                                     ui.label(r["content"]).classes(
@@ -206,17 +210,17 @@ async def rag_page() -> None:
                     else:
                         search_results.clear()
                         with search_results:
-                            ui.label(f"Search failed: {response_error(response)}").classes(
+                            ui.label(_("Search failed: {error}", error=response_error(response))).classes(
                                 "text-sm text-red-500"
                             )
             except httpx.HTTPError as e:
                 search_results.clear()
                 with search_results:
-                    ui.label(f"Search error: {e}").classes("text-sm text-red-500")
+                    ui.label(_("Search error: {error}", error=e)).classes("text-sm text-red-500")
 
-        ui.button("Search", on_click=search_knowledge).props("color=primary")
+        ui.button(_("Search"), on_click=search_knowledge).props("color=primary")
         ui.space()
         ui.button(
-            "Search on Enter",
+            _("Search on Enter"),
             on_click=search_knowledge
         ).props("flat").bind_enabled_from(search_input, "value")

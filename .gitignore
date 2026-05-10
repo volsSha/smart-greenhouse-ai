@@ -3,6 +3,7 @@
 /.claude/
 __pycache__/
 *.pyc
+*.mo
 .env
 .venv/
 /dogfood-output/

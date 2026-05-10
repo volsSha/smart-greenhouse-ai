@@ -10,6 +10,8 @@ from typing import Any
 
 from nicegui import ui
 
+from app.i18n.core import _
+
 
 # ---------------------------------------------------------------------------
 # Metric thresholds for status coloring
@@ -75,7 +77,7 @@ def metric_badge(
 
     with ui.row().classes("items-center gap-1"):
         ui.icon("circle", size="0.5rem").style(f"color: {color}")
-        ui.label(f"{label}:").classes("text-xs opacity-70")
+        ui.label(_("{label}:", label=label)).classes("text-xs opacity-70")
         ui.label(f"{value:.1f} {unit}").classes("text-xs font-semibold")
 
 
@@ -102,7 +104,7 @@ def group_overview_card(group_data: dict[str, Any]) -> None:
 
         with ui.row().classes("items-center gap-4 mt-2"):
             ui.icon("group", size="1.2rem").classes("opacity-50")
-            ui.label(f"{greenhouse_count} greenhouse{'es' if greenhouse_count != 1 else ''}").classes(
+            ui.label(_("{count} greenhouses", count=greenhouse_count)).classes(
                 "text-sm opacity-70"
             )
 
@@ -126,23 +128,23 @@ def greenhouse_card(greenhouse_data: dict[str, Any]) -> None:
         ui.label(name).classes("text-md font-bold")
 
         if zone_count:
-            ui.label(f"{zone_count} zone{'s' if zone_count != 1 else ''}").classes(
+            ui.label(_("{count} zones", count=zone_count)).classes(
                 "text-xs opacity-50 mt-1"
             )
 
         if metrics:
             with ui.column().classes("gap-1 mt-2"):
                 for metric_name, metric_label, unit in [
-                    ("temperature", "Temp", "C"),
-                    ("air_humidity", "Humidity", "%"),
-                    ("soil_moisture", "Soil", "%"),
+                    ("temperature", _("Temp"), "C"),
+                    ("air_humidity", _("Humidity"), "%"),
+                    ("soil_moisture", _("Soil"), "%"),
                 ]:
                     if metric_name in metrics:
                         value = metrics[metric_name]
                         status = _metric_status(metric_name, value)
                         metric_badge(metric_label, value, unit, status)
         else:
-            ui.label("No recent data").classes("text-xs italic opacity-50 mt-2")
+            ui.label(_("No recent data")).classes("text-xs italic opacity-50 mt-2")
 
 
 def zone_detail_card(zone_data: dict[str, Any]) -> None:
@@ -175,15 +177,15 @@ def zone_detail_card(zone_data: dict[str, Any]) -> None:
         if metrics:
             with ui.column().classes("gap-1 mt-2"):
                 metric_units: dict[str, tuple[str, str]] = {
-                    "temperature": ("Temperature", "C"),
-                    "air_humidity": ("Humidity", "%"),
-                    "soil_moisture": ("Soil Moisture", "%"),
-                    "co2": ("CO2", "ppm"),
-                    "light": ("Light", "lux"),
-                    "fan_power": ("Fan", "%"),
-                    "pump_state": ("Pump", ""),
-                    "heater_power": ("Heater", "%"),
-                    "lamp_state": ("Lamp", ""),
+                    "temperature": (_("Temperature"), "C"),
+                    "air_humidity": (_("Humidity"), "%"),
+                    "soil_moisture": (_("Soil Moisture"), "%"),
+                    "co2": (_("CO2"), "ppm"),
+                    "light": (_("Light"), "lux"),
+                    "fan_power": (_("Fan"), "%"),
+                    "pump_state": (_("Pump"), ""),
+                    "heater_power": (_("Heater"), "%"),
+                    "lamp_state": (_("Lamp"), ""),
                 }
                 for metric_name, (label, unit) in metric_units.items():
                     if metric_name in metrics:
@@ -191,4 +193,4 @@ def zone_detail_card(zone_data: dict[str, Any]) -> None:
                         status = _metric_status(metric_name, value)
                         metric_badge(label, value, unit, status)
         else:
-            ui.label("No recent data").classes("text-xs italic opacity-50 mt-2")
+            ui.label(_("No recent data")).classes("text-xs italic opacity-50 mt-2")
