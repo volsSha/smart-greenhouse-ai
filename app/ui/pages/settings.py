@@ -150,17 +150,13 @@ async def settings_page() -> None:
                     ).classes("text-xs text-red-500")
 
             # Update embedding info
-            embedding_info.set_value(
-                _(
-                    "{model} ({dimension} dimensions)",
-                    model=catalog_state['embedding_model'] or _('Not configured'),
-                    dimension=catalog_state['embedding_dimension'] or '?',
-                )
+            embedding_info.text = _(
+                "{model} ({dimension} dimensions)",
+                model=catalog_state['embedding_model'] or _('Not configured'),
+                dimension=catalog_state['embedding_dimension'] or '?',
             )
 
-            selected_model_label.set_value(
-                settings_data.get("selected_chat_model") or _("None")
-            )
+            selected_model_label.text = settings_data.get("selected_chat_model") or _("None")
 
         except httpx.HTTPError as exc:
             logger.error("Failed to load settings: %s", exc)

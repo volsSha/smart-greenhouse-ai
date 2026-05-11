@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
+from app.config import get_settings as get_app_settings
 from app.dependencies import get_db_session
 from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.schemas.settings import (
@@ -36,7 +36,7 @@ async def get_settings(
     repo = ModelSettingsRepository(session)
 
     # Bootstrap settings if they don't exist
-    app_settings = get_settings()
+    app_settings = get_app_settings()
     settings = await repo.bootstrap_settings(
         embedding_model=app_settings.openrouter.embedding_model,
         embedding_dimension=app_settings.openrouter.embedding_dimension,

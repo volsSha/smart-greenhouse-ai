@@ -55,7 +55,7 @@ class OpenRouterModelCatalog(Base, IdTimestampMixin):
     model_id: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
 
     # Display fields (normalized)
-    name: Mapped[str | mapped_column(String(255), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Provider (normalized)
     provider: Mapped[str | None] = mapped_column(String(100))

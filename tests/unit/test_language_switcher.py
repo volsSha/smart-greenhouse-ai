@@ -4,37 +4,42 @@ from app.ui.components import language_switcher
 
 def test_language_switcher_uses_current_language(monkeypatch) -> None:
     calls: list[str] = []
+    selects: list[FakeSelect] = []
 
-    class FakeButton:
-        def __init__(self, label: str) -> None:
-            self.label = label
+    class FakeSelect:
+        def __init__(self, options: list[str], value: str, on_change) -> None:
+            self.options = options
+            self.value = value
+            self.on_change = on_change
 
-        def props(self, value: str) -> "FakeButton":
-            calls.append(f"{self.label}:{value}")
+        def props(self, value: str) -> "FakeSelect":
+            calls.append(f"props:{value}")
             return self
 
-        def tooltip(self, value: str) -> None:
-            calls.append(f"{self.label}:tooltip:{value}")
-
-    class FakeRow:
-        def classes(self, value: str) -> "FakeRow":
-            calls.append(f"row:{value}")
+        def classes(self, value: str) -> "FakeSelect":
+            calls.append(f"classes:{value}")
             return self
 
-        def __enter__(self) -> "FakeRow":
-            return self
+    def fake_select(options: list[str], value: str, on_change) -> FakeSelect:
+        select = FakeSelect(options, value, on_change)
+        selects.append(select)
+        return select
 
-        def __exit__(self, *args: object) -> None:
-            return None
+    class FakeEvent:
+        value = "English"
+
+    switched_languages: list[str] = []
 
     monkeypatch.setattr(language_switcher, "get_current_language", lambda: "uk")
-    monkeypatch.setattr(language_switcher.ui, "row", lambda: FakeRow())
-    monkeypatch.setattr(language_switcher.ui, "button", lambda label, on_click: FakeButton(label))
+    monkeypatch.setattr(language_switcher, "set_language_and_reload", switched_languages.append)
+    monkeypatch.setattr(language_switcher.ui, "select", fake_select)
     monkeypatch.setattr(core, "get_current_language", lambda: "en")
 
     language_switcher.language_switcher()
+    selects[0].on_change(FakeEvent())
 
-    assert "UA:color=primary" in calls
-    assert "EN:flat" in calls
-    assert "UA:tooltip:Ukrainian" in calls
-    assert "EN:tooltip:English" in calls
+    assert selects[0].options == ["Ukrainian", "English"]
+    assert selects[0].value == "Ukrainian"
+    assert "props:dense outlined options-dense" in calls
+    assert "classes:w-36" in calls
+    assert switched_languages == ["en"]

@@ -1,6 +1,7 @@
 # Local development overrides
 # This file is automatically loaded by Docker Compose when running
-# `docker compose up` in development. It binds all ports to localhost only.
+# `docker compose up` in development. It binds all ports to localhost only
+# and switches the app to the dev image with hot reload.
 
 services:
   mosquitto:
@@ -21,11 +22,14 @@ services:
       - "127.0.0.1:3000:3000"
 
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      # Mount source for live-reload during development
       - ./app:/app/app
+      - ./locales:/app/locales
       - ./tests:/app/tests
     environment:
       DEBUG: "true"

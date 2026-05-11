@@ -25,7 +25,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
-from app.config import Settings
+from app.config import Settings, get_settings
 from app.dependencies import create_db_engine, create_influx_client
 from app.services.influx_client import InfluxClient
 from app.repositories.debug_log_repository import create_debug_log_best_effort
@@ -189,10 +189,12 @@ async def root() -> RedirectResponse:
 from app.ui.pages import dashboard, settings, control, logs, ai_chat, rag, simulator, plants  # noqa: E402, F401
 from nicegui import ui  # noqa: E402
 
+app_settings = get_settings()
+
 ui.run_with(
     app,
     title="Smart Greenhouse Fleet",
-    storage_secret="",
+    storage_secret=app_settings.app.app_secret or "smart-greenhouse-dev-secret",
 )
 
 logger.info("API routers and UI pages registered")
