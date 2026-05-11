@@ -166,5 +166,10 @@ class ModelSettingsRepository:
         return list(result.scalars().all())
 
     async def get_catalog_model(self, model_id: str) -> OpenRouterModelCatalog | None:
-        """Get a specific catalog model by ID."""
-        return await self.session.get(OpenRouterModelCatalog, model_id)
+        """Get a specific catalog model by OpenRouter model ID."""
+        result = await self.session.execute(
+            select(OpenRouterModelCatalog).where(
+                OpenRouterModelCatalog.model_id == model_id,
+            )
+        )
+        return result.scalar_one_or_none()
