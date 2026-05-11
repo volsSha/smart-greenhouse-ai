@@ -37,6 +37,7 @@ class CommandLog(Base, IdTimestampMixin):
     duration_seconds: Mapped[int | None] = mapped_column(Integer)
     source: Mapped[str] = mapped_column(String(50), nullable=False)  # manual | control_engine | ai_agent | safety_override
     reason: Mapped[str | None] = mapped_column(Text)
+    mode: Mapped[str] = mapped_column(String(20), nullable=False, default="mqtt")  # simulator | mqtt
     validation_errors: Mapped[dict | None] = mapped_column(JSONB)
     status: Mapped[str] = mapped_column(String(50), nullable=False)  # proposed | validated | approved | executing | executed | cancelled | rejected | expired | failed
     valid_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

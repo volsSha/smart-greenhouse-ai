@@ -35,6 +35,7 @@ class CommandRepository:
         validation_errors: dict | None = None,
         valid_until: datetime | None = None,
         actuator_id: uuid.UUID | None = None,
+        mode: str = "mqtt",
     ) -> CommandLog:
         """Create a new command log entry."""
         command = CommandLog(
@@ -52,6 +53,7 @@ class CommandRepository:
             validation_errors=validation_errors,
             status=status,
             valid_until=valid_until,
+            mode=mode,
         )
         self.session.add(command)
         await self.session.flush()

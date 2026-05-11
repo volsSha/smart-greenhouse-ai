@@ -52,6 +52,7 @@ def _make_command_log(
     value: float | None = None,
     duration_seconds: int | None = 30,
     valid_until: datetime | None = None,
+    mode: str = "mqtt",
 ) -> SimpleNamespace:
     """Create a lightweight mock CommandLog."""
     return SimpleNamespace(
@@ -70,6 +71,7 @@ def _make_command_log(
         validation_errors=None,
         status=status,
         valid_until=valid_until,
+        mode=mode,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

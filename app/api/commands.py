@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ from app.dependencies import get_command_publisher, get_db_session
 from app.schemas.commands import CommandPropose, CommandResponse
 from app.services.command_publisher import CommandPublisher
 from app.services.command_service import CommandError, CommandService
+from app.services.simulator.mode_router import ModeRouter
 
 router = APIRouter(prefix="/api/commands", tags=["commands"])
 
@@ -42,13 +43,16 @@ async def propose_command(
 @router.post("/{command_id}/approve", response_model=CommandResponse)
 async def approve_command(
     command_id: UUID,
+    request: Request,
     session: AsyncSession = Depends(get_db_session),
     publisher: CommandPublisher = Depends(get_command_publisher),
 ) -> CommandResponse:
     """Approve, revalidate, and execute a proposed or validated command."""
+    sim_state = getattr(request.app.state, "simulated_zone_state", None)
+    mode_router = ModeRouter(sim_state) if sim_state else None
     service = CommandService(session, publisher=publisher)
     try:
-        command = await service.approve(command_id, execute=True)
+        command = await service.approve(command_id, execute=True, mode_router=mode_router)
         await session.commit()
         return CommandResponse.model_validate(command)
     except CommandError as e:

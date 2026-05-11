@@ -20,6 +20,7 @@ from app.repositories.command_repository import CommandRepository
 from app.schemas.commands import CommandPropose
 from app.services.command_publisher import CommandPublisher
 from app.services.safety_validator import SafetyValidator, ValidationResult
+from app.services.simulator.mode_router import ModeRouter
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +129,7 @@ class CommandService:
             reason=data.reason,
             status=CommandStatus.PROPOSED,
             valid_until=valid_until,
+            mode=data.mode,
         )
 
         # Run safety validation
@@ -170,6 +172,7 @@ class CommandService:
         current_readings: dict | None = None,
         recent_commands: list | None = None,
         execute: bool = False,
+        mode_router: ModeRouter | None = None,
     ) -> CommandLog:
         """Approve a proposed or validated command.
 
@@ -205,7 +208,7 @@ class CommandService:
             )
             logger.info("Command %s approved", command.id)
             if execute:
-                command = await self.execute(command.id, command=command)
+                command = await self.execute(command.id, command=command, mode_router=mode_router)
         else:
             _check_transition(command.status, CommandStatus.REJECTED)
             command = await self.repo.update_status(
@@ -265,8 +268,9 @@ class CommandService:
         self,
         command_id: uuid.UUID,
         command: CommandLog | None = None,
+        mode_router: ModeRouter | None = None,
     ) -> CommandLog:
-        """Execute an approved command through the configured MQTT publisher."""
+        """Execute an approved command."""
         command = command or await self.repo.get_by_id(command_id)
         if command is None:
             raise CommandError(f"Command {command_id} not found")
@@ -277,32 +281,51 @@ class CommandService:
             raise CommandError(
                 f"Cannot execute command in '{command.status}' state"
             )
-        if self.publisher is None:
-            raise CommandError("Command publisher is not configured")
 
         _check_transition(command.status, CommandStatus.EXECUTING)
         command = await self.repo.update_status(command.id, CommandStatus.EXECUTING)
-        logger.info("Command %s executing", command.id)
+        mode = getattr(command, "mode", "mqtt")
+        logger.info("Command %s executing (mode=%s)", command.id, mode)
 
-        try:
-            publish_result = await self.publisher.publish(command)
-        except Exception as exc:
-            _check_transition(command.status, CommandStatus.FAILED)
-            failed = await self.repo.update_status(
-                command.id,
-                CommandStatus.FAILED,
-                validation_errors={"errors": [f"MQTT publish failed: {exc}"]},
-            )
-            logger.warning("Command %s failed during MQTT publish", command.id, exc_info=True)
-            return failed
+        # Route based on mode
+        if mode == "simulator":
+            try:
+                if mode_router is None:
+                    raise CommandError("Mode router not configured for simulator execution")
+                publish_result = await mode_router.route(command, self.session)
+            except Exception as exc:
+                _check_transition(command.status, CommandStatus.FAILED)
+                failed = await self.repo.update_status(
+                    command.id,
+                    CommandStatus.FAILED,
+                    validation_errors={"errors": [f"Simulator execution failed: {exc}"]},
+                )
+                logger.warning("Command %s failed in simulator mode", command.id, exc_info=True)
+                return failed
+        else:
+            # MQTT mode (default)
+            if self.publisher is None:
+                raise CommandError("Command publisher is not configured")
+
+            try:
+                publish_result = await self.publisher.publish(command)
+            except Exception as exc:
+                _check_transition(command.status, CommandStatus.FAILED)
+                failed = await self.repo.update_status(
+                    command.id,
+                    CommandStatus.FAILED,
+                    validation_errors={"errors": [f"MQTT publish failed: {exc}"]},
+                )
+                logger.warning("Command %s failed during MQTT publish", command.id, exc_info=True)
+                return failed
 
         _check_transition(command.status, CommandStatus.EXECUTED)
         command = await self.repo.update_status(
             command.id,
             CommandStatus.EXECUTED,
-            validation_errors={"publish": publish_result},
+            validation_errors={"publish": publish_result} if mode != "simulator" else None,
         )
-        logger.info("Command %s executed", command.id)
+        logger.info("Command %s executed (mode=%s)", command.id, mode)
         return command
 
     async def get_recent(

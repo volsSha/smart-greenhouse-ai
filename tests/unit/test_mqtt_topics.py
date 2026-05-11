@@ -1,5 +1,7 @@
 """Tests for app.core.mqtt_topics — topic builder functions."""
 
+import re
+
 from app.core.mqtt_topics import (
     all_telemetry_topic,
     alert_topic,
@@ -74,7 +76,35 @@ class TestAllTelemetryTopic:
 
     def test_returns_full_wildcard_telemetry(self) -> None:
         topic = all_telemetry_topic()
-        assert topic == "greenhouse-groups/+/+/+/telemetry"
+        assert topic == "greenhouse-groups/+/greenhouses/+/zones/+/telemetry"
+
+    def test_wildcard_shape_matches_specific_telemetry_topics(self) -> None:
+        topic = telemetry_topic("group-001", "gh-001", "zone-01")
+        pattern = all_telemetry_topic()
+        assert len(topic.split("/")) == len(pattern.split("/"))
+        assert pattern.split("/") == [
+            "greenhouse-groups",
+            "+",
+            "greenhouses",
+            "+",
+            "zones",
+            "+",
+            "telemetry",
+        ]
+
+    def test_wildcard_matches_micropython_constructed_telemetry_topic(self) -> None:
+        micropython_topic = (
+            "greenhouse-groups/{group_id}/greenhouses/{greenhouse_id}"
+            "/zones/{zone_id}/telemetry"
+        ).format(
+            group_id="group-001",
+            greenhouse_id="gh-001",
+            zone_id="zone-01",
+        )
+        wildcard_regex = re.escape(all_telemetry_topic()).replace("\\+", "[^/]+")
+
+        assert micropython_topic == telemetry_topic("group-001", "gh-001", "zone-01")
+        assert re.fullmatch(wildcard_regex, micropython_topic)
 
 
 class TestTopicConsistency:

@@ -57,6 +57,17 @@ async def test_publish_uses_scoped_command_topic_and_payload() -> None:
     assert topic.endswith(f"/zones/{command.zone_id}/commands")
     assert qos == 1
     data = json.loads(payload)
-    assert data["command_id"] == str(command.id)
-    assert data["actuator"] == "pump"
-    assert data["duration_seconds"] == 30
+    assert data == {
+        "command_id": str(command.id),
+        "group_id": str(command.group_id),
+        "greenhouse_id": str(command.greenhouse_id),
+        "zone_id": str(command.zone_id),
+        "actuator": "pump",
+        "action": "on",
+        "value": None,
+        "duration_seconds": 30,
+        "source": "manual",
+        "reason": "dry soil",
+    }
+    assert '"value":null' in payload
+    assert result["payload"] == data

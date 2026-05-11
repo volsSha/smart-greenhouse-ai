@@ -121,14 +121,10 @@ class MQTTService:
     # ------------------------------------------------------------------
 
     async def publish(self, topic: str, payload: bytes | str, qos: int = 0) -> None:
-        """Publish a message to *topic*.
-
-        If the client is disconnected, the publish is silently dropped
-        (the reconnect loop will restore connectivity).
-        """
+        """Publish a message to *topic*."""
         if self._client is None or not self._running:
             logger.warning("MQTT publish skipped -- not connected")
-            return
+            raise RuntimeError("MQTT client is not connected")
 
         if isinstance(payload, str):
             payload = payload.encode("utf-8")
@@ -137,6 +133,7 @@ class MQTTService:
             await self._client.publish(topic, payload, qos=qos)
         except Exception:
             logger.exception("Failed to publish to %s", topic)
+            raise
 
     async def subscribe(
         self,

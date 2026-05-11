@@ -23,6 +23,11 @@ class CommandPropose(BaseModel):
         "manual",
         description="Origin: manual, control_engine, ai_agent, safety_override",
     )
+    mode: str = Field(
+        "mqtt",
+        description="Execution mode: simulator or mqtt",
+        pattern=r"^(simulator|mqtt)$",
+    )
 
 
 class CommandResponse(BaseModel):
@@ -42,6 +47,7 @@ class CommandResponse(BaseModel):
     reason: str | None
     validation_errors: dict | None
     status: str
+    mode: str = "mqtt"
     valid_until: datetime | None
     created_at: datetime
     updated_at: datetime

@@ -1,12 +1,16 @@
 """Simulator control page for the Smart Greenhouse system.
 
 Provides controls for starting/stopping the telemetry simulator,
-selecting scenarios, and configuring simulation parameters.
+selecting scenarios, configuring simulation parameters, and a mode
+selector to switch between Internal Simulator and Wokwi/MQTT mode.
+When the internal simulator is running, a live zone visualization
+with animated actuator feedback is shown.
 """
 
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -14,6 +18,8 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
+from app.ui.components.mqtt_status_panel import MQTTStatusPanel
+from app.ui.components.zone_visualization import ZoneVisualization
 from app.ui.layouts.main_layout import main_layout
 
 logger = logging.getLogger(__name__)
@@ -79,6 +85,19 @@ def _scenario_description(scenario_key: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Animations CSS — inject once via shared CSS
+# ---------------------------------------------------------------------------
+
+def _load_animations_css() -> None:
+    css_path = Path(__file__).parents[2] / "ui" / "static" / "animations.css"
+    try:
+        css = css_path.read_text()
+        ui.add_css(css, shared=True)
+    except FileNotFoundError:
+        logger.warning("animations.css not found at %s", css_path)
+
+
+# ---------------------------------------------------------------------------
 # Simulator page
 # ---------------------------------------------------------------------------
 
@@ -99,7 +118,11 @@ async def simulator() -> None:
         "scenario": "normal",
         "messages_published": 0,
         "last_publish": None,
+        "mode": "simulator",
     }
+
+    # Load animations CSS
+    _load_animations_css()
 
     # --- Status indicator ---
     with ui.card().classes("w-full mt-4"):
@@ -158,12 +181,103 @@ async def simulator() -> None:
                 _("Interval (seconds)"), value=5, min=1, max=300
             ).classes("w-48")
 
+    # --- Mode selector ---
+    with ui.card().classes("w-full mt-4"):
+        ui.label(_("Operational Mode")).classes("text-lg font-bold")
+
+        with ui.row().classes("items-center gap-4 mt-3"):
+            mode_select = ui.select(
+                label=_("Mode"),
+                options={
+                    "simulator": _("Internal Simulator"),
+                    "mqtt": _("Wokwi / MQTT"),
+                },
+                value=state["mode"],
+                on_change=lambda e: _on_mode_change(e.value),
+            ).classes("w-64")
+
+            mode_notice = ui.label("").classes("text-sm italic opacity-60")
+
+    # --- Zone visualization ---
+    with ui.card().classes("w-full mt-4"):
+        ui.label(_("Zone Visualization")).classes("text-lg font-bold")
+        with ui.column().classes("w-full gap-4 mt-2") as viz_container:
+            viz = ZoneVisualization()
+            viz.build(viz_container)
+            no_data_label = ui.label(
+                _("Start the simulator to see zone data.")
+            ).classes("text-sm italic opacity-50")
+            mqtt_placeholder = ui.column().classes("w-full gap-2").style("display: none")
+            with mqtt_placeholder:
+                mqtt_panel = MQTTStatusPanel()
+                mqtt_panel.render()
+
     # --- Result display ---
     result_label = ui.label("").classes("text-sm mt-4")
 
     # -----------------------------------------------------------------------
+    # Timer for zone state polling (active only while simulator runs)
+    # -----------------------------------------------------------------------
+
+    async def _refresh_zones() -> None:
+        """Poll /api/simulator/zones and update the visualization."""
+        if not state["running"] or state["mode"] != "simulator":
+            return
+        try:
+            async with api_client(timeout=5.0) as client:
+                resp = await client.get("/api/simulator/zones")
+                if resp.status_code == 200:
+                    zones = resp.json()
+                    if zones:
+                        no_data_label.style("display: none")
+                        viz.update_all(zones)
+                    else:
+                        viz.clear()
+                        no_data_label.style("display: block")
+                else:
+                    viz.mark_stopped()
+        except httpx.HTTPError:
+            logger.debug("Zone state poll failed (simulator may be stopping)")
+
+    zone_timer = ui.timer(
+        2.0, _refresh_zones, active=False
+    )
+
+    async def _refresh_mqtt_status() -> None:
+        if state["mode"] != "mqtt":
+            return
+        try:
+            async with api_client(timeout=5.0) as client:
+                resp = await client.get("/api/mqtt/status")
+                if resp.status_code == 200:
+                    mqtt_panel.update(resp.json())
+        except httpx.HTTPError:
+            logger.debug("MQTT status poll failed")
+
+    mqtt_timer = ui.timer(
+        3.0, _refresh_mqtt_status, active=False
+    )
+
+    # -----------------------------------------------------------------------
     # Actions
     # -----------------------------------------------------------------------
+
+    def _on_mode_change(new_mode: str) -> None:
+        state["mode"] = new_mode
+        if new_mode == "simulator":
+            mqtt_timer.deactivate()
+            mqtt_placeholder.style("display: none")
+            no_data_label.style("display: block" if not state["running"] else "none")
+            mode_notice.set_text("")
+            if state["running"]:
+                zone_timer.activate()
+        else:
+            zone_timer.deactivate()
+            mqtt_timer.activate()
+            viz.clear()
+            no_data_label.style("display: none")
+            mqtt_placeholder.style("display: block")
+            mode_notice.set_text(_("Run ngrok TCP for local Mosquitto, then use firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
 
     def select_scenario(scenario_key: str) -> None:
         """Update the active scenario display."""
@@ -200,6 +314,9 @@ async def simulator() -> None:
             state["last_publish"] = result.get("last_publish")
 
             _update_status()
+            if state["mode"] == "simulator":
+                zone_timer.activate()
+                no_data_label.style("display: block")
             result_label.set_text(_("Simulator started successfully"))
             result_label.style("color: #4caf50")
             ui.notify(_("Simulator started"), type="positive")
@@ -223,6 +340,9 @@ async def simulator() -> None:
             state["running"] = False
             state["messages_published"] = result.get("messages_published", state["messages_published"])
 
+            zone_timer.deactivate()
+            if state["mode"] == "simulator":
+                viz.mark_stopped()
             _update_status()
             result_label.set_text(_("Simulator stopped"))
             result_label.style("color: #ff9800")

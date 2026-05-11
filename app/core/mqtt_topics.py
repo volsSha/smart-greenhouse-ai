@@ -49,5 +49,9 @@ def group_topic(group_id: str) -> str:
 
 
 def all_telemetry_topic() -> str:
-    """Build a wildcard subscription topic for all telemetry across all groups."""
-    return "greenhouse-groups/+/+/+/telemetry"
+    """Build a wildcard subscription topic for all telemetry across all groups.
+
+    Returns six-segment pattern matching the canonical topic hierarchy:
+        greenhouse-groups/{group_id}/greenhouses/{greenhouse_id}/zones/{zone_id}/telemetry
+    """
+    return "greenhouse-groups/+/greenhouses/+/zones/+/telemetry"

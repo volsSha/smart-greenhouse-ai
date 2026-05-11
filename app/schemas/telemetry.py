@@ -103,8 +103,7 @@ class TelemetryEnvelope(BaseModel):
 class TelemetryValidator:
     """Stateful validator that enforces a timestamp acceptance window.
 
-    Each instance captures *now* at construction time so tests can
-    inject a deterministic reference point.
+    Tests can inject a deterministic reference point.
     """
 
     def __init__(
@@ -112,14 +111,15 @@ class TelemetryValidator:
         now: datetime | None = None,
         window: timedelta = DEFAULT_ACCEPTANCE_WINDOW,
     ) -> None:
-        self._now = now or datetime.now(timezone.utc)
+        self._now = now
         self._window = window
 
     def validate_timestamp(self, ts: datetime) -> None:
         """Raise ``ValueError`` if *ts* is outside the acceptance window."""
-        delta = ts - self._now
+        now = self._now or datetime.now(timezone.utc)
+        delta = ts - now
         if abs(delta) > self._window:
             raise ValueError(
                 f"Timestamp {ts.isoformat()} is outside the acceptance window "
-                f"(+/- {self._window}). Reference now: {self._now.isoformat()}"
+                f"(+/- {self._window}). Reference now: {now.isoformat()}"
             )

@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from collections.abc import Callable
 from typing import Any
 
 import httpx
@@ -77,6 +78,8 @@ def _parse_assistant_content(content: str) -> dict[str, Any]:
 def _render_conversation_messages(
     messages: list[dict[str, Any]],
     tool_calls: list[dict[str, Any]],
+    on_approve: Callable[[str], Any] | None = None,
+    on_reject: Callable[[str], Any] | None = None,
 ) -> None:
     """Render all messages from a conversation into the chat area.
 
@@ -127,13 +130,17 @@ def _render_conversation_messages(
                 if associated_tools:
                     tool_call_panel(associated_tools)
 
-                # Proposed action cards (placeholder for U14)
+                # Proposed action cards with approval/rejection
                 proposed_actions = parsed.get("proposed_actions", [])
                 if proposed_actions:
                     with ui.column().classes("w-full gap-2 mt-2"):
                         ui.label(_("Proposed Actions")).classes("text-xs font-semibold opacity-60")
                         for action in proposed_actions:
-                            proposed_action_card(action)
+                            proposed_action_card(
+                                action,
+                                on_approve=on_approve,
+                                on_reject=on_reject,
+                            )
             elif role == "system":
                 system_message(content)
 
@@ -231,6 +238,30 @@ async def ai_chat() -> None:
         except httpx.HTTPError:
             logger.warning("Failed to load conversations", exc_info=True)
 
+    async def _approve_command(command_id: str) -> None:
+        """Approve and execute a proposed command."""
+        try:
+            async with api_client(timeout=15.0) as client:
+                resp = await client.post(f"/api/commands/{command_id}/approve")
+                resp.raise_for_status()
+            ui.notify(_("Command approved and executed"), type="positive")
+        except httpx.HTTPError as exc:
+            detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
+            ui.notify(_("Approval failed: {detail}", detail=detail), type="negative")
+            logger.warning("Command %s approval failed: %s", command_id, exc)
+
+    async def _reject_command(command_id: str) -> None:
+        """Reject (cancel) a proposed command."""
+        try:
+            async with api_client(timeout=15.0) as client:
+                resp = await client.post(f"/api/commands/{command_id}/cancel")
+                resp.raise_for_status()
+            ui.notify(_("Command rejected"), type="warning")
+        except httpx.HTTPError as exc:
+            detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
+            ui.notify(_("Rejection failed: {detail}", detail=detail), type="negative")
+            logger.warning("Command %s rejection failed: %s", command_id, exc)
+
     async def load_conversation_messages(conversation_id: str) -> None:
         """Fetch messages and tool calls for a conversation and render them."""
         chat_area.clear()
@@ -246,7 +277,11 @@ async def ai_chat() -> None:
                 tool_calls = tools_resp.json()
 
             messages = detail.get("messages", [])
-            _render_conversation_messages(messages, tool_calls)
+            _render_conversation_messages(
+                messages, tool_calls,
+                on_approve=lambda cid: _approve_command(cid),
+                on_reject=lambda cid: _reject_command(cid),
+            )
 
         except httpx.HTTPError as exc:
             ui.label(_("Error loading conversation: {error}", error=exc)).classes("text-red-500 text-sm")
@@ -334,14 +369,18 @@ async def ai_chat() -> None:
                     status=status,
                 )
 
-                # Proposed action cards
+                # Proposed action cards with approval/rejection
                 if proposed_actions:
                     with ui.column().classes("w-full gap-2 mt-2"):
                         ui.label(_("Proposed Actions")).classes(
                             "text-xs font-semibold opacity-60"
                         )
                         for action in proposed_actions:
-                            proposed_action_card(action)
+                            proposed_action_card(
+                                action,
+                                on_approve=lambda cid: _approve_command(cid),
+                                on_reject=lambda cid: _reject_command(cid),
+                            )
 
             # Refresh conversation list
             await load_conversations()

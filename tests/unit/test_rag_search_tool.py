@@ -41,6 +41,8 @@ def _make_mock_settings() -> SimpleNamespace:
         openrouter=SimpleNamespace(
             api_key="test-api-key",
             base_url="https://openrouter.ai/api/v1",
+            embedding_model="text-embedding-3-small",
+            embedding_dimension=1536,
         )
     )
 
@@ -173,8 +175,10 @@ class TestSearchPlantKnowledge:
             )
 
         assert results == []
-        # Should create EmbeddingClient with empty api_key and default base_url
+        # Should create EmbeddingClient with defaults
         mock_client_class.assert_called_once_with(
             api_key="",
             base_url="https://openrouter.ai/api/v1",
+            model="text-embedding-3-small",
+            dimension=1536,
         )

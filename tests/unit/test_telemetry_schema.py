@@ -105,6 +105,10 @@ class TestTelemetryValidator:
         validator = TelemetryValidator(now=NOW)
         validator.validate_timestamp(NOW)
 
+    def test_default_reference_time_is_current_per_validation(self) -> None:
+        validator = TelemetryValidator()
+        validator.validate_timestamp(datetime.now(timezone.utc))
+
     def test_rejects_future_timestamp(self) -> None:
         validator = TelemetryValidator(now=NOW)
         with pytest.raises(ValueError, match="outside the acceptance window"):

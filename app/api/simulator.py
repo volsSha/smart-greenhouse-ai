@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.schemas.telemetry import TelemetryReading
+from app.services.simulator.zone_state import SimulatedZoneState
 
 router = APIRouter(prefix="/api/simulator", tags=["simulator"])
 
@@ -118,12 +119,21 @@ async def start_simulator(request: Request, body: SimulatorStartRequest) -> Simu
             "last_error": None,
         }
     )
+    sim_state = SimulatedZoneState()
+    sim_state.initialize(
+        num_groups=body.groups,
+        greenhouses_per_group=body.greenhouses_per_group,
+        zones_per_greenhouse=body.zones_per_greenhouse,
+        scenario=body.scenario,
+    )
+    request.app.state.simulated_zone_state = sim_state
+
     _state["task"] = asyncio.create_task(_run_simulator(body, telemetry_repository))
     return _status()
 
 
 @router.post("/stop", response_model=SimulatorStatus)
-async def stop_simulator() -> SimulatorStatus:
+async def stop_simulator(request: Request) -> SimulatorStatus:
     _state["running"] = False
     task: asyncio.Task | None = _state.get("task")
     if task and not task.done():
@@ -133,4 +143,10 @@ async def stop_simulator() -> SimulatorStatus:
         except asyncio.CancelledError:
             pass
     _state["task"] = None
+
+    sim_state: SimulatedZoneState | None = getattr(request.app.state, "simulated_zone_state", None)
+    if sim_state is not None:
+        sim_state.reset()
+        delattr(request.app.state, "simulated_zone_state")
+
     return _status()

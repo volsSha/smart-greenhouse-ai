@@ -170,8 +170,8 @@ class GreenhouseAIAgent:
 
         tokens_in, tokens_out = _extract_usage(result)
 
-        # Get the actual model being used
-        actual_model = self.agent._model.name if hasattr(self.agent, "_model") else self.settings.openrouter.model
+        model = getattr(self.agent, "_model", None)
+        actual_model = getattr(model, "name", self.settings.openrouter.model)
 
         await self.conversation_repository.add_message(
             conversation.id,

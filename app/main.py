@@ -30,6 +30,8 @@ from app.dependencies import create_db_engine, create_influx_client
 from app.services.influx_client import InfluxClient
 from app.repositories.debug_log_repository import create_debug_log_best_effort
 from app.repositories.telemetry_repository import TelemetryRepository
+from app.services.mqtt_runtime import MQTTRuntime
+from app.services.telemetry_ingestion import TelemetryIngestion
 
 logger = logging.getLogger(__name__)
 
@@ -65,13 +67,16 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("InfluxDB client initialized")
 
     # --- MQTT ---
-    # MQTT client is created on-demand per connection (aiomqtt manages its
-    # own lifecycle). We store settings so dependency can build clients.
-    logger.info("MQTT configured (client created on-demand)")
+    telemetry_ingestion = TelemetryIngestion(influx_client=influx_wrapper)
+    mqtt_runtime = MQTTRuntime(settings.mqtt, telemetry_ingestion)
+    fastapi_app.state.mqtt_runtime = mqtt_runtime
+    await mqtt_runtime.start()
+    logger.info("MQTT telemetry runtime started")
 
     yield
 
     # --- Shutdown ---
+    await mqtt_runtime.stop()
     await db_engine.dispose()
     influx_wrapper.close()
     influx_client.close()
@@ -162,6 +167,8 @@ from app.api.commands import router as commands_router  # noqa: E402
 from app.api.ai_chat import router as ai_chat_router  # noqa: E402
 from app.api.rag import router as rag_router  # noqa: E402
 from app.api.simulator import router as simulator_router  # noqa: E402
+from app.api.simulator_state import router as simulator_state_router  # noqa: E402
+from app.api.mqtt_status import router as mqtt_status_router  # noqa: E402
 from app.api.settings import router as settings_router  # noqa: E402
 
 app.include_router(health_router)
@@ -174,6 +181,8 @@ app.include_router(commands_router)
 app.include_router(ai_chat_router)
 app.include_router(rag_router)
 app.include_router(simulator_router)
+app.include_router(simulator_state_router)
+app.include_router(mqtt_status_router)
 app.include_router(settings_router)
 
 

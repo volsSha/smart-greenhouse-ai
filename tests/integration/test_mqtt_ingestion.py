@@ -109,7 +109,7 @@ class TestMQTTIngestionFlow:
         from app.core.mqtt_topics import all_telemetry_topic
 
         pattern = all_telemetry_topic()
-        assert pattern == "greenhouse-groups/+/+/+/telemetry"
+        assert pattern == "greenhouse-groups/+/greenhouses/+/zones/+/telemetry"
 
     @pytest.mark.asyncio
     async def test_mqtt_service_topic_matching(self) -> None:
