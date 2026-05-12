@@ -1,7 +1,7 @@
 """RAG knowledge base management page."""
 
 import httpx
-from nicegui import ui
+from nicegui import events, ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
@@ -92,6 +92,20 @@ async def rag_page() -> None:
         ).classes("w-full").props('rows="8"')
 
         notification = ui.notification(position="top", timeout=5)
+
+        async def load_uploaded_file(event: events.UploadEventArguments) -> None:
+            content = event.content.read().decode("utf-8", errors="replace")
+            if not title_input.value:
+                title_input.set_value(event.name)
+            source_type_input.set_value("file")
+            content_input.set_value(content)
+            notify(notification, _("Loaded file content. Review it, then add the document."), "info")
+
+        ui.upload(
+            label=_("Upload text file"),
+            auto_upload=True,
+            on_upload=load_uploaded_file,
+        ).props("accept=.txt,.md,.csv,.json,.log,text/*").classes("w-full")
 
         async def add_document() -> None:
             """Submit a new document to the knowledge base."""

@@ -187,10 +187,19 @@ async def dashboard() -> None:
         ui.label(_("Greenhouses")).classes("text-lg font-bold mt-2")
         with ui.row().classes("w-full gap-4 flex-wrap"):
             for gh_id, gh_data in greenhouses.items():
+                def view_zones_handler(gh: str):
+                    async def handler() -> None:
+                        await select_greenhouse(gh)
+
+                    return handler
+
                 column = ui.column().classes("w-64 cursor-pointer")
-                column.on("click", lambda gh=gh_id: select_greenhouse(gh))
                 with column:
                     greenhouse_card(gh_data)
+                    ui.button(
+                        _("View zones"),
+                        on_click=view_zones_handler(gh_id),
+                    ).props("flat color=primary size=sm").classes("mt-2")
 
         # --- Zone detail area (hidden initially) ---
         zone_detail_container = ui.column().classes("w-full gap-4 mt-4")
@@ -202,21 +211,21 @@ async def dashboard() -> None:
             zone_detail_container.clear()
             zone_detail_container.set_visibility(True)
 
-            ui.label(_("Greenhouse: {greenhouse_id}", greenhouse_id=gh_id)).classes("text-lg font-bold")
+            with zone_detail_container:
+                ui.label(_("Greenhouse: {greenhouse_id}", greenhouse_id=gh_id)).classes("text-lg font-bold")
 
-            zones = transform_latest_to_zones(readings, gh_id)
+                zones = transform_latest_to_zones(readings, gh_id)
 
-            if not zones:
-                ui.label(_("No zone data available")).classes("text-sm opacity-50")
-                return
+                if not zones:
+                    ui.label(_("No zone data available")).classes("text-sm opacity-50")
+                    return
 
-            # Zone detail cards
-            with ui.row().classes("w-full gap-4 flex-wrap"):
-                for zone in zones:
-                    zone_detail_card(zone)
+                # Zone detail cards
+                with ui.row().classes("w-full gap-4 flex-wrap"):
+                    for zone in zones:
+                        zone_detail_card(zone)
 
-            # Zone charts -- fetch historical data
-            with content_area:
+                # Zone charts -- fetch historical data
                 ui.separator().classes("w-full mt-2")
                 ui.label(_("Zone Charts")).classes("text-lg font-bold mt-2")
 

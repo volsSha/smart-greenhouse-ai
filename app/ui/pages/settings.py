@@ -92,19 +92,27 @@ async def settings_page() -> None:
     ).classes("w-full mt-4").style("height: 400px;")
 
     # Select button for selected row
-    with ui.row().classes("w-full gap-2 mt-2"):
+    with ui.row().classes("w-full gap-2 mt-2 items-end flex-wrap"):
+        model_select = ui.select(
+            label=_("Model"),
+            options=[],
+            on_change=lambda event: select_model(event.value),
+        ).classes("min-w-[320px] flex-1")
         ui.label(_("Selected:")).classes("text-sm opacity-60")
         selected_model_label = ui.label(_("None")).classes("text-sm font-medium")
-        ui.button(
+        save_model_button = ui.button(
             _("Use Selected Model"),
             icon="check",
             on_click=lambda: select_current_model(),
-        ).props("color=positive").set_enabled(False)
+        ).props("color=positive")
+        save_model_button.disable()
 
     # --- State ---
     catalog_state: dict = {
         "models": [],
+        "model_labels": {},
         "selected_model_id": None,
+        "pending_model_id": None,
         "embedding_model": None,
         "embedding_dimension": None,
     }
@@ -194,20 +202,43 @@ async def settings_page() -> None:
     def update_catalog_table(models: list) -> None:
         """Update the AG Grid table with model data."""
         row_data = []
+        model_options: list[str] = []
+        model_labels: dict[str, str] = {}
+        selected_label = None
+
         for m in models:
+            model_id = m.get("model_id", "")
+            label = f"{m.get('name', model_id)} ({model_id})"
             prompt_price = m.get("prompt_price_per_million")
             completion_price = m.get("completion_price_per_million")
 
+            if model_id:
+                model_options.append(label)
+                model_labels[label] = model_id
+                if model_id == catalog_state.get("pending_model_id") or model_id == catalog_state.get("selected_model_id"):
+                    selected_label = label
+
             row_data.append({
-                "name": m.get("name", m.get("model_id", "")),
+                "name": m.get("name", model_id),
                 "provider": m.get("provider", ""),
                 "prompt_price": f"${prompt_price:.2f}" if prompt_price else "N/A",
                 "completion_price": f"${completion_price:.2f}" if completion_price else "N/A",
                 "context_length": format_context_length(m.get("context_length")),
             })
 
+        catalog_state["model_labels"] = model_labels
+        model_select.set_options(model_options)
+        if selected_label:
+            model_select.set_value(selected_label)
+
         catalog_table.options["rowData"] = row_data
         catalog_table.update()
+
+    def select_model(value: object) -> None:
+        model_id = catalog_state["model_labels"].get(str(value))
+        catalog_state["pending_model_id"] = model_id
+        save_model_button.set_enabled(bool(model_id))
+        selected_model_label.text = model_id or catalog_state.get("selected_model_id") or _("None")
 
     async def refresh_catalog_from_api() -> None:
         """Refresh the catalog from OpenRouter API."""
@@ -263,11 +294,25 @@ async def settings_page() -> None:
         await load_catalog()
 
     async def select_current_model() -> None:
-        """Select the currently highlighted model in the catalog."""
-        # AG Grid doesn't expose selected row easily in NiceGUI
-        # For now, we'll require the user to search and select from a dropdown
-        # This is a limitation that could be improved with a custom table component
-        pass
+        """Persist the selected model as the chat model."""
+        model_id = catalog_state.get("pending_model_id")
+        if not model_id:
+            ui.notify(_("Select a model first"), type="warning")
+            return
+
+        save_model_button.disable()
+        try:
+            async with api_client(timeout=10.0) as client:
+                resp = await client.put("/api/settings", json={"selected_chat_model": model_id})
+                resp.raise_for_status()
+
+            catalog_state["selected_model_id"] = model_id
+            selected_model_label.text = model_id
+            ui.notify(_("Chat model saved"), type="positive")
+            await load_settings()
+        except httpx.HTTPError as exc:
+            ui.notify(_("Failed to save model: {error}", error=response_error(exc)), type="negative")
+            save_model_button.enable()
 
     def format_timestamp(ts: str | None) -> str:
         """Format a timestamp for display."""
