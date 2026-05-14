@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
-import pytest
 
 from app.ui.pages.ai_chat import _parse_assistant_content, _build_scope_dict
 from app.ui.components.tool_call_trace import _truncate_value, _format_duration

@@ -157,7 +157,6 @@ services/
   worker/
 infra/
   mosquitto/
-  grafana/
 migrations/
   alembic/
 tests/
@@ -274,7 +273,7 @@ flowchart TB
 
 - U2. **Add Docker Compose infrastructure**
 
-**Goal:** Provide reproducible local services for Mosquitto, PostgreSQL/pgvector, InfluxDB, Grafana, and the application.
+**Goal:** Provide reproducible local services for Mosquitto, PostgreSQL/pgvector, InfluxDB, and the application.
 
 **Requirements:** R1, R2, R4, R12
 
@@ -285,15 +284,13 @@ flowchart TB
 - Create: `compose.override.yml`
 - Create: `infra/mosquitto/mosquitto.conf`
 - Create: `infra/mosquitto/acl.conf`
-- Create: `infra/grafana/provisioning/datasources/datasources.yml`
-- Create: `infra/grafana/provisioning/dashboards/dashboards.yml`
 - Create: `Dockerfile`
 - Test: `tests/system/test_compose_health.py`
 
 **Approach:**
 - Pin infrastructure images to verified tags, including `influxdb:2.7.12` and `pgvector/pgvector:0.8.2-pg17-trixie`.
-- Add health checks for PostgreSQL, InfluxDB, Mosquitto, Grafana, and the app.
-- Use named volumes for PostgreSQL, InfluxDB, and Grafana state.
+- Add health checks for PostgreSQL, InfluxDB, Mosquitto, and the app.
+- Use named volumes for PostgreSQL and InfluxDB state.
 - Keep secrets in `.env` and `.env.example`; do not hardcode credentials.
 - Disable anonymous Mosquitto access and use credentials plus ACLs so simulator clients can only publish telemetry topics, the app command publisher is the only command-topic publisher, and other services cannot bypass FastAPI safety validation.
 
@@ -302,7 +299,7 @@ flowchart TB
 - `.agents/skills/docker-compose-orchestration/SKILL.md` health-check and dependency patterns.
 
 **Test scenarios:**
-- Integration: starting the Compose stack makes PostgreSQL, InfluxDB, Mosquitto, Grafana, and app health checks report healthy.
+- Integration: starting the Compose stack makes PostgreSQL, InfluxDB, Mosquitto, and app health checks report healthy.
 - Error path: the app readiness endpoint reports dependency failure when a required service is unavailable.
 - Integration: Mosquitto accepts publish/subscribe on allowed telemetry topics in local development.
 - Error path: a telemetry-only MQTT credential cannot publish to command topics.

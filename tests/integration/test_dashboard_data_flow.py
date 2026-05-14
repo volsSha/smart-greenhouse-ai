@@ -7,9 +7,7 @@ structured data. Uses mocked HTTP clients and repositories.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 
 from app.ui.pages.dashboard import (
     build_group_data,

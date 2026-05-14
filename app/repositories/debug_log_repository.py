@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.models.debug_log import DebugLog
@@ -65,6 +66,25 @@ class DebugLogRepository:
         self.session.add(log)
         await self.session.flush()
         return log
+
+    async def list(
+        self,
+        *,
+        level: str | None = None,
+        component: str | None = None,
+        event_type: str | None = None,
+        limit: int = 50,
+    ) -> list[DebugLog]:
+        stmt = select(DebugLog).order_by(DebugLog.created_at.desc())
+        if level is not None:
+            stmt = stmt.where(DebugLog.level == level)
+        if component is not None:
+            stmt = stmt.where(DebugLog.component == component)
+        if event_type is not None:
+            stmt = stmt.where(DebugLog.event_type == event_type)
+
+        result = await self.session.execute(stmt.limit(limit))
+        return list(result.scalars().all())
 
 
 async def create_debug_log_best_effort(

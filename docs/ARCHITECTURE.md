@@ -108,7 +108,6 @@ smart-greenhouse-ai/
 |   +-- mosquitto/
 |   +-- postgres/
 |   +-- influxdb/
-|   +-- grafana/
 |
 +-- migrations/
 |   +-- alembic/

@@ -17,19 +17,17 @@ import asyncio
 import json
 import logging
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 # Add project root to path so `app` is importable when running as a script.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from app.config import get_settings, MQTTSettings
+from app.config import get_settings
 from app.core.mqtt_topics import telemetry_topic
-from app.schemas.telemetry import TelemetryEnvelope, TelemetryReading, Quality
+from app.schemas.telemetry import TelemetryEnvelope, TelemetryReading
 from app.services.mqtt_service import MQTTService
 from services.simulator.scenarios import (
     ALL_SCENARIOS,
-    NormalScenario,
     Scenario,
     ScenarioReading,
 )

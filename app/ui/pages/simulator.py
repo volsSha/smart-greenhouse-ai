@@ -186,7 +186,7 @@ async def simulator() -> None:
         ui.label(_("Operational Mode")).classes("text-lg font-bold")
 
         with ui.row().classes("items-center gap-4 mt-3"):
-            mode_select = ui.select(
+            ui.select(
                 label=_("Mode"),
                 options={
                     "simulator": _("Internal Simulator"),

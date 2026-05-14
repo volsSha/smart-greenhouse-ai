@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from app.models.plant_batch import PlantProfile
-from app.services.threshold_service import ThresholdService, ThresholdResult
+from app.services.threshold_service import ThresholdService
 
 
 # ---------------------------------------------------------------------------

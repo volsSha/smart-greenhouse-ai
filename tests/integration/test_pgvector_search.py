@@ -118,7 +118,7 @@ class TestRAGRepositoryDocumentCRUD:
         # We need to mock the actual RAGDocument creation
         with patch("app.repositories.rag_repository.RAGDocument") as mock_model:
             mock_model.return_value = fake_doc
-            doc = await repo.create_document(
+            await repo.create_document(
                 title="Test",
                 content="Content",
             )

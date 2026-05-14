@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from pgvector.sqlalchemy import Vector
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

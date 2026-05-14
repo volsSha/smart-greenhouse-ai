@@ -6,9 +6,7 @@ responses into card/chart structures. No UI rendering is involved.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 
-import pytest
 
 from app.ui.pages.dashboard import (
     build_group_data,

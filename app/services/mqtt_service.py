@@ -67,8 +67,6 @@ class MQTTService:
         ``reconnect_delay`` seconds between attempts.
         """
         retries = 0
-        last_err: Exception | None = None
-
         while True:
             try:
                 self._client = aiomqtt.Client(
@@ -87,7 +85,6 @@ class MQTTService:
                 )
                 return
             except Exception as exc:
-                last_err = exc
                 retries += 1
                 if self._max_retries > 0 and retries >= self._max_retries:
                     logger.error(

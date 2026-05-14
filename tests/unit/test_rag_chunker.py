@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from app.services.rag.chunker import chunk_text
 

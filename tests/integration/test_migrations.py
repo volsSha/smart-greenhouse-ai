@@ -7,7 +7,7 @@ running PostgreSQL instance.
 
 import pytest
 
-from app.models import Base, GreenhouseGroup
+from app.models import Base
 
 
 # ---------------------------------------------------------------------------

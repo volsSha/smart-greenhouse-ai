@@ -9,7 +9,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.services.influx_client import InfluxClient
 from app.schemas.telemetry import Quality, TelemetryReading

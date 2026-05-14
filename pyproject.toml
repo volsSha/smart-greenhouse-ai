@@ -30,6 +30,7 @@ dev = [
     "babel",
     "pytest",
     "pytest-asyncio",
+    "ruff>=0.15.12",
 ]
 
 [tool.pytest.ini_options]

@@ -26,3 +26,9 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 - Language switcher uses `ui.select` with label-to-code mapping (NiceGUI select events emit display labels, not dict keys)
 - NiceGUI components that need language must call `_()` from `app.i18n.core` at render time
 - `ui.run_with(...)` requires a real `storage_secret` for `app.storage.user` persistence
+
+## Debugging
+
+- Check `/logs` first when debugging API, UI, or AI command failures; it displays persisted `debug_log` entries.
+- For failed AI commands, inspect `debug_log` rows with `level="error"`, `component="ai_agent"`, and `event_type="ai_chat_failed"`.
+- Correlate error-log entries with AI conversation messages and `ai_tool_calls` when the failure involves tool execution.

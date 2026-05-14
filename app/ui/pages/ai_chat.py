@@ -173,17 +173,17 @@ async def ai_chat() -> None:
         # Scope selectors
         with ui.row().classes("items-center gap-2"):
             ui.label(_("Scope:")).classes("text-sm opacity-60")
-            group_input = ui.input(
+            ui.input(
                 label=_("Group ID"),
                 placeholder="group-001",
                 on_change=lambda e: scope_state.update({"group_id": e.value or None}),
             ).classes("w-32")
-            greenhouse_input = ui.input(
+            ui.input(
                 label=_("Greenhouse"),
                 placeholder="gh-001",
                 on_change=lambda e: scope_state.update({"greenhouse_id": e.value or None}),
             ).classes("w-32")
-            zone_input = ui.input(
+            ui.input(
                 label=_("Zone"),
                 placeholder="zone-01",
                 on_change=lambda e: scope_state.update({"zone_id": e.value or None}),
@@ -357,9 +357,6 @@ async def ai_chat() -> None:
             recommendations = ai_response.get("recommendations", [])
             proposed_actions = ai_response.get("proposed_actions", [])
             status = ai_response.get("status", "ok")
-
-            # Update conversation ID from response if new
-            conversation_id = ai_response.get("conversation_id")
 
             with chat_area:
                 assistant_message_bubble(

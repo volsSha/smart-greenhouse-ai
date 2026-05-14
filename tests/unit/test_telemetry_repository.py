@@ -7,9 +7,8 @@ No real InfluxDB connection is required.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
-import pytest
 
 from app.repositories.telemetry_repository import TelemetryRepository
 from app.schemas.telemetry import Quality, TelemetryReading

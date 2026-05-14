@@ -15,13 +15,6 @@ import pytest
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.test import TestModel
 
-from app.models.group import GreenhouseGroup
-from app.models.greenhouse import Greenhouse
-from app.models.zone import GreenhouseZone
-from app.models.alert import Alert
-from app.models.plant_batch import PlantBatch, PlantProfile
-from app.models.command import CommandLog
-from app.models.device import Sensor, Actuator
 from app.services.ai_agent.agent import GreenhouseAIAgent
 from app.services.ai_agent.models import AIResponse, AIScope
 from app.services.ai_agent.tools.deps import ToolDeps

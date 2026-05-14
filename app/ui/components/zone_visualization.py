@@ -12,7 +12,6 @@ from typing import Any
 
 from nicegui import ui
 
-from app.i18n.core import _
 from app.ui.components.telemetry_cards import METRIC_THRESHOLDS
 
 # ---------------------------------------------------------------------------

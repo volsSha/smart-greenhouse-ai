@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.alert import Alert
-from app.models.plant_batch import PlantBatch, PlantProfile
+from app.models.plant_batch import PlantProfile
 from app.repositories.plant_batch_repository import PlantBatchRepository, PlantProfileRepository
 from app.repositories.zone_repository import ZoneRepository
 from app.repositories.greenhouse_repository import GreenhouseRepository

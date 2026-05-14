@@ -14,7 +14,6 @@ Expected services:
 - Mosquitto MQTT on `11883` and WebSocket on `19001`
 - PostgreSQL with pgvector on `5432`
 - InfluxDB on `8086`
-- Grafana on `3000`
 
 ## App startup
 

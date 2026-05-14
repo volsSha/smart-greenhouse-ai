@@ -16,7 +16,10 @@ def _parse_uuid(value: str | uuid.UUID | None) -> uuid.UUID | None:
     """Convert an optional string UUID to UUID."""
     if value is None or isinstance(value, uuid.UUID):
         return value
-    return uuid.UUID(value)
+    try:
+        return uuid.UUID(value)
+    except ValueError:
+        return None
 
 
 class AIConversationRepository:

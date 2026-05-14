@@ -10,7 +10,7 @@ from __future__ import annotations
 import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from app.core.safety_limits import VALID_METRICS
 

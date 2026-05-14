@@ -279,7 +279,7 @@ async def settings_page() -> None:
             status_container.clear()
             with status_container:
                 ui.icon("error", color="negative").classes("text-sm")
-                ui.label(_("Refresh failed: {error}", error=response_error(exc))).classes("text-sm text-red-500")
+                ui.label(_("Refresh failed: {error}", error=response_error(exc.response))).classes("text-sm text-red-500")
                 ui.button(
                     _("Retry"),
                     icon="refresh",

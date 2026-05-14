@@ -60,33 +60,6 @@ services:
       retries: 5
       start_period: 15s
 
-  grafana:
-    image: grafana/grafana:13.0.1
-    container_name: greenhouse-grafana
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
-      GF_AUTH_ANONYMOUS_ENABLED: "false"
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/greenhouse-dashboard.json
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./infra/grafana/provisioning/dashboards:/var/lib/grafana/dashboards:ro
-    networks:
-      - greenhouse-net
-    depends_on:
-      influxdb:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/health >/dev/null || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
   app:
     build:
@@ -129,8 +102,6 @@ volumes:
     name: greenhouse-influxdb-data
   influxdb_config:
     name: greenhouse-influxdb-config
-  grafana_data:
-    name: greenhouse-grafana-data
   mosquitto_data:
     name: greenhouse-mosquitto-data
   mosquitto_log:

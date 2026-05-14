@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import traceback
 from typing import Any
 from uuid import UUID
 
@@ -13,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_db_session
 from app.repositories.ai_conversation_repository import AIConversationRepository
 from app.repositories.ai_tool_log_repository import AIToolLogRepository
+from app.repositories.debug_log_repository import create_debug_log_best_effort
 from app.services.ai_agent.agent import AIConfigurationError, GreenhouseAIAgent
 from app.services.ai_agent.models import AIResponse, AIScope
 
@@ -87,11 +89,35 @@ async def chat(
     except AIConfigurationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    response = await service.chat(
-        message=body.message,
-        conversation_id=body.conversation_id,
-        scope=body.scope,
-    )
+    try:
+        response = await service.chat(
+            message=body.message,
+            conversation_id=body.conversation_id,
+            scope=body.scope,
+        )
+    except Exception as exc:
+        await session.rollback()
+        session_factory = getattr(request.app.state, "session_factory", None)
+        if session_factory is not None:
+            await create_debug_log_best_effort(
+                session_factory,
+                level="error",
+                event_type="ai_chat_failed",
+                component="ai_agent",
+                message=str(exc),
+                path="/api/ai/chat",
+                method="POST",
+                status_code=500,
+                error_type=type(exc).__name__,
+                stack_trace="".join(traceback.format_exception(exc)),
+                metadata={
+                    "message": body.message,
+                    "conversation_id": str(body.conversation_id) if body.conversation_id else None,
+                    "scope": body.scope.model_dump(mode="json"),
+                },
+            )
+        raise
+
     await session.commit()
     return response
 

@@ -7,7 +7,6 @@ avoiding the need for a running database.
 from __future__ import annotations
 
 import uuid
-from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch

@@ -20,7 +20,6 @@ from app.schemas.plant_batches import (
     PlantBatchUpdate,
     PlantProfileCreate,
     PlantProfileResponse,
-    PlantProfileUpdate,
 )
 
 router = APIRouter(tags=["plants"])

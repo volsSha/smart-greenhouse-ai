@@ -12,7 +12,6 @@ from app.schemas.rag import (
     RAGChunkResponse,
     RAGDocumentCreate,
     RAGDocumentResponse,
-    RAGSearchQuery,
 )
 from app.services.rag.embedding_client import EmbeddingClient, EmbeddingError
 from app.services.rag.reindex_service import ReindexService

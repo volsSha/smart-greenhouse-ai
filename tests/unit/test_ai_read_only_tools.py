@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import RunContext
 
 from app.services.ai_agent.tools.alert_tools import get_active_alerts
 from app.services.ai_agent.tools.command_tools import get_recent_commands
@@ -367,6 +367,38 @@ async def test_get_zone_state_returns_shape() -> None:
     assert result["actuator_count"] == 1
     assert len(result["plant_batches"]) == 1
     assert len(result["active_alerts"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_zone_state_accepts_display_identifiers() -> None:
+    """get_zone_state resolves simulator display identifiers before querying repos."""
+    group = _make_group(name="group-001")
+    greenhouse = _make_greenhouse(name="gh-001")
+    zone = _make_zone(name="zone-01")
+    deps = _make_deps(
+        group_repo=AsyncMock(list=AsyncMock(return_value=[group])),
+        greenhouse_repo=AsyncMock(list=AsyncMock(return_value=[greenhouse])),
+        zone_repo=AsyncMock(
+            list=AsyncMock(return_value=[zone]),
+            get_by_id=AsyncMock(return_value=zone),
+        ),
+        alert_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        sensor_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        actuator_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[])),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_state(ctx, "group-001", "gh-001", "zone-01")
+
+    assert result["zone_id"] == str(ZONE_ID)
+    deps.zone_repo.get_by_id.assert_awaited_once_with(ZONE_ID)
+    deps.alert_repo.list.assert_awaited_once_with(
+        group_id=GROUP_ID,
+        greenhouse_id=GREENHOUSE_ID,
+        zone_id=ZONE_ID,
+        status="active",
+    )
 
 
 @pytest.mark.asyncio

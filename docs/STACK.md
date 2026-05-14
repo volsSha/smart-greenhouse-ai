@@ -124,6 +124,5 @@ Add these only when implementing advanced autonomous control. The initial system
 | Mosquitto | eclipse-mosquitto:2.1.2-alpine | 11883, 19001 |
 | PostgreSQL | pgvector/pgvector:0.8.2-pg17-trixie | 5432 |
 | InfluxDB | influxdb:2.7.12 | 8086 |
-| Grafana | grafana/grafana:13.0.1 | 3000 |
 
 Pin exact image tags in Docker Compose. Do not use floating `latest` for stateful services. Related troubleshooting: `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` documents the verified local Compose image set, pgvector init, and NiceGUI dashboard launch fix.

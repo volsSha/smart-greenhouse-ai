@@ -1,7 +1,6 @@
 """Application settings and OpenRouter model catalog models."""
 
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB

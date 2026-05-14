@@ -30,6 +30,13 @@ class AIResponse(BaseModel):
 
     scope: AIScope
     status: AIResponseStatus
+
+    @field_validator("scope", mode="before")
+    @classmethod
+    def coerce_global_scope(cls, scope: Any) -> Any:
+        if isinstance(scope, str):
+            return {}
+        return scope
     summary: str = Field(min_length=1)
     observations: list[str] = Field(default_factory=list)
     recommendations: list[str] = Field(default_factory=list)

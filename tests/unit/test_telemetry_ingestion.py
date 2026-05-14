@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from app.schemas.telemetry import TelemetryEnvelope, TelemetryReading, Quality
+from app.schemas.telemetry import TelemetryEnvelope, TelemetryReading
 from app.services.telemetry_ingestion import TelemetryIngestion
 
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +40,7 @@ async def get_settings(
         embedding_model=app_settings.openrouter.embedding_model,
         embedding_dimension=app_settings.openrouter.embedding_dimension,
     )
+    await session.commit()
 
     return SettingsResponse.model_validate(settings)
 
@@ -66,6 +66,7 @@ async def update_settings(
 
     # Update the selected model
     settings = await repo.set_selected_chat_model(body.selected_chat_model)
+    await session.commit()
 
     return SettingsResponse.model_validate(settings)
 
@@ -110,8 +111,13 @@ async def refresh_catalog(
     client = OpenRouterModelsClient()
 
     try:
+        await repo.bootstrap_settings(
+            embedding_model=get_app_settings().openrouter.embedding_model,
+            embedding_dimension=get_app_settings().openrouter.embedding_dimension,
+        )
         catalog_data = await client.fetch_models()
         catalog_models = await repo.record_refresh_success(catalog_data)
+        await session.commit()
 
         return CatalogRefreshResponse(
             status="success",
@@ -121,6 +127,7 @@ async def refresh_catalog(
     except OpenRouterModelCatalogError as e:
         # Record failure but don't delete existing catalog
         await repo.record_refresh_failure(str(e))
+        await session.commit()
 
         return CatalogRefreshResponse(
             status="failed",

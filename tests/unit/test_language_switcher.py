@@ -4,7 +4,6 @@ from app.ui.components import language_switcher
 
 def test_language_switcher_uses_current_language(monkeypatch) -> None:
     calls: list[str] = []
-    selects: list[FakeSelect] = []
 
     class FakeSelect:
         def __init__(self, options: list[str], value: str, on_change) -> None:
@@ -19,6 +18,8 @@ def test_language_switcher_uses_current_language(monkeypatch) -> None:
         def classes(self, value: str) -> "FakeSelect":
             calls.append(f"classes:{value}")
             return self
+
+    selects: list[FakeSelect] = []
 
     def fake_select(options: list[str], value: str, on_change) -> FakeSelect:
         select = FakeSelect(options, value, on_change)

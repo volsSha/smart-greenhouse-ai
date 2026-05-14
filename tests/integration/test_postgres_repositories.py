@@ -7,19 +7,16 @@ argument handling, and basic plumbing without real database I/O.
 
 import uuid
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
-    Actuator,
     Alert,
-    EdgeNode,
     Greenhouse,
     GreenhouseGroup,
     GreenhouseZone,
-    Sensor,
 )
 from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_repository import ActuatorRepository, EdgeNodeRepository, SensorRepository
@@ -287,7 +284,7 @@ class TestAlertRepository:
         mock_result.scalars.return_value.all.return_value = []
         session.execute = AsyncMock(return_value=mock_result)
 
-        result = await repo.list_by_status("active")
+        await repo.list_by_status("active")
 
         session.execute.assert_called_once()
 

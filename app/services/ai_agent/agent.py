@@ -6,7 +6,7 @@ import json
 import uuid
 from typing import Any
 
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent, UnexpectedModelBehavior
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +26,7 @@ from app.repositories.plant_batch_repository import (
 )
 from app.repositories.telemetry_repository import TelemetryRepository
 from app.repositories.zone_repository import ZoneRepository
-from app.services.ai_agent.models import AIResponse, AIScope
+from app.services.ai_agent.models import AIResponse, AIResponseStatus, AIScope
 from app.services.ai_agent.prompts import SYSTEM_PROMPT
 from app.services.ai_agent.tool_logging import ToolCallLogger
 from app.services.ai_agent.tools import ALL_TOOLS
@@ -53,7 +53,7 @@ class GreenhouseAIAgent:
         self.conversation_repository = AIConversationRepository(session)
         self.tool_log_repository = AIToolLogRepository(session)
         self.tool_logger = ToolCallLogger(self.tool_log_repository)
-        self.agent = agent or self._build_agent(self.settings, self.session)
+        self.agent = agent or self._build_agent(self.settings)
         if agent is None:
             self.register_tools()
 
@@ -92,6 +92,7 @@ class GreenhouseAIAgent:
             instructions=SYSTEM_PROMPT,
             output_type=AIResponse,
             deps_type=ToolDeps,
+            output_retries=2,
         )
 
     async def _ensure_agent_uses_selected_model(self) -> None:
@@ -114,7 +115,7 @@ class GreenhouseAIAgent:
         if app_settings.selected_chat_model:
             if app_settings.selected_model_available:
                 # Rebuild agent if model changed
-                if self.agent._model.name != app_settings.selected_chat_model:
+                if self.agent._model.model_name != app_settings.selected_chat_model:
                     self.agent = self._build_agent(self.settings, app_settings.selected_chat_model)
                     self.register_tools()
                 return
@@ -165,14 +166,26 @@ class GreenhouseAIAgent:
 
         prompt = self._build_scoped_prompt(message, scope)
         deps = self._build_deps()
-        result = await self.agent.run(prompt, deps=deps)
-        ai_response = result.output
+        try:
+            result = await self.agent.run(prompt, deps=deps)
+        except UnexpectedModelBehavior:
+            ai_response = AIResponse(
+                scope=scope,
+                status=AIResponseStatus.INSUFFICIENT_DATA,
+                summary="The AI model returned a response that did not match the required schema. Please try again or select a different chat model.",
+                observations=[],
+                recommendations=["Refresh the model catalog and choose a model with stronger structured-output support."],
+                proposed_actions=[],
+            )
+            tokens_in = None
+            tokens_out = None
+        else:
+            ai_response = result.output
+            tokens_in, tokens_out = _extract_usage(result)
 
-        tokens_in, tokens_out = _extract_usage(result)
 
         model = getattr(self.agent, "_model", None)
-        actual_model = getattr(model, "name", self.settings.openrouter.model)
-
+        actual_model = getattr(model, "model_name", self.settings.openrouter.model)
         await self.conversation_repository.add_message(
             conversation.id,
             role="assistant",

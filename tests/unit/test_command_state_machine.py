@@ -20,7 +20,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.command import CommandLog
 from app.schemas.commands import CommandPropose
 from app.services.command_service import (
     CommandError,
@@ -28,7 +27,6 @@ from app.services.command_service import (
     CommandStatus,
     _check_transition,
 )
-from app.services.safety_validator import SafetyValidator
 
 
 def _make_mock_session() -> AsyncSession:

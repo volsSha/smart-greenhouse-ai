@@ -17,7 +17,6 @@ def state() -> SimulatedZoneState:
 class TestInitialize:
     def test_creates_zones(self, state: SimulatedZoneState) -> None:
         assert state.is_initialized
-        import asyncio
         keys = list(state._zones.keys())
         assert len(keys) == 2  # 1 group × 1 gh × 2 zones
 

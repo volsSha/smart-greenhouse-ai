@@ -14,9 +14,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.safety_limits import VALID_METRICS
 

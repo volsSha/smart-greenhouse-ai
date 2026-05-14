@@ -6,7 +6,7 @@ module: "docker-compose / FastAPI / NiceGUI"
 problem_type: ui_bug
 component: tooling
 symptoms:
-  - "Docker Compose stack had launch blockers across Mosquitto, InfluxDB, Grafana, PostgreSQL, and the app container."
+  - "Docker Compose stack had launch blockers across Mosquitto, InfluxDB, PostgreSQL, and the app container."
   - "FastAPI root path / returned Not Found instead of opening the dashboard."
   - "NiceGUI dashboard returned HTTP 500 with AttributeError: module nicegui.ui has no attribute 'sidebar'."
 root_cause: wrong_api
@@ -17,7 +17,6 @@ tags:
   - fastapi
   - nicegui
   - pgvector
-  - grafana
   - influxdb
   - mosquitto
 ---
@@ -34,8 +33,6 @@ The local Smart Greenhouse Docker Compose stack had multiple service startup blo
 - Mosquitto failed when configured with a missing password file.
 - InfluxDB `2.9.0` setup failed with `dasel` reporting a missing `http-bind-address` map key.
 - The app container failed with `uvicorn` missing from `PATH`.
-- Grafana 13 healthcheck failed because `grafana-cli` was unavailable.
-- Grafana dashboard provisioning failed until dashboards were mounted at `/var/lib/grafana/dashboards`.
 - `GET /` returned 404.
 - `GET /dashboard` returned 500 with:
 
@@ -68,8 +65,6 @@ services:
     image: pgvector/pgvector:0.8.2-pg17-trixie
   influxdb:
     image: influxdb:2.7.12
-  grafana:
-    image: grafana/grafana:13.0.1
 ```
 
 ```yaml

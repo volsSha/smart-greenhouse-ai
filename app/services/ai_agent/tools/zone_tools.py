@@ -20,13 +20,14 @@ async def get_zone_state(
     Includes zone metadata, active alerts, sensor count, actuator count,
     and plant batch summary.
     """
-    zid = uuid.UUID(zone_id)
+    resolved = await _resolve_scope(ctx, group_id, greenhouse_id, zone_id)
+    if isinstance(resolved, dict):
+        return resolved
+    gid, ghid, zid = resolved
+
     zone = await ctx.deps.zone_repo.get_by_id(zid)
     if zone is None:
         return {"error": f"Zone {zone_id} not found"}
-
-    gid = uuid.UUID(group_id)
-    ghid = uuid.UUID(greenhouse_id)
 
     alerts = await ctx.deps.alert_repo.list(
         group_id=gid,
@@ -79,7 +80,11 @@ async def get_zone_plant_info(
     Returns plant batch information along with the profile threshold
     ranges for temperature, humidity, soil moisture, CO2, and light.
     """
-    zid = uuid.UUID(zone_id)
+    resolved = await _resolve_scope(ctx, group_id, greenhouse_id, zone_id)
+    if isinstance(resolved, dict):
+        return resolved
+    _, _, zid = resolved
+
     zone = await ctx.deps.zone_repo.get_by_id(zid)
     if zone is None:
         return {"error": f"Zone {zone_id} not found"}
@@ -110,3 +115,35 @@ async def get_zone_plant_info(
         "plant_batches": batch_summaries,
         "profiles": profiles,
     }
+
+
+async def _resolve_scope(
+    ctx: RunContext[ToolDeps],
+    group_id: str | uuid.UUID,
+    greenhouse_id: str | uuid.UUID,
+    zone_id: str | uuid.UUID,
+) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID] | dict:
+    if isinstance(group_id, uuid.UUID) and isinstance(greenhouse_id, uuid.UUID) and isinstance(zone_id, uuid.UUID):
+        return group_id, greenhouse_id, zone_id
+
+    try:
+        return uuid.UUID(str(group_id)), uuid.UUID(str(greenhouse_id)), uuid.UUID(str(zone_id))
+    except ValueError:
+        pass
+
+    groups = await ctx.deps.group_repo.list(name=group_id)
+    group = groups[0] if groups else None
+    if group is None:
+        return {"error": f"Group {group_id} not found"}
+
+    greenhouses = await ctx.deps.greenhouse_repo.list(group_id=group.id, name=greenhouse_id)
+    greenhouse = greenhouses[0] if greenhouses else None
+    if greenhouse is None:
+        return {"error": f"Greenhouse {greenhouse_id} not found in group {group_id}"}
+
+    zones = await ctx.deps.zone_repo.list(greenhouse_id=greenhouse.id, name=zone_id)
+    zone = zones[0] if zones else None
+    if zone is None:
+        return {"error": f"Zone {zone_id} not found in greenhouse {greenhouse_id}"}
+
+    return group.id, greenhouse.id, zone.id

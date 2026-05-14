@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from pydantic_ai import Agent
+from pydantic_ai import Agent, UnexpectedModelBehavior
 from pydantic_ai.models.test import TestModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -62,6 +62,21 @@ async def test_conversation_repository_create_and_add_message() -> None:
 
 
 @pytest.mark.asyncio
+async def test_conversation_repository_ignores_display_scope_ids() -> None:
+    """Repository does not crash when chat scope uses display identifiers."""
+    session = _make_mock_session()
+    repo = AIConversationRepository(session)
+
+    conversation = await repo.create_conversation(
+        AIScope(group_id="group-001", greenhouse_id="gh-001", zone_id="zone-01")
+    )
+
+    assert conversation.group_id is None
+    assert conversation.greenhouse_id is None
+    assert conversation.zone_id is None
+
+
+@pytest.mark.asyncio
 async def test_tool_log_repository_create() -> None:
     """Tool log repository persists tool-call ORM objects."""
     session = _make_mock_session()
@@ -81,6 +96,59 @@ async def test_tool_log_repository_create() -> None:
     assert session.flush.await_count == 1
     assert tool_call.conversation_id == conversation_id
     assert tool_call.tool_name == "get_group_overview"
+
+
+def test_agent_default_uses_configured_openrouter_model() -> None:
+    """Default agent construction uses configured model, not the DB session."""
+    session = _make_mock_session()
+
+    service = GreenhouseAIAgent(session, settings=_settings())
+
+    assert service.agent._model.model_name == "test-model"
+
+
+@pytest.mark.asyncio
+async def test_agent_rebuilds_when_selected_model_differs() -> None:
+    """Selected model comparison uses Pydantic AI's public model_name."""
+    session = _make_mock_session()
+    selected_settings = SimpleNamespace(
+        selected_chat_model="anthropic/claude-sonnet-4",
+        selected_model_available=True,
+    )
+    service = GreenhouseAIAgent(session, settings=_settings(), agent=MagicMock())
+    service.agent._model = SimpleNamespace(model_name="test-model")
+    service.register_tools = MagicMock()
+    service._build_agent = MagicMock(return_value=MagicMock())
+
+    service.session.execute.return_value.scalar_one_or_none.return_value = selected_settings
+
+    await service._ensure_agent_uses_selected_model()
+
+    service._build_agent.assert_called_once_with(_settings(), "anthropic/claude-sonnet-4")
+    service.register_tools.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_agent_chat_returns_fallback_for_invalid_model_output() -> None:
+    """Invalid structured model output is returned as a safe chat response, not a 500."""
+    session = _make_mock_session()
+    conversation_id = uuid.uuid4()
+    fake_conversation = SimpleNamespace(id=conversation_id)
+    fake_agent = MagicMock()
+    fake_agent.run = AsyncMock(side_effect=UnexpectedModelBehavior("bad output"))
+    fake_agent._model = SimpleNamespace(model_name="test-model")
+
+    service = GreenhouseAIAgent(session, settings=_settings(), agent=fake_agent)
+    service.conversation_repository.create_conversation = AsyncMock(return_value=fake_conversation)
+    service.conversation_repository.add_message = AsyncMock()
+
+    response = await service.chat(message="Привіт", scope=AIScope())
+
+    assert response.status == AIResponseStatus.INSUFFICIENT_DATA
+    assert "required schema" in response.summary
+    assert service.conversation_repository.add_message.await_count == 2
+    assistant_call = service.conversation_repository.add_message.await_args_list[1]
+    assert assistant_call.kwargs["model"] == "test-model"
 
 
 @pytest.mark.asyncio

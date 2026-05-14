@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.model_settings import ModelSettings, OpenRouterModelCatalog
@@ -84,10 +83,7 @@ class ModelSettingsRepository:
         if settings is None:
             raise RuntimeError("Settings not bootstrapped")
 
-        # Clear old catalog and insert new data
-        # (In production, consider soft-delete or timestamped versioning)
-        for old_row in await self.session.scalars(select(OpenRouterModelCatalog)):
-            await self.session.delete(old_row)
+        await self.session.execute(delete(OpenRouterModelCatalog))
 
         catalog_rows = []
         for item in catalog_data:
