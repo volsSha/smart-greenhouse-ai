@@ -18,6 +18,7 @@ from app.i18n.core import _
 from app.ui.api_client import api_client
 
 from app.ui.components.alert_panel import alert_panel
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.components.telemetry_cards import (
     group_overview_card,
     greenhouse_card,
@@ -131,10 +132,14 @@ async def dashboard() -> None:
     """Render the fleet dashboard page."""
     main_layout()
 
-    ui.label(_("Dashboard")).classes("text-2xl font-bold mt-6")
-
-    # State containers
-    content_area = ui.column().classes("w-full gap-4 mt-4")
+    with page_container():
+        page_hero(
+            _("Dashboard"),
+            _("Live greenhouse telemetry, alerts, and zone trends for the active fleet group."),
+            icon="dashboard",
+            meta=_("Operations"),
+        )
+        content_area = ui.column().classes("w-full gap-5")
     selected_gh: dict[str, Any] = {"id": None}
 
     async def load_data() -> None:
@@ -153,22 +158,24 @@ async def dashboard() -> None:
                 anomalies_data = anomalies_resp.json()
 
         except httpx.HTTPError as exc:
-            ui.label(_("Error loading data: {error}", error=exc)).classes("text-red-500 text-sm")
-            ui.label(
-                _("Make sure the API is running and InfluxDB is available.")
-            ).classes("text-xs opacity-50 mt-1")
+            with content_area:
+                empty_state(
+                    _("Error loading data"),
+                    _("Make sure the API is running and InfluxDB is available. Details: {error}", error=exc),
+                    icon="cloud_off",
+                )
             return
 
         readings = latest_data.get("readings", [])
         anomalies = anomalies_data.get("anomalies", [])
 
         if not readings:
-            with ui.column().classes("w-full items-center gap-4 mt-20"):
-                ui.icon("sensors_off", size="4rem").classes("opacity-30")
-                ui.label(_("No telemetry data available")).classes("text-lg opacity-50")
-                ui.label(
-                    _("Start the simulator to generate data and see it here.")
-                ).classes("text-sm opacity-40")
+            with content_area:
+                empty_state(
+                    _("No telemetry data available"),
+                    _("Start the simulator to generate data and see the fleet cockpit come alive."),
+                    icon="sensors_off",
+                )
             return
 
         # Transform data
@@ -177,15 +184,16 @@ async def dashboard() -> None:
 
         # --- Group overview ---
         with ui.row().classes("w-full gap-4"):
-            with ui.column().classes("w-2/3"):
+            with ui.column().classes("w-2/3 min-w-[320px]"):
                 group_overview_card(group_data)
 
-            with ui.column().classes("w-1/3"):
+            with ui.column().classes("w-1/3 min-w-[280px]"):
                 alert_panel(anomalies)
 
         # --- Greenhouse cards ---
-        ui.label(_("Greenhouses")).classes("text-lg font-bold mt-2")
-        with ui.row().classes("w-full gap-4 flex-wrap"):
+        with section_card(_("Greenhouses"), _("Select a house to inspect zone-level metrics and trends."), icon="warehouse"):
+            greenhouse_grid = ui.row().classes("w-full gap-4 flex-wrap mt-4")
+        with greenhouse_grid:
             for gh_id, gh_data in greenhouses.items():
                 def view_zones_handler(gh: str):
                     async def handler() -> None:
@@ -212,22 +220,24 @@ async def dashboard() -> None:
             zone_detail_container.set_visibility(True)
 
             with zone_detail_container:
-                ui.label(_("Greenhouse: {greenhouse_id}", greenhouse_id=gh_id)).classes("text-lg font-bold")
+                with section_card(
+                    _("Greenhouse: {greenhouse_id}", greenhouse_id=gh_id),
+                    _("Zone detail cards and recent six-hour telemetry trends."),
+                    icon="yard",
+                ):
+                    zones = transform_latest_to_zones(readings, gh_id)
 
-                zones = transform_latest_to_zones(readings, gh_id)
+                    if not zones:
+                        empty_state(_("No zone data available"), _("This greenhouse has not reported zone telemetry yet."), icon="grid_off")
+                        return
 
-                if not zones:
-                    ui.label(_("No zone data available")).classes("text-sm opacity-50")
-                    return
+                    with ui.row().classes("w-full gap-4 flex-wrap mt-4"):
+                        for zone in zones:
+                            with ui.column().classes("w-72 min-w-[260px]"):
+                                zone_detail_card(zone)
 
-                # Zone detail cards
-                with ui.row().classes("w-full gap-4 flex-wrap"):
-                    for zone in zones:
-                        zone_detail_card(zone)
-
-                # Zone charts -- fetch historical data
-                ui.separator().classes("w-full mt-2")
-                ui.label(_("Zone Charts")).classes("text-lg font-bold mt-2")
+                    ui.separator().classes("w-full mt-4")
+                    ui.label(_("Zone Charts")).classes("text-lg font-bold mt-3")
 
             try:
                 async with api_client(timeout=10.0) as client:
@@ -275,10 +285,10 @@ async def dashboard() -> None:
                         with ui.row().classes("w-full mt-4"):
                             multi_metric_chart(range_readings)
                     else:
-                        ui.label(_("No historical data for charts")).classes("text-sm opacity-50")
+                        empty_state(_("No historical data for charts"), _("Recent range data will appear here after telemetry accumulates."), icon="show_chart")
 
             except httpx.HTTPError as exc:
-                ui.label(_("Error loading chart data: {error}", error=exc)).classes("text-red-500 text-xs")
+                empty_state(_("Error loading chart data"), str(exc), icon="sync_problem")
 
     # Initial load
     await load_data()

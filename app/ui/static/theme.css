@@ -1,0 +1,169 @@
+:root {
+    --gh-ink: #17251f;
+    --gh-muted: #617268;
+    --gh-line: rgba(39, 84, 61, 0.14);
+    --gh-surface: rgba(255, 255, 255, 0.88);
+    --gh-surface-strong: #ffffff;
+    --gh-green: #1f7a4d;
+    --gh-green-dark: #145638;
+    --gh-green-soft: #e7f4ec;
+    --gh-amber: #c77814;
+    --gh-red: #c54135;
+    --gh-blue: #2476a8;
+}
+
+body.body--light {
+    background:
+        radial-gradient(circle at 14% 4%, rgba(95, 166, 115, 0.18), transparent 30rem),
+        radial-gradient(circle at 84% 10%, rgba(63, 132, 91, 0.12), transparent 26rem),
+        linear-gradient(180deg, #f5f8f2 0%, #eef5ee 48%, #f8faf7 100%);
+    color: var(--gh-ink);
+}
+
+.greenhouse-header {
+    background: rgba(255, 255, 255, 0.82) !important;
+    color: var(--gh-ink) !important;
+    border-bottom: 1px solid var(--gh-line);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 10px 34px rgba(21, 73, 44, 0.08);
+}
+
+.greenhouse-brand-mark {
+    background: linear-gradient(135deg, #1f7a4d, #8bbf5a);
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(31, 122, 77, 0.24);
+}
+
+.greenhouse-drawer {
+    background: rgba(250, 253, 248, 0.92) !important;
+    border-right: 1px solid var(--gh-line);
+    backdrop-filter: blur(18px);
+}
+
+.greenhouse-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.62rem 0.75rem;
+    border-radius: 14px;
+    color: var(--gh-muted);
+    text-decoration: none;
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.greenhouse-nav-link:hover,
+.greenhouse-nav-link:focus-visible {
+    background: var(--gh-green-soft);
+    color: var(--gh-green-dark);
+    transform: translateX(2px);
+}
+
+.greenhouse-page {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.5rem clamp(1rem, 3vw, 2rem) 3rem;
+}
+
+.greenhouse-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--gh-line);
+    border-radius: 28px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(235, 247, 238, 0.86)),
+        radial-gradient(circle at 92% 14%, rgba(31, 122, 77, 0.18), transparent 18rem);
+    box-shadow: 0 22px 60px rgba(21, 73, 44, 0.10);
+}
+
+.greenhouse-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -3rem -5rem auto;
+    width: 18rem;
+    height: 18rem;
+    border-radius: 999px;
+    background: rgba(31, 122, 77, 0.08);
+}
+
+.greenhouse-card,
+.greenhouse-section-card {
+    border: 1px solid var(--gh-line) !important;
+    border-radius: 22px !important;
+    background: var(--gh-surface) !important;
+    box-shadow: 0 16px 42px rgba(21, 73, 44, 0.08) !important;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.greenhouse-card:hover,
+.greenhouse-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgba(31, 122, 77, 0.28) !important;
+    box-shadow: 0 22px 54px rgba(21, 73, 44, 0.13) !important;
+}
+
+.greenhouse-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.2rem 0.62rem;
+    background: var(--gh-green-soft);
+    color: var(--gh-green-dark);
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+
+.greenhouse-empty {
+    border: 1px dashed rgba(31, 122, 77, 0.24);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.58);
+}
+
+.greenhouse-metric-row {
+    border-radius: 12px;
+    padding: 0.25rem 0.4rem;
+    background: rgba(247, 250, 246, 0.8);
+}
+
+.greenhouse-chat-panel {
+    border: 1px solid var(--gh-line);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.64);
+    padding: 1rem;
+}
+
+.greenhouse-composer {
+    border: 1px solid var(--gh-line);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 12px 30px rgba(21, 73, 44, 0.08);
+}
+
+.greenhouse-code-block {
+    border-radius: 14px;
+    border: 1px solid var(--gh-line);
+    background: #102018 !important;
+    color: #dff3e5 !important;
+}
+
+.greenhouse-scenario-active {
+    outline: 2px solid rgba(31, 122, 77, 0.42);
+    background: linear-gradient(135deg, rgba(231, 244, 236, 0.92), rgba(255, 255, 255, 0.92)) !important;
+}
+
+.q-field--focused .q-field__control {
+    box-shadow: 0 0 0 3px rgba(31, 122, 77, 0.14);
+}
+
+@media (max-width: 900px) {
+    .greenhouse-page {
+        padding: 1rem 0.75rem 2rem;
+    }
+
+    .greenhouse-hero {
+        border-radius: 20px;
+    }
+}

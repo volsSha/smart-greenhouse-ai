@@ -12,6 +12,7 @@ from app.i18n.core import _
 from app.schemas.commands import CommandPropose
 from app.services.command_service import CommandStatus
 from app.ui.api_client import api_client, response_error
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.components.proposed_action_card import proposed_action_card
 from app.ui.layouts.main_layout import main_layout
 
@@ -30,52 +31,34 @@ async def control() -> None:
     """Render the actuator control page."""
     main_layout()
 
-    ui.label(_("Actuator Control")).classes("text-2xl font-bold mt-6")
-    ui.label(_("Propose, validate, approve, and execute actuator commands.")).classes(
-        "text-sm opacity-70 mt-2"
-    )
-
-    notification = ui.notification(position="top", timeout=5)
-
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Propose Command")).classes("text-lg font-semibold")
-        with ui.row().classes("w-full gap-4 mt-4"):
-            group_id = ui.input(_("Group ID"), value=_SAMPLE_GROUP_ID).classes("w-80")
-            greenhouse_id = ui.input(_("Greenhouse ID"), value=_SAMPLE_GREENHOUSE_ID).classes("w-80")
-            zone_id = ui.input(_("Zone ID"), value=_SAMPLE_ZONE_ID).classes("w-80")
-        with ui.row().classes("w-full gap-4 mt-4"):
-            actuator = ui.select(
-                label=_("Actuator"),
-                options=["pump", "fan", "heater", "lamp"],
-                value="pump",
-            ).classes("w-48")
-            action = ui.select(
-                label=_("Action"),
-                options=["on", "off", "set_power"],
-                value="on",
-            ).classes("w-48")
-            value = ui.number(label=_("Value"), value=None).classes("w-32")
-            duration = ui.number(label=_("Duration (s)"), value=30).classes("w-32")
-        reason = ui.textarea(label=_("Reason"), value=_("Manual greenhouse adjustment")).classes("w-full mt-4")
-        ui.button(
-            _("Propose"),
-            color="primary",
-            on_click=lambda: propose_command(),
+    with page_container():
+        page_hero(
+            _("Actuator Control"),
+            _("Propose, validate, approve, and execute physical actuator commands with safety gates."),
+            icon="tune",
+            meta=_("Command center"),
         )
 
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Pending Commands")).classes("text-lg font-semibold")
-        ui.label(
-            _("Validated and AI-generated proposals require approval before MQTT execution.")
-        ).classes("text-sm opacity-70 mt-2")
-        pending_commands = ui.column().classes("w-full gap-2 mt-4")
+        notification = ui.notification(position="top", timeout=5)
 
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Recent Commands")).classes("text-lg font-semibold")
-        ui.label(_("Executed, rejected, failed, and expired commands appear here.")).classes(
-            "text-sm opacity-70 mt-2"
-        )
-        recent_commands = ui.column().classes("w-full gap-2 mt-4")
+        with section_card(_("Propose Command"), _("Target a zone, choose an actuator action, and explain the operational reason."), icon="add_task"):
+            with ui.row().classes("w-full gap-4 mt-4 flex-wrap"):
+                group_id = ui.input(_("Group ID"), value=_SAMPLE_GROUP_ID).classes("w-80")
+                greenhouse_id = ui.input(_("Greenhouse ID"), value=_SAMPLE_GREENHOUSE_ID).classes("w-80")
+                zone_id = ui.input(_("Zone ID"), value=_SAMPLE_ZONE_ID).classes("w-80")
+            with ui.row().classes("w-full gap-4 mt-4 flex-wrap"):
+                actuator = ui.select(label=_("Actuator"), options=["pump", "fan", "heater", "lamp"], value="pump").classes("w-48")
+                action = ui.select(label=_("Action"), options=["on", "off", "set_power"], value="on").classes("w-48")
+                value = ui.number(label=_("Value"), value=None).classes("w-32")
+                duration = ui.number(label=_("Duration (s)"), value=30).classes("w-32")
+            reason = ui.textarea(label=_("Reason"), value=_("Manual greenhouse adjustment")).classes("w-full mt-4")
+            ui.button(_("Propose"), color="primary", on_click=lambda: propose_command()).classes("mt-3")
+
+        with section_card(_("Pending Commands"), _("Validated and AI-generated proposals require approval before MQTT execution."), icon="pending_actions"):
+            pending_commands = ui.column().classes("w-full gap-3 mt-4")
+
+        with section_card(_("Recent Commands"), _("Executed, rejected, failed, and expired commands appear here."), icon="history"):
+            recent_commands = ui.column().classes("w-full gap-2 mt-4")
 
     def notify(message: str, kind: str = "info") -> None:
         notification.set_message(message)
@@ -160,7 +143,7 @@ async def control() -> None:
             UUID(group_id.value or "")
         except ValueError:
             with pending_commands:
-                ui.label(_("Enter a valid Group ID to load commands.")).classes("text-sm opacity-60")
+                empty_state(_("Enter a valid Group ID"), _("Commands are loaded by group scope."), icon="badge")
             return
 
         try:
@@ -168,12 +151,12 @@ async def control() -> None:
                 response = await client.get(f"/api/commands/groups/{group_id.value}/recent")
                 if response.status_code != 200:
                     with pending_commands:
-                        ui.label(_("Failed to load commands: {error}", error=response_error(response))).classes("text-sm text-red-500")
+                        empty_state(_("Failed to load commands"), response_error(response), icon="sync_problem")
                     return
                 commands = response.json()
         except httpx.HTTPError as exc:
             with pending_commands:
-                ui.label(_("Failed to load commands: {error}", error=exc)).classes("text-sm text-red-500")
+                empty_state(_("Failed to load commands"), str(exc), icon="sync_problem")
             return
 
         pending: list[dict[str, Any]] = []
@@ -186,7 +169,7 @@ async def control() -> None:
 
         with pending_commands:
             if not pending:
-                ui.label(_("No pending commands.")).classes("text-sm opacity-60")
+                empty_state(_("No pending commands"), _("Validated proposals will appear here before approval."), icon="task_alt")
             for command in pending:
                 proposed_action_card(
                     command_to_action(command),
@@ -196,9 +179,9 @@ async def control() -> None:
 
         with recent_commands:
             if not completed:
-                ui.label(_("No recent completed commands.")).classes("text-sm opacity-60")
+                empty_state(_("No recent completed commands"), _("Executed, rejected, failed, and expired commands will be listed here."), icon="history")
             for command in completed[:10]:
-                with ui.row().classes("w-full items-center justify-between p-2 border border-gray-200 rounded"):
+                with ui.row().classes("greenhouse-card w-full items-center justify-between p-3 rounded"):
                     ui.label(f"{command['actuator_name']} -> {command['action']}").classes("font-medium")
                     ui.badge(command["status"], color="blue")
 

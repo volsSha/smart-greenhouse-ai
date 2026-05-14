@@ -10,6 +10,7 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.layouts.main_layout import main_layout
 
 _LEVEL_COLORS = {
@@ -30,15 +31,19 @@ async def logs() -> None:
     """Render the persisted project error logs page."""
     main_layout()
 
-    ui.label(_("Project Error Logs")).classes("text-2xl font-bold mt-6")
-    ui.label(
-        _("Database-backed debug and error events captured by the application.")
-    ).classes("text-sm opacity-70 mt-2")
+    with page_container():
+        page_hero(
+            _("Project Error Logs"),
+            _("Database-backed debug and error events captured by the application."),
+            icon="fact_check",
+            meta=_("Diagnostics"),
+        )
 
     selected_level = {"value": "error"}
     selected_component = {"value": "all"}
     selected_event_type = {"value": "all"}
-    content_area = ui.column().classes("w-full gap-3 mt-6")
+    with page_container():
+        content_area = ui.column().classes("w-full gap-3")
 
     async def load_logs() -> None:
         content_area.clear()
@@ -68,15 +73,13 @@ async def logs() -> None:
         spinner.delete()
         with content_area:
             if not logs_data:
-                with ui.column().classes("w-full items-center gap-3 mt-12"):
-                    ui.icon("fact_check", size="4rem").classes("opacity-30")
-                    ui.label(_("No log entries match the selected filters.")).classes("text-lg opacity-50")
+                empty_state(_("No log entries match the selected filters."), _("Try broadening level, component, or event type filters."), icon="fact_check")
                 return
 
             for entry in logs_data:
                 level = entry.get("level", "info")
                 color = _LEVEL_COLORS.get(level, "grey")
-                with ui.card().classes("w-full"):
+                with ui.card().classes("greenhouse-card w-full p-4"):
                     with ui.row().classes("w-full items-start gap-3"):
                         ui.badge(level.upper(), color=color).classes("mt-1")
                         with ui.column().classes("grow gap-1"):
@@ -119,9 +122,10 @@ async def logs() -> None:
                             ui.label(_("Stack trace")).classes("text-sm font-semibold mt-2")
                             ui.code(entry["stack_trace"]).classes("w-full text-xs")
 
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Filters")).classes("text-lg font-semibold")
-        with ui.row().classes("w-full gap-4 mt-4 items-end"):
+    with page_container():
+        filter_card = section_card(_("Filters"), _("Narrow persisted debug events before reviewing details."), icon="filter_alt")
+    with filter_card:
+        with ui.row().classes("w-full gap-4 mt-4 items-end flex-wrap"):
             level_select = ui.select(
                 label=_("Level"),
                 options=["all", "error", "warning", "info"],

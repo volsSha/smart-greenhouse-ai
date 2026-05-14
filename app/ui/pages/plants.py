@@ -3,6 +3,7 @@
 from nicegui import ui
 
 from app.i18n.core import _
+from app.ui.components.design import page_container, page_hero, section_card
 from app.ui.layouts.main_layout import main_layout
 
 
@@ -10,32 +11,32 @@ from app.ui.layouts.main_layout import main_layout
 async def plants() -> None:
     """Render the plants management page."""
     main_layout()
-    ui.label(_("Plants")).classes("text-2xl font-bold mt-6")
-    ui.label(_("Plant batches, profiles, growth stages, and zone assignments.")).classes(
-        "text-sm opacity-70 mt-2"
-    )
+    with page_container():
+        page_hero(
+            _("Plants"),
+            _("Plan crop profiles, track batches, and connect growth stages to greenhouse zones."),
+            icon="local_florist",
+            meta=_("Crop planning"),
+        )
 
-    with ui.row().classes("w-full mt-6 gap-4"):
-        # Plant Profiles section
-        with ui.card().classes("w-1/2"):
-            ui.label(_("Plant Profiles")).classes("text-lg font-bold")
-            ui.label(
-                _("Manage reusable environmental condition profiles for different crops.")
-            ).classes("text-sm opacity-70 mt-1")
-            ui.label(_("Placeholder -- profiles management will appear here.")).classes(
-                "text-xs italic mt-4"
-            )
+        with ui.row().classes("w-full gap-4 flex-wrap"):
+            with section_card(
+                _("Plant Profiles"),
+                _("Reusable environmental targets for crops and growth stages."),
+                icon="spa",
+                classes="w-1/2 min-w-[320px]",
+            ):
+                ui.label(_("Profiles will define preferred temperature, humidity, soil moisture, CO2, and light ranges.")).classes("text-sm opacity-65 mt-4")
+                ui.badge(_("Planned"), color="green").props("outline")
 
-        # Plant Batches section
-        with ui.card().classes("w-1/2"):
-            ui.label(_("Plant Batches")).classes("text-lg font-bold")
-            ui.label(
-                _("Track growing batches across greenhouse zones.")
-            ).classes("text-sm opacity-70 mt-1")
-            ui.label(_("Placeholder -- batch management will appear here.")).classes(
-                "text-xs italic mt-4"
-            )
+            with section_card(
+                _("Plant Batches"),
+                _("Operational batches assigned to zones across the fleet."),
+                icon="inventory_2",
+                classes="w-1/2 min-w-[320px]",
+            ):
+                ui.label(_("Batch tracking will connect planting dates, growth stages, and zone assignments." )).classes("text-sm opacity-65 mt-4")
+                ui.badge(_("Planned"), color="green").props("outline")
 
-    ui.label(_("Placeholder -- full plant management UI will be implemented.")).classes(
-        "text-xs italic mt-6"
-    )
+        with section_card(_("Coming Next"), _("This page is ready for the full plant-management workflow without looking unfinished."), icon="event_upcoming"):
+            ui.label(_("Use the dashboard and simulator today; crop-specific planning can be added here when APIs are available.")).classes("text-sm opacity-70 mt-3")

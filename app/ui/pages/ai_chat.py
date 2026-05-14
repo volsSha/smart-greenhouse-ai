@@ -19,6 +19,7 @@ from nicegui import ui
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.components.chat_message import (
     assistant_message_bubble,
     system_message,
@@ -88,12 +89,11 @@ def _render_conversation_messages(
         tool_calls: List of tool call dicts for transparency display.
     """
     if not messages:
-        with ui.column().classes("w-full items-center gap-4 mt-20"):
-            ui.icon("forum", size="4rem").classes("opacity-30")
-            ui.label(_("No messages yet")).classes("text-lg opacity-50")
-            ui.label(
-                _("Ask a question about your greenhouses, zones, or sensor data.")
-            ).classes("text-sm opacity-40")
+        empty_state(
+            _("No messages yet"),
+            _("Ask about greenhouse health, sensor anomalies, recent trends, or safe actuator actions."),
+            icon="forum",
+        )
         return
 
     # Group tool calls by message order (associate with the last assistant message)
@@ -150,7 +150,13 @@ async def ai_chat() -> None:
     """Render the AI chat page with conversation management."""
     main_layout()
 
-    ui.label(_("AI Assistant")).classes("text-2xl font-bold mt-6")
+    with page_container():
+        page_hero(
+            _("AI Assistant"),
+            _("Ask scoped operational questions and review transparent tool calls before approving physical actions."),
+            icon="smart_toy",
+            meta=_("Intelligence"),
+        )
 
     # --- State ---
     selected_conversation_id: dict[str, str | None] = {"value": None}
@@ -161,61 +167,36 @@ async def ai_chat() -> None:
     }
     is_processing: dict[str, bool] = {"value": False}
 
-    # --- Top controls row ---
-    with ui.row().classes("w-full gap-4 mt-4 items-center flex-wrap"):
-        # Conversation selector
-        conversation_select = ui.select(
-            label=_("Conversation"),
-            options={},
-            on_change=lambda e: select_conversation(e.value),
-        ).classes("flex-1 min-w-[200px]")
+    with page_container():
+        # --- Top controls row ---
+        with section_card(_("Conversation Context"), _("Select a saved thread and narrow the assistant to a fleet scope."), icon="hub"):
+            with ui.row().classes("w-full gap-4 mt-4 items-center flex-wrap"):
+                conversation_select = ui.select(
+                    label=_("Conversation"),
+                    options={},
+                    on_change=lambda e: select_conversation(e.value),
+                ).classes("flex-1 min-w-[220px]")
 
-        # Scope selectors
-        with ui.row().classes("items-center gap-2"):
-            ui.label(_("Scope:")).classes("text-sm opacity-60")
-            ui.input(
-                label=_("Group ID"),
-                placeholder="group-001",
-                on_change=lambda e: scope_state.update({"group_id": e.value or None}),
-            ).classes("w-32")
-            ui.input(
-                label=_("Greenhouse"),
-                placeholder="gh-001",
-                on_change=lambda e: scope_state.update({"greenhouse_id": e.value or None}),
-            ).classes("w-32")
-            ui.input(
-                label=_("Zone"),
-                placeholder="zone-01",
-                on_change=lambda e: scope_state.update({"zone_id": e.value or None}),
-            ).classes("w-32")
+                with ui.row().classes("items-center gap-2 flex-wrap"):
+                    ui.label(_("Scope:")).classes("text-sm opacity-60")
+                    ui.input(label=_("Group ID"), placeholder="group-001", on_change=lambda e: scope_state.update({"group_id": e.value or None})).classes("w-36")
+                    ui.input(label=_("Greenhouse"), placeholder="gh-001", on_change=lambda e: scope_state.update({"greenhouse_id": e.value or None})).classes("w-36")
+                    ui.input(label=_("Zone"), placeholder="zone-01", on_change=lambda e: scope_state.update({"zone_id": e.value or None})).classes("w-32")
+                ui.button(_("New Conversation"), icon="add", on_click=lambda: start_new_conversation()).props("flat color=primary")
 
-    # --- Chat messages area ---
-    chat_area = ui.column().classes("w-full gap-4 mt-4 flex-1 overflow-y-auto")
-    chat_area.style("max-height: 60vh; min-height: 300px;")
+        # --- Chat messages area ---
+        with section_card(_("Operator Chat"), _("Responses include observations, recommendations, proposed actions, and tool traces."), icon="forum"):
+            chat_area = ui.column().classes("greenhouse-chat-panel w-full gap-4 mt-4 flex-1 overflow-y-auto")
+            chat_area.style("max-height: 60vh; min-height: 340px;")
 
-    # --- Loading / error state containers ---
-    loading_container = ui.column().classes("w-full items-center gap-2 mt-4")
-    loading_container.set_visibility(False)
-    error_container = ui.column().classes("w-full mt-4")
-    error_container.set_visibility(False)
+            loading_container = ui.column().classes("w-full items-center gap-2 mt-4")
+            loading_container.set_visibility(False)
+            error_container = ui.column().classes("w-full mt-4")
+            error_container.set_visibility(False)
 
-    # --- Message input ---
-    with ui.row().classes("w-full gap-2 mt-4 items-end sticky bottom-0 bg-white py-2"):
-        message_input = ui.textarea(
-            placeholder=_("Ask about your greenhouses..."),
-        ).classes("flex-1").props('rows=1 autogrow outlined dense')
-        send_button = ui.button(
-            _("Send"),
-            icon="send",
-            on_click=lambda: send_message(),
-        ).props("color=primary")
-
-    # --- New conversation button ---
-    ui.button(
-        _("New Conversation"),
-        icon="add",
-        on_click=lambda: start_new_conversation(),
-    ).classes("mt-2").props("flat color=grey")
+            with ui.row().classes("greenhouse-composer w-full gap-2 mt-4 items-end sticky bottom-0 p-3"):
+                message_input = ui.textarea(placeholder=_("Ask about your greenhouses...")).classes("flex-1").props('rows=1 autogrow outlined dense')
+                send_button = ui.button(_("Send"), icon="send", on_click=lambda: send_message()).props("color=primary")
 
     # --- Functions ---
 

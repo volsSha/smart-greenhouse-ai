@@ -79,11 +79,15 @@ def alert_panel(alerts: list[dict[str, Any]]) -> None:
     Parameters:
         alerts: List of alert dicts as described in :func:`alert_item`.
     """
-    with ui.card().classes("w-full"):
-        ui.label(_("Active Alerts")).classes("text-lg font-bold")
+    with ui.card().classes("greenhouse-card w-full p-5"):
+        with ui.row().classes("items-center justify-between w-full"):
+            ui.label(_("Active Alerts")).classes("text-lg font-bold")
+            ui.icon("notifications_active", size="1.2rem").classes("opacity-45")
 
         if not alerts:
-            ui.label(_("No active alerts")).classes("text-sm opacity-50 mt-2")
+            with ui.row().classes("items-center gap-2 mt-3"):
+                ui.icon("check_circle", size="1.1rem").style("color: #1f7a4d")
+                ui.label(_("No active alerts")).classes("text-sm opacity-65")
             return
 
         # Sort by severity: critical first, then warning, then info

@@ -81,8 +81,8 @@ def user_message_bubble(
                 if timestamp:
                     ui.label(_format_timestamp(timestamp)).classes("text-xs opacity-40")
                 ui.label(content).classes(
-                    "bg-blue-500 text-white px-4 py-2 rounded-2xl rounded-br-sm text-sm"
-                )
+                    "px-4 py-2 rounded-2xl rounded-br-sm text-sm"
+                ).style("background: linear-gradient(135deg, #1f7a4d, #247a5a); color: white;")
 
 
 def assistant_message_bubble(
@@ -114,7 +114,7 @@ def assistant_message_bubble(
                                 "text-xs opacity-40 ml-auto"
                             )
 
-                    ui.label(content).classes("text-sm mt-1")
+                    ui.label(content).classes("greenhouse-card text-sm mt-1 p-3")
 
                     _render_observations(observations or [])
                     _render_recommendations(recommendations or [])

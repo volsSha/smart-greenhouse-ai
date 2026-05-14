@@ -18,6 +18,7 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.components.mqtt_status_panel import MQTTStatusPanel
 from app.ui.components.zone_visualization import ZoneVisualization
 from app.ui.layouts.main_layout import main_layout
@@ -107,10 +108,13 @@ async def simulator() -> None:
     """Render the simulator control page."""
     main_layout()
 
-    ui.label(_("Simulator")).classes("text-2xl font-bold mt-6")
-    ui.label(
-        _("Control the telemetry data simulator for testing and demos.")
-    ).classes("text-sm opacity-70 mt-1")
+    with page_container():
+        page_hero(
+            _("Simulator"),
+            _("Generate realistic telemetry and actuator state changes for demos, validation, and operator training."),
+            icon="precision_manufacturing",
+            meta=_("Telemetry lab"),
+        )
 
     # State
     state: dict[str, Any] = {
@@ -124,93 +128,59 @@ async def simulator() -> None:
     # Load animations CSS
     _load_animations_css()
 
-    # --- Status indicator ---
-    with ui.card().classes("w-full mt-4"):
-        with ui.row().classes("items-center justify-between w-full"):
-            ui.label(_("Status")).classes("text-lg font-bold")
-            status_badge = ui.badge(_("Stopped"), color="grey")
+    with page_container():
+        # --- Status indicator ---
+        with section_card(_("Simulator Status"), _("Live run state and publish counters."), icon="monitor_heart"):
+            with ui.row().classes("items-center gap-6 mt-4 flex-wrap"):
+                status_badge = ui.badge(_("Stopped"), color="grey")
+                ui.separator().props("vertical")
+                ui.label(_("Messages published:")).classes("text-sm opacity-70")
+                msg_count_label = ui.label("0").classes("text-sm font-mono font-bold")
+                ui.separator().props("vertical")
+                ui.label(_("Last publish:")).classes("text-sm opacity-70")
+                last_publish_label = ui.label("--").classes("text-sm font-mono")
 
-        with ui.row().classes("items-center gap-6 mt-2"):
-            ui.label(_("Messages published:")).classes("text-sm opacity-70")
-            msg_count_label = ui.label("0").classes("text-sm font-mono font-bold")
-            ui.separator().props("vertical")
-            ui.label(_("Last publish:")).classes("text-sm opacity-70")
-            last_publish_label = ui.label("--").classes("text-sm font-mono")
+        # --- Scenario selection ---
+        with section_card(_("Scenario"), _("Choose the environmental story the simulator should emit."), icon="science"):
+            with ui.row().classes("w-full gap-3 mt-4 flex-wrap"):
+                scenario_cards: dict[str, ui.card] = {}
+                for key, scenario in SCENARIOS.items():
+                    with ui.card().classes("greenhouse-card greenhouse-interactive w-64 p-4 cursor-pointer") as scenario_card:
+                        scenario_card.on("click", lambda _e, k=key: select_scenario(k))
+                        scenario_cards[key] = scenario_card
+                        with ui.row().classes("items-center gap-2"):
+                            ui.icon(scenario["icon"], size="1.25rem").style(f"color: {scenario['color']}")
+                            ui.label(_scenario_label(key)).classes("font-semibold")
+                        ui.label(_scenario_description(key)).classes("text-xs opacity-65 mt-2")
+            scenario_cards["normal"].classes("greenhouse-scenario-active")
+            active_scenario_label = ui.label(_("Normal")).classes("text-md mt-4 font-semibold").style("color: #4caf50")
+            scenario_desc = ui.label(_("Stable conditions within optimal ranges")).classes("text-sm opacity-60 mt-1")
 
-    # --- Active scenario ---
-    with ui.card().classes("w-full mt-4"):
-        ui.label(_("Active Scenario")).classes("text-lg font-bold")
-        active_scenario_label = ui.label(_("Normal")).classes(
-            "text-md mt-1 font-semibold"
-        ).style("color: #4caf50")
-        scenario_desc = ui.label(
-            _("Stable conditions within optimal ranges")
-        ).classes("text-sm opacity-60 mt-1")
+        # --- Configuration and mode ---
+        with section_card(_("Run Configuration"), _("Scale the generated fleet and choose local simulation or external MQTT."), icon="settings_input_component"):
+            with ui.row().classes("w-full gap-4 mt-4 flex-wrap"):
+                groups_input = ui.number(_("Groups"), value=1, min=1, max=10).classes("w-32")
+                greenhouses_input = ui.number(_("Greenhouses per Group"), value=3, min=1, max=20).classes("w-48")
+                zones_input = ui.number(_("Zones per Greenhouse"), value=4, min=1, max=20).classes("w-48")
+                interval_input = ui.number(_("Interval (seconds)"), value=5, min=1, max=300).classes("w-48")
+                ui.select(
+                    label=_("Mode"),
+                    options={"simulator": _("Internal Simulator"), "mqtt": _("Wokwi / MQTT")},
+                    value=state["mode"],
+                    on_change=lambda e: _on_mode_change(e.value),
+                ).classes("w-64")
+            mode_notice = ui.label("").classes("text-sm italic opacity-60 mt-3")
 
-    # --- Scenario selection ---
-    with ui.card().classes("w-full mt-4"):
-        ui.label(_("Select Scenario")).classes("text-lg font-bold")
-
-        with ui.row().classes("w-full gap-3 mt-3 flex-wrap"):
-            for key, scenario in SCENARIOS.items():
-                btn = ui.button(
-                    _scenario_label(key),
-                    icon=scenario["icon"],
-                    on_click=lambda k=key: select_scenario(k),
-                )
-                btn.props(f'color="{scenario["color"]}" outline')
-
-    # --- Configuration ---
-    with ui.card().classes("w-full mt-4"):
-        ui.label(_("Configuration")).classes("text-lg font-bold")
-
-        with ui.row().classes("w-full gap-4 mt-3"):
-            groups_input = ui.number(
-                _("Groups"), value=1, min=1, max=10
-            ).classes("w-32")
-
-            greenhouses_input = ui.number(
-                _("Greenhouses per Group"), value=3, min=1, max=20
-            ).classes("w-48")
-
-            zones_input = ui.number(
-                _("Zones per Greenhouse"), value=4, min=1, max=20
-            ).classes("w-48")
-
-            interval_input = ui.number(
-                _("Interval (seconds)"), value=5, min=1, max=300
-            ).classes("w-48")
-
-    # --- Mode selector ---
-    with ui.card().classes("w-full mt-4"):
-        ui.label(_("Operational Mode")).classes("text-lg font-bold")
-
-        with ui.row().classes("items-center gap-4 mt-3"):
-            ui.select(
-                label=_("Mode"),
-                options={
-                    "simulator": _("Internal Simulator"),
-                    "mqtt": _("Wokwi / MQTT"),
-                },
-                value=state["mode"],
-                on_change=lambda e: _on_mode_change(e.value),
-            ).classes("w-64")
-
-            mode_notice = ui.label("").classes("text-sm italic opacity-60")
-
-    # --- Zone visualization ---
-    with ui.card().classes("w-full mt-4"):
-        ui.label(_("Zone Visualization")).classes("text-lg font-bold")
-        with ui.column().classes("w-full gap-4 mt-2") as viz_container:
-            viz = ZoneVisualization()
-            viz.build(viz_container)
-            no_data_label = ui.label(
-                _("Start the simulator to see zone data.")
-            ).classes("text-sm italic opacity-50")
-            mqtt_placeholder = ui.column().classes("w-full gap-2").style("display: none")
-            with mqtt_placeholder:
-                mqtt_panel = MQTTStatusPanel()
-                mqtt_panel.render()
+        # --- Zone visualization ---
+        with section_card(_("Zone Visualization"), _("Animated zone and actuator feedback for the active telemetry stream."), icon="grid_view"):
+            with ui.column().classes("w-full gap-4 mt-2") as viz_container:
+                viz = ZoneVisualization()
+                viz.build(viz_container)
+                no_data_label = ui.label(_("Start the simulator to see zone data.")).classes("text-sm italic opacity-50")
+                mqtt_placeholder = ui.column().classes("w-full gap-2").style("display: none")
+                with mqtt_placeholder:
+                    mqtt_panel = MQTTStatusPanel()
+                    mqtt_panel.render()
 
     # --- Result display ---
     result_label = ui.label("").classes("text-sm mt-4")
@@ -284,6 +254,11 @@ async def simulator() -> None:
         scenario = SCENARIOS[scenario_key]
         state["scenario"] = scenario_key
 
+        for key, card in scenario_cards.items():
+            if key == scenario_key:
+                card.classes("greenhouse-scenario-active")
+            else:
+                card.classes(remove="greenhouse-scenario-active")
         active_scenario_label.set_text(_scenario_label(scenario_key))
         active_scenario_label.style(f"color: {scenario['color']}")
         scenario_desc.set_text(_scenario_description(scenario_key))

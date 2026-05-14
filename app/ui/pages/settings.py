@@ -9,6 +9,7 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
+from app.ui.components.design import page_container, page_hero, section_card
 from app.ui.layouts.main_layout import main_layout
 
 logger = logging.getLogger(__name__)
@@ -19,93 +20,91 @@ async def settings_page() -> None:
     """Render the system settings page with model catalog management."""
     main_layout()
 
-    ui.label(_("Model Settings")).classes("text-2xl font-bold mt-6")
-    ui.label(
-        _("Configure the AI chat model and manage the OpenRouter model catalog.")
-    ).classes("text-sm opacity-70 mt-2")
+    with page_container():
+        page_hero(
+            _("Model Settings"),
+            _("Configure the AI chat model and manage the OpenRouter model catalog."),
+            icon="settings",
+            meta=_("System"),
+        )
 
-    # --- Current Settings Section ---
-    ui.label(_("Current Settings")).classes("text-lg font-semibold mt-6 mb-2")
+        current_card = section_card(_("Current Settings"), _("Active chat and embedding model state."), icon="tune")
+    with current_card:
+        settings_container = ui.column().classes("greenhouse-card w-full gap-3 p-4 mt-4")
+        settings_loading = ui.column().classes("w-full items-center gap-2")
+        with settings_loading:
+            ui.spinner("dots")
+            ui.label(_("Loading settings...")).classes("text-sm opacity-60")
 
-    settings_container = ui.column().classes("w-full gap-3 p-4 bg-gray-50 rounded-lg")
-    settings_loading = ui.column().classes("w-full items-center gap-2")
-    with settings_loading:
-        ui.spinner("dots")
-        ui.label(_("Loading settings...")).classes("text-sm opacity-60")
-
-    # --- Embedding Model Info ---
-    with ui.column().classes("w-full gap-2 mt-4"):
-        ui.label(_("Embedding Model")).classes("text-sm font-semibold")
-        ui.label(
-            _(
-                "The embedding model is fixed by configuration. "
-                "Changing it requires reindexing all RAG documents."
-            )
-        ).classes("text-xs text-amber-600 opacity-80")
-        embedding_info = ui.label(_("Loading...")).classes("text-sm opacity-70")
+        with ui.column().classes("w-full gap-2 mt-4"):
+            ui.label(_("Embedding Model")).classes("text-sm font-semibold")
+            ui.label(
+                _(
+                    "The embedding model is fixed by configuration. "
+                    "Changing it requires reindexing all RAG documents."
+                )
+            ).classes("text-xs text-amber-600 opacity-80")
+            embedding_info = ui.label(_("Loading...")).classes("text-sm opacity-70")
 
     # --- Model Catalog Section ---
-    ui.label(_("OpenRouter Model Catalog")).classes("text-lg font-semibold mt-6 mb-2")
+    with page_container():
+        catalog_card = section_card(_("OpenRouter Model Catalog"), _("Search, refresh, and choose the model used by AI chat."), icon="view_list")
+    with catalog_card:
+        with ui.row().classes("w-full gap-3 items-center flex-wrap mt-4"):
+            search_input = ui.input(
+                placeholder=_("Search models..."),
+                on_change=lambda: refresh_catalog_display(),
+            ).classes("flex-1 min-w-[200px]").props("debounce=300")
 
-    # Catalog controls
-    with ui.row().classes("w-full gap-3 items-center flex-wrap"):
-        search_input = ui.input(
-            placeholder=_("Search models..."),
-            on_change=lambda: refresh_catalog_display(),
-        ).classes("flex-1 min-w-[200px]").props("debounce=300")
+            provider_filter = ui.select(
+                label=_("Provider"),
+                options={_("All"): None},
+                on_change=lambda: refresh_catalog_display(),
+            ).classes("w-40")
 
-        provider_filter = ui.select(
-            label=_("Provider"),
-            options={_("All"): None},
-            on_change=lambda: refresh_catalog_display(),
-        ).classes("w-40")
+            capability_filter = ui.select(
+                label=_("Capability"),
+                options={_("All"): None},
+                on_change=lambda: refresh_catalog_display(),
+            ).classes("w-40")
 
-        capability_filter = ui.select(
-            label=_("Capability"),
-            options={_("All"): None},
-            on_change=lambda: refresh_catalog_display(),
-        ).classes("w-40")
+            refresh_button = ui.button(
+                _("Refresh Catalog"),
+                icon="refresh",
+                on_click=lambda: refresh_catalog_from_api(),
+            ).props("color=primary")
 
-        refresh_button = ui.button(
-            _("Refresh Catalog"),
-            icon="refresh",
-            on_click=lambda: refresh_catalog_from_api(),
-        ).props("color=primary")
+        status_container = ui.column().classes("w-full mt-2")
 
-    # Status message container
-    status_container = ui.column().classes("w-full mt-2")
+        catalog_table = ui.aggrid(
+            {
+                "columnDefs": [
+                    {"headerName": _("Model"), "field": "name", "flex": 2},
+                    {"headerName": _("Provider"), "field": "provider", "flex": 1},
+                    {"headerName": _("Prompt $/M"), "field": "prompt_price", "flex": 1},
+                    {"headerName": _("Completion $/M"), "field": "completion_price", "flex": 1},
+                    {"headerName": _("Context"), "field": "context_length", "flex": 1},
+                ],
+                "rowData": [],
+                "defaultColDef": {"sortable": True, "filter": True, "resizable": True},
+            },
+            html_columns=[0],
+        ).classes("w-full mt-4").style("height: 400px;")
 
-    # Catalog table
-    catalog_table = ui.aggrid(
-        {
-            "columnDefs": [
-                {"headerName": _("Model"), "field": "name", "flex": 2},
-                {"headerName": _("Provider"), "field": "provider", "flex": 1},
-                {"headerName": _("Prompt $/M"), "field": "prompt_price", "flex": 1},
-                {"headerName": _("Completion $/M"), "field": "completion_price", "flex": 1},
-                {"headerName": _("Context"), "field": "context_length", "flex": 1},
-            ],
-            "rowData": [],
-            "defaultColDef": {"sortable": True, "filter": True, "resizable": True},
-        },
-        html_columns=[0],
-    ).classes("w-full mt-4").style("height: 400px;")
-
-    # Select button for selected row
-    with ui.row().classes("w-full gap-2 mt-2 items-end flex-wrap"):
-        model_select = ui.select(
-            label=_("Model"),
-            options=[],
-            on_change=lambda event: select_model(event.value),
-        ).classes("min-w-[320px] flex-1")
-        ui.label(_("Selected:")).classes("text-sm opacity-60")
-        selected_model_label = ui.label(_("None")).classes("text-sm font-medium")
-        save_model_button = ui.button(
-            _("Use Selected Model"),
-            icon="check",
-            on_click=lambda: select_current_model(),
-        ).props("color=positive")
-        save_model_button.disable()
+        with ui.row().classes("w-full gap-2 mt-2 items-end flex-wrap"):
+            model_select = ui.select(
+                label=_("Model"),
+                options=[],
+                on_change=lambda event: select_model(event.value),
+            ).classes("min-w-[320px] flex-1")
+            ui.label(_("Selected:")).classes("text-sm opacity-60")
+            selected_model_label = ui.label(_("None")).classes("text-sm font-medium")
+            save_model_button = ui.button(
+                _("Use Selected Model"),
+                icon="check",
+                on_click=lambda: select_current_model(),
+            ).props("color=positive")
+            save_model_button.disable()
 
     # --- State ---
     catalog_state: dict = {

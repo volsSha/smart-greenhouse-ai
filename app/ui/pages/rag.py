@@ -5,6 +5,7 @@ from nicegui import events, ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
+from app.ui.components.design import empty_state, page_container, page_hero, section_card
 from app.ui.layouts.main_layout import main_layout
 
 
@@ -13,10 +14,13 @@ async def rag_page() -> None:
     """Render the RAG knowledge base management page."""
     main_layout()
 
-    ui.label(_("Knowledge Base")).classes("text-2xl font-bold mt-6")
-    ui.label(
-        _("Manage agronomic knowledge documents for AI-powered search.")
-    ).classes("text-sm opacity-70 mt-2")
+    with page_container():
+        page_hero(
+            _("Knowledge Base"),
+            _("Manage agronomic documents that ground AI answers and semantic search."),
+            icon="travel_explore",
+            meta=_("RAG"),
+        )
 
     def notify(notification, message: str, kind: str) -> None:
         notification.set_message(message)
@@ -24,9 +28,9 @@ async def rag_page() -> None:
         notification.open()
 
     # --- Document list ---
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Documents")).classes("text-lg font-bold")
-
+    with page_container():
+        document_card = section_card(_("Documents"), _("Indexed source material available to the assistant."), icon="description")
+    with document_card:
         document_list = ui.column().classes("w-full gap-2 mt-4")
 
         async def load_documents() -> None:
@@ -42,13 +46,10 @@ async def rag_page() -> None:
                         document_list.clear()
                         with document_list:
                             if not documents:
-                                ui.label(_("No documents yet.")).classes(
-                                    "text-sm opacity-60"
-                                )
+                                empty_state(_("No documents yet"), _("Add agronomic notes, manuals, or documentation to ground AI answers."), icon="note_add")
                             for doc in documents:
                                 with ui.row().classes(
-                                    "w-full items-center justify-between p-2 "
-                                    "border border-gray-200 rounded"
+                                    "greenhouse-card w-full items-center justify-between p-3 rounded"
                                 ):
                                     with ui.column():
                                         ui.label(doc["title"]).classes(
@@ -68,19 +69,17 @@ async def rag_page() -> None:
             except Exception:
                 document_list.clear()
                 with document_list:
-                    ui.label(_("Failed to load documents.")).classes(
-                        "text-sm text-red-500"
-                    )
+                    empty_state(_("Failed to load documents"), _("Check API and database availability, then refresh."), icon="sync_problem")
 
         await load_documents()
 
         ui.button(_("Refresh"), on_click=load_documents).props("flat color=primary")
 
     # --- Add document form ---
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Add Document")).classes("text-lg font-bold")
-
-        title_input = ui.input(label=_("Title")).classes("w-full")
+    with page_container():
+        add_card = section_card(_("Add Document"), _("Paste, type, or upload knowledge content for indexing."), icon="post_add")
+    with add_card:
+        title_input = ui.input(label=_("Title")).classes("w-full mt-4")
         source_type_input = ui.select(
             label=_("Source Type"),
             options=["manual", "url", "file", "documentation"],
@@ -136,11 +135,13 @@ async def rag_page() -> None:
         ui.button(_("Add Document"), on_click=add_document).props("color=primary")
 
     # --- Reindex ---
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Reindex")).classes("text-lg font-bold")
-        ui.label(
-            _("Re-chunk and re-embed all documents. Use after changing the embedding model.")
-        ).classes("text-sm opacity-70 mt-1")
+    with page_container():
+        reindex_card = section_card(
+            _("Reindex"),
+            _("Re-chunk and re-embed all documents. Use after changing the embedding model."),
+            icon="sync",
+        )
+    with reindex_card:
 
         reindex_notification = ui.notification(position="top", timeout=5)
 
@@ -171,9 +172,9 @@ async def rag_page() -> None:
         )
 
     # --- Search ---
-    with ui.card().classes("w-full mt-6"):
-        ui.label(_("Search Knowledge Base")).classes("text-lg font-bold")
-
+    with page_container():
+        search_card = section_card(_("Search Knowledge Base"), _("Probe semantic matches before relying on documents in AI answers."), icon="search")
+    with search_card:
         search_input = ui.input(
             label=_("Search Query"),
             placeholder=_("e.g. tomato wilting, CO2 optimal levels..."),
@@ -204,11 +205,9 @@ async def rag_page() -> None:
                         search_results.clear()
                         with search_results:
                             if not results:
-                                ui.label(_("No results found.")).classes(
-                                    "text-sm opacity-60"
-                                )
+                                empty_state(_("No results found"), _("Try a broader crop, symptom, or environmental query."), icon="search_off")
                             for r in results:
-                                with ui.card().classes("w-full p-3"):
+                                with ui.card().classes("greenhouse-card w-full p-3"):
                                     with ui.row().classes(
                                         "w-full items-center justify-between"
                                     ):

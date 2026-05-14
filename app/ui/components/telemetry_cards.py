@@ -75,7 +75,7 @@ def metric_badge(
 
     color = _STATUS_COLORS.get(status, "#9e9e9e")
 
-    with ui.row().classes("items-center gap-1"):
+    with ui.row().classes("greenhouse-metric-row items-center gap-2"):
         ui.icon("circle", size="0.5rem").style(f"color: {color}")
         ui.label(_("{label}:", label=label)).classes("text-xs opacity-70")
         ui.label(f"{value:.1f} {unit}").classes("text-xs font-semibold")
@@ -96,16 +96,20 @@ def group_overview_card(group_data: dict[str, Any]) -> None:
     greenhouse_count = group_data.get("greenhouse_count", 0)
     active_alerts = group_data.get("active_alerts", 0)
 
-    with ui.card().classes("w-full"):
+    with ui.card().classes("greenhouse-card w-full p-5"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.label(name).classes("text-lg font-bold")
+            with ui.column().classes("gap-0"):
+                ui.label(name).classes("text-xl font-bold")
+                ui.label(group_id).classes("text-xs font-mono opacity-50")
             if active_alerts > 0:
-                ui.badge(str(active_alerts), color="red").props('outline')
+                ui.badge(_("{count} alerts", count=active_alerts), color="red").props('outline')
+            else:
+                ui.badge(_("Healthy"), color="green").props('outline')
 
-        with ui.row().classes("items-center gap-4 mt-2"):
-            ui.icon("group", size="1.2rem").classes("opacity-50")
+        with ui.row().classes("items-center gap-4 mt-4"):
+            ui.icon("group", size="1.4rem").classes("opacity-55")
             ui.label(_("{count} greenhouses", count=greenhouse_count)).classes(
-                "text-sm opacity-70"
+                "text-sm opacity-75"
             )
 
 
@@ -124,12 +128,14 @@ def greenhouse_card(greenhouse_data: dict[str, Any]) -> None:
     zone_count = greenhouse_data.get("zone_count", 0)
     metrics = greenhouse_data.get("metrics", {})
 
-    with ui.card().classes("w-full"):
-        ui.label(name).classes("text-md font-bold")
+    with ui.card().classes("greenhouse-card greenhouse-interactive w-full p-4"):
+        with ui.row().classes("w-full items-center justify-between"):
+            ui.label(name).classes("text-md font-bold")
+            ui.icon("chevron_right", size="1.1rem").classes("opacity-35")
 
         if zone_count:
             ui.label(_("{count} zones", count=zone_count)).classes(
-                "text-xs opacity-50 mt-1"
+                "text-xs opacity-55 mt-1"
             )
 
         if metrics:
@@ -164,7 +170,7 @@ def zone_detail_card(zone_data: dict[str, Any]) -> None:
     plant_batch = zone_data.get("plant_batch")
     growth_stage = zone_data.get("growth_stage")
 
-    with ui.card().classes("w-full"):
+    with ui.card().classes("greenhouse-card w-full p-4"):
         ui.label(name).classes("text-md font-bold")
 
         if plant_batch or growth_stage:

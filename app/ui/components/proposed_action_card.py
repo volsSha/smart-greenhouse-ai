@@ -75,7 +75,7 @@ def proposed_action_card(
 
     config = _ACTION_STATUS_CONFIG.get(status, _ACTION_STATUS_CONFIG["pending"])
 
-    with ui.card().classes("w-full").style(f"border-left: 4px solid {config['color']}"):
+    with ui.card().classes("greenhouse-card w-full p-4").style(f"border-left: 4px solid {config['color']}"):
         # Header row: actuator, action, status badge
         with ui.row().classes("items-center w-full gap-2"):
             ui.icon(config["icon"], size="1.2rem").style(f"color: {config['color']}")

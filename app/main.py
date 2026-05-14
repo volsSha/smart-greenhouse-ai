@@ -19,6 +19,7 @@ import time
 import traceback
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
@@ -200,6 +201,16 @@ async def root() -> RedirectResponse:
 from app.ui.pages import dashboard, settings as settings_page, control, logs, ai_chat, rag, simulator, plants  # noqa: E402, F401
 from nicegui import ui  # noqa: E402
 
+
+def _load_theme_css() -> None:
+    css_path = Path(__file__).parent / "ui" / "static" / "theme.css"
+    try:
+        ui.add_css(css_path.read_text(), shared=True)
+    except FileNotFoundError:
+        logger.warning("theme.css not found at %s", css_path)
+
+
+_load_theme_css()
 app_settings = get_settings()
 
 ui.run_with(
