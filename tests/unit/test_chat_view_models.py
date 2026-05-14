@@ -10,7 +10,14 @@ import json
 from datetime import datetime, timezone
 
 
-from app.ui.pages.ai_chat import _parse_assistant_content, _build_scope_dict
+from app.ui.pages.ai_chat import (
+    ChatRenderState,
+    ChatScopeState,
+    ScopeOption,
+    _build_scope_dict,
+    _option_maps,
+    _parse_assistant_content,
+)
 from app.ui.components.tool_call_trace import _truncate_value, _format_duration
 from app.ui.components.chat_message import _format_timestamp
 
@@ -135,6 +142,158 @@ class TestBuildScopeDict:
             "greenhouse_id": None,
             "zone_id": None,
         }
+
+
+# ---------------------------------------------------------------------------
+# ChatScopeState
+# ---------------------------------------------------------------------------
+
+
+class TestChatScopeState:
+    """Tests for canonical scope state transformations."""
+
+    def test_selected_scope_builds_api_dict_without_message_tokens(self) -> None:
+        state = ChatScopeState()
+        state.select_group("11111111-1111-1111-1111-111111111111", "North · 11111111")
+        state.select_greenhouse("22222222-2222-2222-2222-222222222222", "GH A · 22222222")
+        state.select_zone("33333333-3333-3333-3333-333333333333", "Zone A · 33333333")
+
+        assert state.to_dict() == {
+            "group_id": "11111111-1111-1111-1111-111111111111",
+            "greenhouse_id": "22222222-2222-2222-2222-222222222222",
+            "zone_id": "33333333-3333-3333-3333-333333333333",
+        }
+
+    def test_no_scope_is_fleet_wide(self) -> None:
+        state = ChatScopeState()
+
+        assert state.to_dict() == {
+            "group_id": None,
+            "greenhouse_id": None,
+            "zone_id": None,
+        }
+        assert state.can_send()
+
+    def test_changing_group_clears_dependent_scope(self) -> None:
+        state = ChatScopeState(
+            group_id="group-a",
+            greenhouse_id="greenhouse-a",
+            zone_id="zone-a",
+            labels={"group": "Group A", "greenhouse": "GH A", "zone": "Zone A"},
+        )
+
+        state.select_group("group-b", "Group B")
+
+        assert state.group_id == "group-b"
+        assert state.greenhouse_id is None
+        assert state.zone_id is None
+        assert state.labels == {"group": "Group B"}
+
+    def test_removing_greenhouse_clears_zone(self) -> None:
+        state = ChatScopeState(group_id="group-a", greenhouse_id="gh-a", zone_id="zone-a")
+
+        state.select_greenhouse(None)
+
+        assert state.group_id == "group-a"
+        assert state.greenhouse_id is None
+        assert state.zone_id is None
+
+    def test_rehydrate_marks_unresolved_ids(self) -> None:
+        state = ChatScopeState()
+
+        state.rehydrate(
+            "group-a",
+            "greenhouse-a",
+            "zone-a",
+            {"group": {"group-a": "Group A"}, "greenhouse": {}, "zone": {}},
+        )
+
+        assert state.labels["group"] == "Group A"
+        assert "greenhouse" in state.unresolved
+        assert "zone" in state.unresolved
+        assert not state.can_send()
+
+    def test_rehydrate_resolves_dependent_scope_labels_after_options_load(self) -> None:
+        state = ChatScopeState()
+
+        state.rehydrate(
+            "group-a",
+            "greenhouse-a",
+            "zone-a",
+            {
+                "group": {"group-a": "Group A"},
+                "greenhouse": {"greenhouse-a": "GH A"},
+                "zone": {"zone-a": "Zone A"},
+            },
+        )
+
+        assert state.labels == {"group": "Group A", "greenhouse": "GH A", "zone": "Zone A"}
+        assert state.unresolved == set()
+        assert state.can_send()
+
+    def test_clear_resets_all_scope_fields(self) -> None:
+        state = ChatScopeState(
+            group_id="group-a",
+            greenhouse_id="gh-a",
+            zone_id="zone-a",
+            labels={"group": "Group A"},
+            unresolved={"zone"},
+        )
+
+        state.clear()
+
+        assert state.to_dict() == {"group_id": None, "greenhouse_id": None, "zone_id": None}
+        assert state.labels == {}
+        assert state.unresolved == set()
+
+
+class TestScopeOptionMaps:
+    """Tests for duplicate-safe label and canonical ID mappings."""
+
+    def test_duplicate_names_keep_distinct_labels_and_ids(self) -> None:
+        first = "11111111-1111-1111-1111-111111111111"
+        second = "22222222-2222-2222-2222-222222222222"
+
+        label_to_id, id_to_label = _option_maps([
+            ScopeOption(first, "North"),
+            ScopeOption(second, "North"),
+        ])
+
+        assert len(label_to_id) == 2
+        assert label_to_id[f"North · {first[:8]}"] == first
+        assert label_to_id[f"North · {second[:8]}"] == second
+        assert id_to_label[first] != id_to_label[second]
+
+
+class TestChatRenderState:
+    """Tests for async render guards."""
+
+    def test_stale_conversation_load_is_not_current_after_switch(self) -> None:
+        state = ChatRenderState()
+        token_a = state.select_conversation("conversation-a")
+        token_b = state.select_conversation("conversation-b")
+
+        assert not state.load_is_current(token_a, "conversation-a")
+        assert state.load_is_current(token_b, "conversation-b")
+
+    def test_send_is_stale_after_conversation_switch(self) -> None:
+        state = ChatRenderState(selected_conversation_id="conversation-a")
+        token, target = state.start_send()
+
+        state.select_conversation("conversation-b")
+
+        assert not state.send_is_current(token, target)
+
+    def test_start_new_invalidates_load_and_send_tokens(self) -> None:
+        state = ChatRenderState(selected_conversation_id="conversation-a")
+        load_token = state.load_token
+        send_token = state.send_token
+
+        state.start_new()
+
+        assert state.selected_conversation_id is None
+        assert state.load_token > load_token
+        assert state.send_token > send_token
 
 
 # ---------------------------------------------------------------------------
