@@ -18,7 +18,7 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
-from app.ui.components.design import empty_state, page_container, page_hero, section_card
+from app.ui.components.design import page_container, page_hero, section_card
 from app.ui.components.mqtt_status_panel import MQTTStatusPanel
 from app.ui.components.zone_visualization import ZoneVisualization
 from app.ui.layouts.main_layout import main_layout

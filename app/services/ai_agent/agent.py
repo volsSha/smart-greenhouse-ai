@@ -53,6 +53,7 @@ class GreenhouseAIAgent:
         self.conversation_repository = AIConversationRepository(session)
         self.tool_log_repository = AIToolLogRepository(session)
         self.tool_logger = ToolCallLogger(self.tool_log_repository)
+        self.last_conversation_id: uuid.UUID | None = None
         self.agent = agent or self._build_agent(self.settings)
         if agent is None:
             self.register_tools()
@@ -157,6 +158,7 @@ class GreenhouseAIAgent:
                 scope,
                 title=message[:80],
             )
+        self.last_conversation_id = conversation.id
 
         await self.conversation_repository.add_message(
             conversation.id,
