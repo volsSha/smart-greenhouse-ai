@@ -20,6 +20,7 @@ async def test_record_refresh_success_bulk_deletes_catalog_before_inserting() ->
         last_refresh_status=None,
         last_refresh_error="previous error",
         selected_model_available=False,
+        control_mode="mqtt",
     )
     result = MagicMock()
     result.scalar_one_or_none.return_value = settings
@@ -46,4 +47,20 @@ async def test_record_refresh_success_bulk_deletes_catalog_before_inserting() ->
     assert session.execute.await_count == 2
     assert str(session.execute.await_args_list[1].args[0]).startswith("DELETE FROM openrouter_model_catalog")
     session.add.assert_called_once()
+    session.flush.assert_awaited_once()
+
+
+@pytest.mark.anyio
+async def test_set_control_mode_updates_settings() -> None:
+    session = MagicMock(spec=AsyncSession)
+    settings = SimpleNamespace(control_mode="mqtt")
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = settings
+    session.execute = AsyncMock(return_value=result)
+    session.flush = AsyncMock()
+
+    repo = ModelSettingsRepository(session)
+    updated = await repo.set_control_mode("simulator")
+
+    assert updated.control_mode == "simulator"
     session.flush.assert_awaited_once()

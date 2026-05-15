@@ -40,6 +40,9 @@ class ModelSettings(Base, IdTimestampMixin):
         default=True,
     )
 
+    # Project-wide actuator command execution mode: mqtt | simulator
+    control_mode: Mapped[str] = mapped_column(String(20), nullable=False, default="mqtt")
+
 
 class OpenRouterModelCatalog(Base, IdTimestampMixin):
     """Cached OpenRouter model catalog for admin selection.

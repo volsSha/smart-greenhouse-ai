@@ -32,6 +32,7 @@ from app.services.influx_client import InfluxClient
 from app.repositories.debug_log_repository import create_debug_log_best_effort
 from app.repositories.telemetry_repository import TelemetryRepository
 from app.services.mqtt_runtime import MQTTRuntime
+from app.api.simulator import stop_simulator_task
 from app.services.telemetry_ingestion import TelemetryIngestion
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # --- Shutdown ---
+    await stop_simulator_task(fastapi_app.state)
     await mqtt_runtime.stop()
     await db_engine.dispose()
     influx_wrapper.close()

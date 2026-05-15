@@ -12,6 +12,7 @@ from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.schemas.settings import (
     CatalogModelResponse,
     CatalogRefreshResponse,
+    ControlModeUpdateRequest,
     SettingsResponse,
     SettingsUpdateRequest,
 )
@@ -68,6 +69,22 @@ async def update_settings(
     settings = await repo.set_selected_chat_model(body.selected_chat_model)
     await session.commit()
 
+    return SettingsResponse.model_validate(settings)
+
+
+@router.put("/control-mode", response_model=SettingsResponse)
+async def update_control_mode(
+    body: ControlModeUpdateRequest,
+    session: AsyncSession = Depends(get_db_session),
+) -> SettingsResponse:
+    """Update the project-wide actuator execution mode."""
+    repo = ModelSettingsRepository(session)
+    await repo.bootstrap_settings(
+        embedding_model=get_app_settings().openrouter.embedding_model,
+        embedding_dimension=get_app_settings().openrouter.embedding_dimension,
+    )
+    settings = await repo.set_control_mode(body.control_mode)
+    await session.commit()
     return SettingsResponse.model_validate(settings)
 
 

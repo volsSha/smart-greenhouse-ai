@@ -249,7 +249,7 @@ async def simulator() -> None:
             mqtt_placeholder.style("display: block")
             mode_notice.set_text(_("Run ngrok TCP for local Mosquitto, then use firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
 
-    def select_scenario(scenario_key: str) -> None:
+    def select_scenario(scenario_key: str, *, notify: bool = True) -> None:
         """Update the active scenario display."""
         scenario = SCENARIOS[scenario_key]
         state["scenario"] = scenario_key
@@ -263,10 +263,11 @@ async def simulator() -> None:
         active_scenario_label.style(f"color: {scenario['color']}")
         scenario_desc.set_text(_scenario_description(scenario_key))
 
-        ui.notify(
-            _("Scenario changed to {scenario}", scenario=_scenario_label(scenario_key)),
-            type="info",
-        )
+        if notify:
+            ui.notify(
+                _("Scenario changed to {scenario}", scenario=_scenario_label(scenario_key)),
+                type="info",
+            )
 
     async def start_simulator() -> None:
         """Attempt to start the simulator via the API."""
@@ -350,6 +351,28 @@ async def simulator() -> None:
         else:
             last_publish_label.set_text("--")
 
+    async def _hydrate_simulator_status() -> None:
+        try:
+            async with api_client(timeout=5.0) as client:
+                resp = await client.get("/api/simulator/status")
+                resp.raise_for_status()
+                status = resp.json()
+        except httpx.HTTPError:
+            logger.debug("Simulator status hydration failed")
+            return
+
+        state["running"] = bool(status.get("running"))
+        state["messages_published"] = status.get("messages_published", 0)
+        state["last_publish"] = status.get("last_publish")
+        scenario = status.get("scenario", state["scenario"])
+        if scenario in SCENARIOS:
+            select_scenario(scenario, notify=False)
+
+        _update_status()
+        if state["running"] and state["mode"] == "simulator":
+            zone_timer.activate()
+            await _refresh_zones()
+
     # --- Control buttons ---
     with ui.row().classes("w-full gap-4 mt-6"):
         start_btn = ui.button(
@@ -365,3 +388,5 @@ async def simulator() -> None:
             color="negative",
             on_click=stop_simulator,
         ).props("disable")
+
+    await _hydrate_simulator_status()

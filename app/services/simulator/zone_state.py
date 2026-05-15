@@ -15,6 +15,77 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+GROUP_LABELS = (
+    "vegetable-production",
+    "herb-nursery",
+    "fruit-crops",
+    "research-trials",
+    "seedling-starts",
+    "flower-production",
+    "organic-farm",
+    "hydroponic-range",
+    "climate-lab",
+    "market-garden",
+)
+
+GREENHOUSE_LABELS = (
+    "tomatoes",
+    "cucumbers",
+    "bell-peppers",
+    "lettuce",
+    "strawberries",
+    "basil",
+    "spinach",
+    "microgreens",
+    "eggplants",
+    "cherry-tomatoes",
+    "herbs",
+    "peppers",
+    "kale",
+    "mint",
+    "arugula",
+    "seedlings",
+    "flowers",
+    "melons",
+    "beans",
+    "experimental-crops",
+)
+
+ZONE_LABELS = (
+    "seedlings",
+    "vegetative-growth",
+    "flowering",
+    "fruiting",
+    "propagation",
+    "irrigation-test",
+    "high-light-bed",
+    "shade-bed",
+    "nutrient-trial",
+    "harvest-ready",
+    "cool-zone",
+    "warm-zone",
+    "humidity-control",
+    "co2-enrichment",
+    "soil-moisture-test",
+    "young-plants",
+    "mature-plants",
+    "quarantine",
+    "pollination",
+    "storage-bench",
+)
+
+
+def simulator_group_id(index: int) -> str:
+    return f"group-{index:03d}-{GROUP_LABELS[(index - 1) % len(GROUP_LABELS)]}"
+
+
+def simulator_greenhouse_id(index: int) -> str:
+    return f"gh-{index:03d}-{GREENHOUSE_LABELS[(index - 1) % len(GREENHOUSE_LABELS)]}"
+
+
+def simulator_zone_id(index: int) -> str:
+    return f"zone-{index:02d}-{ZONE_LABELS[(index - 1) % len(ZONE_LABELS)]}"
+
 
 # ---------------------------------------------------------------------------
 # Data types
@@ -125,11 +196,11 @@ class SimulatedZoneState:
         scenario_offsets = self._scenario_offsets(scenario)
 
         for g in range(1, num_groups + 1):
-            group_id = f"group-{g:03d}"
+            group_id = simulator_group_id(g)
             for gh in range(1, greenhouses_per_group + 1):
-                greenhouse_id = f"gh-{gh:03d}"
+                greenhouse_id = simulator_greenhouse_id(gh)
                 for z in range(1, zones_per_greenhouse + 1):
-                    zone_id = f"zone-{z:02d}"
+                    zone_id = simulator_zone_id(z)
                     key = (group_id, greenhouse_id, zone_id)
                     base_metrics = self._base_metrics()
                     for metric in base_metrics:

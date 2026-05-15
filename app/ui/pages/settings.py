@@ -46,6 +46,27 @@ async def settings_page() -> None:
             ).classes("text-xs text-amber-600 opacity-80")
             embedding_info = ui.label(_("Loading...")).classes("text-sm opacity-70")
 
+        control_card = section_card(_("Control Mode"), _("Choose where approved greenhouse commands execute."), icon="toggle_on")
+    with control_card:
+        with ui.column().classes("greenhouse-card w-full gap-3 p-4 mt-4"):
+            control_mode_labels = {
+                _("MQTT remote devices"): "mqtt",
+                _("Internal simulator"): "simulator",
+            }
+            control_mode_value_to_label = {value: label for label, value in control_mode_labels.items()}
+            ui.label(_("MQTT mode sends approved commands to subscribed remote devices. Simulator mode changes the internal simulator state.")).classes("text-xs opacity-70")
+            with ui.row().classes("w-full gap-3 items-end flex-wrap"):
+                control_mode_select = ui.select(
+                    label=_("Control Mode"),
+                    options=list(control_mode_labels),
+                ).classes("min-w-[260px]")
+                save_control_mode_button = ui.button(
+                    _("Save Control Mode"),
+                    icon="save",
+                    on_click=lambda: save_control_mode(),
+                ).props("color=primary")
+            control_mode_status = ui.label(_("Loading...")).classes("text-sm opacity-70")
+
     # --- Model Catalog Section ---
     with page_container():
         catalog_card = section_card(_("OpenRouter Model Catalog"), _("Search, refresh, and choose the model used by AI chat."), icon="view_list")
@@ -114,6 +135,7 @@ async def settings_page() -> None:
         "pending_model_id": None,
         "embedding_model": None,
         "embedding_dimension": None,
+        "control_mode": "mqtt",
     }
 
     # --- Functions ---
@@ -130,6 +152,7 @@ async def settings_page() -> None:
             catalog_state["selected_model_id"] = settings_data.get("selected_chat_model")
             catalog_state["embedding_model"] = settings_data.get("embedding_model")
             catalog_state["embedding_dimension"] = settings_data.get("embedding_dimension")
+            catalog_state["control_mode"] = settings_data.get("control_mode") or "mqtt"
 
             # Update UI
             settings_container.clear()
@@ -164,6 +187,9 @@ async def settings_page() -> None:
             )
 
             selected_model_label.text = settings_data.get("selected_chat_model") or _("None")
+            control_mode = catalog_state["control_mode"]
+            control_mode_select.set_value(control_mode_value_to_label.get(control_mode))
+            control_mode_status.text = _("Saved: {mode}", mode=control_mode.upper())
 
         except httpx.HTTPError as exc:
             logger.error("Failed to load settings: %s", exc)
@@ -312,6 +338,30 @@ async def settings_page() -> None:
         except httpx.HTTPError as exc:
             ui.notify(_("Failed to save model: {error}", error=response_error(exc)), type="negative")
             save_model_button.enable()
+
+    async def save_control_mode() -> None:
+        label = str(control_mode_select.value or "")
+        control_mode = control_mode_labels.get(label)
+        if control_mode is None:
+            ui.notify(_("Select a control mode first"), type="warning")
+            return
+
+        save_control_mode_button.disable()
+        try:
+            async with api_client(timeout=10.0) as client:
+                resp = await client.put("/api/settings/control-mode", json={"control_mode": control_mode})
+                resp.raise_for_status()
+                settings_data = resp.json()
+
+            catalog_state["control_mode"] = settings_data.get("control_mode") or control_mode
+            control_mode_status.text = _("Saved: {mode}", mode=catalog_state["control_mode"].upper())
+            ui.notify(_("Control mode saved"), type="positive")
+        except httpx.HTTPError as exc:
+            previous = catalog_state.get("control_mode") or "mqtt"
+            control_mode_select.set_value(control_mode_value_to_label.get(previous))
+            ui.notify(_("Failed to save control mode: {error}", error=response_error(exc)), type="negative")
+        finally:
+            save_control_mode_button.enable()
 
     def format_timestamp(ts: str | None) -> str:
         """Format a timestamp for display."""

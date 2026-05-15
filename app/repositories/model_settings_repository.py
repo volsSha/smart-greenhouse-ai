@@ -42,6 +42,7 @@ class ModelSettingsRepository:
                 embedding_dimension=embedding_dimension,
                 selected_model_available=True,
                 last_refresh_status="success",
+                control_mode="mqtt",
             )
             self.session.add(settings)
             await self.session.flush()
@@ -69,6 +70,15 @@ class ModelSettingsRepository:
         if settings is None:
             raise RuntimeError("Settings not bootstrapped")
         settings.selected_model_available = available
+        await self.session.flush()
+        return settings
+
+    async def set_control_mode(self, control_mode: str) -> ModelSettings:
+        """Update project-wide actuator command execution mode."""
+        settings = await self.get_settings()
+        if settings is None:
+            raise RuntimeError("Settings not bootstrapped")
+        settings.control_mode = control_mode
         await self.session.flush()
         return settings
 

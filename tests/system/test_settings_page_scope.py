@@ -16,3 +16,13 @@ def test_settings_page_does_not_expose_secret_inputs_or_safety_editing() -> None
     assert "api_key" not in lowered
     assert "safety" not in lowered
     assert "placeholder" in lowered
+
+
+def test_settings_page_includes_project_control_mode_without_secrets() -> None:
+    source = inspect.getsource(settings.settings_page)
+
+    assert "Control Mode" in source
+    assert "MQTT remote devices" in source
+    assert "Internal simulator" in source
+    assert "/api/settings/control-mode" in source
+    assert "control_mode_labels" in source

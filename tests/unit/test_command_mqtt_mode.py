@@ -95,6 +95,32 @@ class TestCommandServiceSimulatorMode:
         assert update_status.await_args_list[1].kwargs["validation_errors"] is None
 
     @pytest.mark.asyncio
+    async def test_execute_simulator_mode_reports_simulator_not_running(self) -> None:
+        session = MagicMock()
+        command = _command(mode="simulator")
+        executing_command = _command(mode="simulator")
+        executing_command.status = CommandStatus.EXECUTING
+        failed_command = _command(mode="simulator")
+        failed_command.status = CommandStatus.FAILED
+        service = CommandService(session, publisher=MagicMock())
+
+        with patch.object(
+            service.repo,
+            "get_by_id",
+            new_callable=AsyncMock,
+            return_value=command,
+        ), patch.object(
+            service.repo,
+            "update_status",
+            new_callable=AsyncMock,
+            side_effect=[executing_command, failed_command],
+        ) as update_status:
+            result = await service.execute(command.id)
+
+        assert result.status == CommandStatus.FAILED
+        assert "Simulator execution failed" in update_status.await_args_list[1].kwargs["validation_errors"]["errors"][0]
+
+    @pytest.mark.asyncio
     async def test_execute_simulator_mode_without_router_marks_failed(self) -> None:
         session = MagicMock()
         command = _command(mode="simulator")

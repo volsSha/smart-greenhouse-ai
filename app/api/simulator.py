@@ -10,7 +10,12 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.schemas.telemetry import TelemetryReading
-from app.services.simulator.zone_state import SimulatedZoneState
+from app.services.simulator.zone_state import (
+    SimulatedZoneState,
+    simulator_greenhouse_id,
+    simulator_group_id,
+    simulator_zone_id,
+)
 
 router = APIRouter(prefix="/api/simulator", tags=["simulator"])
 
@@ -68,7 +73,7 @@ def _metric_value(metric: str, scenario: str, group: int, greenhouse: int, zone:
     return base_values[metric] + scenario_offsets.get(scenario, {}).get(metric, 0.0) + group + greenhouse + zone
 
 
-async def _run_simulator(config: SimulatorStartRequest, telemetry_repository: Any) -> None:
+async def _run_simulator(config: SimulatorStartRequest, telemetry_repository: Any, sim_state: SimulatedZoneState) -> None:
     try:
         while _state["running"]:
             now = datetime.now(timezone.utc)
@@ -76,15 +81,21 @@ async def _run_simulator(config: SimulatorStartRequest, telemetry_repository: An
             for group in range(1, config.groups + 1):
                 for greenhouse in range(1, config.greenhouses_per_group + 1):
                     for zone in range(1, config.zones_per_greenhouse + 1):
+                        group_id = simulator_group_id(group)
+                        greenhouse_id = simulator_greenhouse_id(greenhouse)
+                        zone_id = simulator_zone_id(zone)
                         for metric in ("temperature", "air_humidity", "soil_moisture", "co2", "light"):
+                            value = _metric_value(metric, config.scenario, group, greenhouse, zone)
+                            if sim_state.is_initialized:
+                                value = await sim_state.telemetry_value(group_id, greenhouse_id, zone_id, metric)
                             telemetry_repository.write_telemetry(
                                 TelemetryReading(
-                                    group_id=f"group-{group:03d}",
-                                    greenhouse_id=f"gh-{greenhouse:03d}",
-                                    zone_id=f"zone-{zone:02d}",
+                                    group_id=group_id,
+                                    greenhouse_id=greenhouse_id,
+                                    zone_id=zone_id,
                                     sensor_id=f"{metric}-{zone:02d}",
                                     metric=metric,
-                                    value=_metric_value(metric, config.scenario, group, greenhouse, zone),
+                                    value=value,
                                     timestamp=now,
                                 )
                             )
@@ -128,12 +139,11 @@ async def start_simulator(request: Request, body: SimulatorStartRequest) -> Simu
     )
     request.app.state.simulated_zone_state = sim_state
 
-    _state["task"] = asyncio.create_task(_run_simulator(body, telemetry_repository))
+    _state["task"] = asyncio.create_task(_run_simulator(body, telemetry_repository, sim_state))
     return _status()
 
 
-@router.post("/stop", response_model=SimulatorStatus)
-async def stop_simulator(request: Request) -> SimulatorStatus:
+async def stop_simulator_task(app_state: Any | None = None) -> None:
     _state["running"] = False
     task: asyncio.Task | None = _state.get("task")
     if task and not task.done():
@@ -144,9 +154,16 @@ async def stop_simulator(request: Request) -> SimulatorStatus:
             pass
     _state["task"] = None
 
-    sim_state: SimulatedZoneState | None = getattr(request.app.state, "simulated_zone_state", None)
+    if app_state is None:
+        return
+
+    sim_state: SimulatedZoneState | None = getattr(app_state, "simulated_zone_state", None)
     if sim_state is not None:
         sim_state.reset()
-        delattr(request.app.state, "simulated_zone_state")
+        delattr(app_state, "simulated_zone_state")
 
+
+@router.post("/stop", response_model=SimulatorStatus)
+async def stop_simulator(request: Request) -> SimulatorStatus:
+    await stop_simulator_task(request.app.state)
     return _status()

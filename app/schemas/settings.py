@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+
+ControlMode = Literal["mqtt", "simulator"]
 
 
 class SettingsResponse(BaseModel):
@@ -39,6 +43,10 @@ class SettingsResponse(BaseModel):
         ...,
         description="Whether the selected chat model is available in the current catalog",
     )
+    control_mode: ControlMode = Field(
+        "mqtt",
+        description="Project-wide actuator execution mode: mqtt or simulator",
+    )
 
     model_config = {"from_attributes": True}
 
@@ -51,6 +59,15 @@ class SettingsUpdateRequest(BaseModel):
         min_length=1,
         max_length=200,
         description="Model ID to select as the chat model (must exist in catalog)",
+    )
+
+
+class ControlModeUpdateRequest(BaseModel):
+    """Schema for updating project-wide actuator execution mode."""
+
+    control_mode: ControlMode = Field(
+        ...,
+        description="Project-wide actuator execution mode: mqtt or simulator",
     )
 
 

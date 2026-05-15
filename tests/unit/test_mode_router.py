@@ -8,7 +8,14 @@ import pytest
 
 from app.models.command import CommandLog
 from app.services.simulator.mode_router import ModeRouter
-from app.services.simulator.zone_state import SimulatedZoneState
+from app.services.simulator.zone_state import (
+    SimulatedZoneState,
+    simulator_greenhouse_id,
+    simulator_group_id,
+    simulator_zone_id,
+)
+
+ZONE_KEY = (simulator_group_id(1), simulator_greenhouse_id(1), simulator_zone_id(1))
 
 
 @pytest.fixture
@@ -26,15 +33,15 @@ def session_mock():
     async def get(model, pk):
         if model.__name__ == "GreenhouseGroup":
             m = MagicMock()
-            m.name = "group-001"
+            m.name = ZONE_KEY[0]
             return m
         if model.__name__ == "Greenhouse":
             m = MagicMock()
-            m.name = "gh-001"
+            m.name = ZONE_KEY[1]
             return m
         if model.__name__ == "GreenhouseZone":
             m = MagicMock()
-            m.name = "zone-01"
+            m.name = ZONE_KEY[2]
             return m
         return None
 
@@ -68,7 +75,7 @@ class TestModeRouter:
         result = await router.route(command, session_mock)
 
         assert result == {"mode": "simulator", "applied": True}
-        zone = await sim_state.get_state("group-001", "gh-001", "zone-01")
+        zone = await sim_state.get_state(*ZONE_KEY)
         assert zone is not None
         assert zone.pump.active
         assert zone.pump.value == 50.0

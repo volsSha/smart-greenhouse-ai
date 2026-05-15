@@ -9,6 +9,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_command_publisher, get_db_session
+from app.config import get_settings as get_app_settings
+from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.schemas.commands import CommandPropose, CommandResponse
 from app.services.command_publisher import CommandPublisher
 from app.services.command_service import CommandError, CommandService
@@ -27,6 +29,15 @@ async def propose_command(
     Runs safety validation. Returns the command with status 'validated'
     if safe, or 'proposed' with validation_errors if unsafe.
     """
+    settings_repo = ModelSettingsRepository(session)
+    app_settings = get_app_settings()
+    settings = await settings_repo.bootstrap_settings(
+        embedding_model=app_settings.openrouter.embedding_model,
+        embedding_dimension=app_settings.openrouter.embedding_dimension,
+    )
+    if body.mode != settings.control_mode:
+        body = body.model_copy(update={"mode": settings.control_mode})
+
     service = CommandService(session)
     try:
         command = await service.propose(body)
