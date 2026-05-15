@@ -16,6 +16,7 @@ _NAV_GROUPS = [
         [
             ("Dashboard", "dashboard", "/dashboard", "dashboard"),
             ("Simulator", "precision_manufacturing", "/simulator", "simulator"),
+            ("Zones", "view_in_ar", "/zones", "zones"),
             ("Plants", "local_florist", "/plants", "plants"),
             ("Control", "tune", "/control", "control"),
         ],

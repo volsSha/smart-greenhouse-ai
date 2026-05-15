@@ -122,7 +122,9 @@ async def create_zone(
         greenhouse_id=greenhouse_id,
         name=body.name,
         description=body.description,
+        source_type=body.source_type,
     )
+    await session.commit()
     return ZoneResponse.model_validate(zone)
 
 
@@ -163,3 +165,25 @@ async def update_zone(
     update_data = body.model_dump(exclude_unset=True)
     updated = await repo.update(zone_id, **update_data)
     return ZoneResponse.model_validate(updated)
+
+
+@router.delete("/{greenhouse_id}/zones/{zone_id}", status_code=204)
+async def delete_zone(
+    group_id: UUID,
+    greenhouse_id: UUID,
+    zone_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> None:
+    """Delete a zone and its child registry rows."""
+    repo = ZoneRepository(session)
+    zone = await repo.get_by_id(zone_id)
+    if zone is None or zone.greenhouse_id != greenhouse_id:
+        raise HTTPException(status_code=404, detail="Zone not found")
+
+    gh_repo = GreenhouseRepository(session)
+    greenhouse = await gh_repo.get_by_id(greenhouse_id)
+    if greenhouse is None or greenhouse.group_id != group_id:
+        raise HTTPException(status_code=404, detail="Zone not found")
+
+    await repo.delete(zone_id)
+    await session.commit()

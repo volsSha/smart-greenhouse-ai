@@ -192,26 +192,33 @@ class SimulatedZoneState:
         scenario: str = "normal",
     ) -> None:
         """Build zone topology and apply scenario baselines."""
+        zone_refs = []
+        for g in range(1, num_groups + 1):
+            for gh in range(1, greenhouses_per_group + 1):
+                for z in range(1, zones_per_greenhouse + 1):
+                    zone_refs.append((simulator_group_id(g), simulator_greenhouse_id(gh), simulator_zone_id(z)))
+        self.initialize_from_zones(zone_refs, scenario=scenario)
+
+    def initialize_from_zones(
+        self,
+        zone_refs: list[tuple[str, str, str]],
+        scenario: str = "normal",
+    ) -> None:
         self._zones.clear()
         scenario_offsets = self._scenario_offsets(scenario)
 
-        for g in range(1, num_groups + 1):
-            group_id = simulator_group_id(g)
-            for gh in range(1, greenhouses_per_group + 1):
-                greenhouse_id = simulator_greenhouse_id(gh)
-                for z in range(1, zones_per_greenhouse + 1):
-                    zone_id = simulator_zone_id(z)
-                    key = (group_id, greenhouse_id, zone_id)
-                    base_metrics = self._base_metrics()
-                    for metric in base_metrics:
-                        offset = scenario_offsets.get(metric, 0.0)
-                        base_metrics[metric] += offset + g + gh + z
-                    self._zones[key] = ZoneState(
-                        group_id=group_id,
-                        greenhouse_id=greenhouse_id,
-                        zone_id=zone_id,
-                        **base_metrics,
-                    )
+        for index, (group_id, greenhouse_id, zone_id) in enumerate(zone_refs, start=1):
+            key = (group_id, greenhouse_id, zone_id)
+            base_metrics = self._base_metrics()
+            for metric in base_metrics:
+                offset = scenario_offsets.get(metric, 0.0)
+                base_metrics[metric] += offset + index
+            self._zones[key] = ZoneState(
+                group_id=group_id,
+                greenhouse_id=greenhouse_id,
+                zone_id=zone_id,
+                **base_metrics,
+            )
         self._initialized = True
 
     def reset(self) -> None:

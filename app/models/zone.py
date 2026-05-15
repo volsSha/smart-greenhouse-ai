@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy import Boolean, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IdTimestampMixin
@@ -19,6 +19,8 @@ class GreenhouseZone(Base, IdTimestampMixin):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
+    source_type: Mapped[str] = mapped_column(String(20), nullable=False, default="real")
+    simulator_managed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # -- relationships --
     greenhouse: Mapped["Greenhouse"] = relationship(back_populates="zones")  # noqa: F821

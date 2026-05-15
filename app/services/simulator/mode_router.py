@@ -50,27 +50,26 @@ class ModeRouter:
 
             raise CommandError("Simulator is not running — start the simulator first")
 
-        # Resolve UUIDs → string names for the in-memory zone lookup.
-        from app.models.greenhouse import Greenhouse
-        from app.models.group import GreenhouseGroup
-        from app.models.zone import GreenhouseZone
+        group_id = str(command.group_id)
+        greenhouse_id = str(command.greenhouse_id)
+        zone_id = str(command.zone_id)
+        if await self._sim_state.get_state(group_id, greenhouse_id, zone_id) is None:
+            from app.models.greenhouse import Greenhouse
+            from app.models.group import GreenhouseGroup
+            from app.models.zone import GreenhouseZone
 
-        group = await session.get(GreenhouseGroup, command.group_id)
-        gh = await session.get(Greenhouse, command.greenhouse_id)
-        zone = await session.get(GreenhouseZone, command.zone_id)
-
-        if not all([group, gh, zone]):
-            from app.services.command_service import CommandError
-
-            raise CommandError(
-                f"Zone not found for command {command.id}: "
-                f"{command.group_id}/{command.greenhouse_id}/{command.zone_id}"
-            )
+            group = await session.get(GreenhouseGroup, command.group_id)
+            greenhouse = await session.get(Greenhouse, command.greenhouse_id)
+            zone = await session.get(GreenhouseZone, command.zone_id)
+            if group is not None and greenhouse is not None and zone is not None:
+                group_id = group.name
+                greenhouse_id = greenhouse.name
+                zone_id = zone.name
 
         cmd_dict: dict[str, Any] = {
-            "group_id": group.name,
-            "greenhouse_id": gh.name,
-            "zone_id": zone.name,
+            "group_id": group_id,
+            "greenhouse_id": greenhouse_id,
+            "zone_id": zone_id,
             "actuator_name": command.actuator_name,
             "action": command.action,
             "value": command.value or 0.0,
@@ -84,8 +83,8 @@ class ModeRouter:
             command.id,
             command.actuator_name,
             command.action,
-            group.name,
-            gh.name,
-            zone.name,
+            group_id,
+            greenhouse_id,
+            zone_id,
         )
         return {"mode": "simulator", "applied": True}

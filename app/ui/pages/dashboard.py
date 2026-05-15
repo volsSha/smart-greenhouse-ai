@@ -6,7 +6,6 @@ and an alert panel. Handles loading, empty, and error states explicitly.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -33,9 +32,6 @@ from app.ui.components.telemetry_charts import (
 from app.ui.layouts.main_layout import main_layout
 
 logger = logging.getLogger(__name__)
-
-# Default group to display when no selection is made
-_DEFAULT_GROUP_ID = "group-001"
 
 
 # ---------------------------------------------------------------------------
@@ -148,13 +144,31 @@ async def dashboard() -> None:
 
         try:
             async with api_client(timeout=10.0) as client:
-                latest_resp, anomalies_resp = await asyncio.gather(
-                    client.get(f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/latest"),
-                    client.get(f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/anomalies"),
-                )
-                latest_resp.raise_for_status()
+                groups_resp = await client.get("/api/groups")
+                groups_resp.raise_for_status()
+                groups = groups_resp.json()
+                if not groups:
+                    with content_area:
+                        empty_state(
+                            _("No greenhouse groups available"),
+                            _("Create a group or start the simulator after switching to Internal simulator mode."),
+                            icon="groups",
+                        )
+                    return
+                group_id = str(groups[0].get("id"))
+                latest_data: dict[str, Any] = {"readings": []}
+                for group in groups:
+                    candidate_group_id = str(group.get("id"))
+                    latest_resp = await client.get(f"/api/groups/{candidate_group_id}/telemetry/latest")
+                    latest_resp.raise_for_status()
+                    candidate_latest_data = latest_resp.json()
+                    if candidate_latest_data.get("readings"):
+                        group_id = candidate_group_id
+                        latest_data = candidate_latest_data
+                        break
+
+                anomalies_resp = await client.get(f"/api/groups/{group_id}/telemetry/anomalies")
                 anomalies_resp.raise_for_status()
-                latest_data = latest_resp.json()
                 anomalies_data = anomalies_resp.json()
 
         except httpx.HTTPError as exc:
@@ -180,7 +194,7 @@ async def dashboard() -> None:
 
         # Transform data
         greenhouses = transform_latest_to_greenhouses(readings)
-        group_data = build_group_data(greenhouses, anomalies, _DEFAULT_GROUP_ID)
+        group_data = build_group_data(greenhouses, anomalies, group_id)
 
         # --- Group overview ---
         with ui.row().classes("w-full gap-4"):
@@ -246,7 +260,7 @@ async def dashboard() -> None:
                     end = now.isoformat()
 
                     range_resp = await client.get(
-                        f"/api/groups/{_DEFAULT_GROUP_ID}/telemetry/range",
+                        f"/api/groups/{group_id}/telemetry/range",
                         params={
                             "start": start,
                             "end": end,

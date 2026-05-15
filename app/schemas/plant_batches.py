@@ -206,6 +206,7 @@ class ZoneCreate(BaseModel):
 
     name: str = Field(..., max_length=255)
     description: str | None = None
+    source_type: str = Field("real", max_length=20)
 
 
 class ZoneUpdate(BaseModel):
@@ -213,6 +214,7 @@ class ZoneUpdate(BaseModel):
 
     name: str | None = Field(None, max_length=255)
     description: str | None = None
+    source_type: str | None = Field(None, max_length=20)
 
 
 class ZoneResponse(BaseModel):
@@ -222,6 +224,8 @@ class ZoneResponse(BaseModel):
     greenhouse_id: UUID
     name: str
     description: str | None
+    source_type: str
+    simulator_managed: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -240,6 +244,8 @@ class EdgeNodeCreate(BaseModel):
     name: str = Field(..., max_length=255)
     node_type: str = Field(..., max_length=50)
     firmware_version: str | None = Field(None, max_length=50)
+    mqtt_username: str | None = Field(None, max_length=255)
+    mqtt_token: str | None = Field(None, max_length=255)
 
 
 class EdgeNodeResponse(BaseModel):
@@ -251,6 +257,8 @@ class EdgeNodeResponse(BaseModel):
     name: str
     node_type: str
     firmware_version: str | None
+    mqtt_username: str | None
+    mqtt_token: str | None
     last_seen_at: datetime | None
     created_at: datetime
 

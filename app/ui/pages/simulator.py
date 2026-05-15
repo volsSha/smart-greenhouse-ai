@@ -271,6 +271,13 @@ async def simulator() -> None:
 
     async def start_simulator() -> None:
         """Attempt to start the simulator via the API."""
+        if state["mode"] == "mqtt":
+            detail = _("The internal simulator cannot be started in Wokwi / MQTT mode. Switch Mode to Internal Simulator first.")
+            result_label.set_text(detail)
+            result_label.style("color: #f44336")
+            ui.notify(detail, type="warning")
+            return
+
         config = {
             "scenario": state["scenario"],
             "groups": int(groups_input.value),
@@ -281,6 +288,15 @@ async def simulator() -> None:
 
         try:
             async with api_client(timeout=10.0) as client:
+                settings_resp = await client.get("/api/settings")
+                settings_resp.raise_for_status()
+                if settings_resp.json().get("control_mode") == "mqtt":
+                    detail = _("Simulator cannot run while MQTT remote devices mode is selected. Switch control mode to Internal simulator in Settings first.")
+                    result_label.set_text(detail)
+                    result_label.style("color: #f44336")
+                    ui.notify(detail, type="warning")
+                    return
+
                 resp = await client.post("/api/simulator/start", json=config)
                 resp.raise_for_status()
                 result = resp.json()

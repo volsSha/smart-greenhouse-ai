@@ -91,6 +91,7 @@ async def create_plant_batch(
         growth_stage=body.growth_stage,
         notes=body.notes,
     )
+    await session.commit()
     return PlantBatchResponse.model_validate(batch)
 
 

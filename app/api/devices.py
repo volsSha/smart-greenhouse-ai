@@ -79,7 +79,10 @@ async def create_edge_node(
         name=body.name,
         node_type=body.node_type,
         firmware_version=body.firmware_version,
+        mqtt_username=body.mqtt_username,
+        mqtt_token=body.mqtt_token,
     )
+    await session.commit()
     return EdgeNodeResponse.model_validate(node)
 
 

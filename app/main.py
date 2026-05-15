@@ -200,7 +200,7 @@ async def root() -> RedirectResponse:
 # Importing the page modules registers their @ui.page() decorators
 # with NiceGUI's internal router. The pages are not accessible until
 # NiceGUI is mounted via ui.run_with() or ui.run().
-from app.ui.pages import dashboard, settings as settings_page, control, logs, ai_chat, rag, simulator, plants  # noqa: E402, F401
+from app.ui.pages import dashboard, settings as settings_page, control, logs, ai_chat, rag, simulator, plants, zone_management  # noqa: E402, F401
 from nicegui import ui  # noqa: E402
 
 

@@ -329,7 +329,9 @@ async def control() -> None:
             zones = build_scope_options(zones_response.json(), fallback_prefix=_("Zone"))
             selected_zone = zones[0] if zones else None
             commands = commands_response.json() if commands_response.status_code == 200 else []
-            telemetry = telemetry_by_zone(telemetry_response.json()) if telemetry_response.status_code == 200 else {}
+            telemetry_data = telemetry_response.json() if telemetry_response.status_code == 200 else {}
+            telemetry_readings = telemetry_data.get("readings", []) if isinstance(telemetry_data, dict) else telemetry_data
+            telemetry = telemetry_by_zone(telemetry_readings)
             plant_contexts = plant_context_by_zone(plants_response.json()) if plants_response.status_code == 200 else {}
         except httpx.HTTPError as exc:
             notify(_("Failed to load control data: {error}", error=exc), "negative")
@@ -432,7 +434,7 @@ async def control() -> None:
                 notify(_("Approve failed: {error}", error=response_error(response)), "negative")
                 return
             notify(_("Command approved"), "positive")
-            await refresh_commands()
+            await load_panel_data()
         except httpx.HTTPError as exc:
             notify(_("Approve failed: {error}", error=exc), "negative")
 
