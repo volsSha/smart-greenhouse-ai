@@ -31,7 +31,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy application source
 COPY app/ ./app/
 COPY locales/ ./locales/
-COPY pyproject.toml uv.lock ./
+COPY migrations/ ./migrations/
+COPY alembic.ini pyproject.toml uv.lock ./
 
 # Switch to non-root user
 USER appuser

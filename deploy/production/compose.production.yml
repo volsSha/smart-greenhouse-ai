@@ -1,0 +1,163 @@
+name: greenhouse-production
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.1.2-alpine
+    container_name: greenhouse-prod-mosquitto
+    restart: unless-stopped
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf:ro
+      - ${MQTT_PASSWORD_FILE:-./secrets/mosquitto_passwords}:/mosquitto/config/passwords:ro
+    networks:
+      - greenhouse-net
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -u app -P $$MQTT_PASSWORD -t 'greenhouse-groups/healthcheck' -C 1 -W 3 >/tmp/mqtt-healthcheck.out & pid=$$!; mosquitto_pub -h localhost -u app -P $$MQTT_PASSWORD -t 'greenhouse-groups/healthcheck' -m ok; wait $$pid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    env_file:
+      - ./.env
+
+  postgres:
+    image: pgvector/pgvector:0.8.2-pg17-trixie
+    container_name: greenhouse-prod-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - greenhouse-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?POSTGRES_USER is required} -d ${POSTGRES_DB:?POSTGRES_DB is required}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  influxdb:
+    image: influxdb:2.7.12
+    container_name: greenhouse-prod-influxdb
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: greenhouse_admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:?INFLUX_PASSWORD is required}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG:?INFLUX_ORG is required}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET:?INFLUX_BUCKET is required}
+      DOCKER_INFLUXDB_INIT_RETENTION: 30d
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:?INFLUX_TOKEN is required}
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - greenhouse-net
+    healthcheck:
+      test: ["CMD-SHELL", "influx ping 2>/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: greenhouse-app:production
+    container_name: greenhouse-prod-migrate
+    restart: "no"
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      INFLUX_URL: http://influxdb:8086
+      MQTT_HOST: mosquitto
+      DEBUG: "false"
+    command: ["alembic", "upgrade", "head"]
+    networks:
+      - greenhouse-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: greenhouse-app:production
+    container_name: greenhouse-prod-app
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      INFLUX_URL: http://influxdb:8086
+      MQTT_HOST: mosquitto
+      DEBUG: "false"
+      API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}
+    networks:
+      - greenhouse-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8080/api/health/live\")' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: greenhouse-prod-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ${NGINX_CERTS_DIR:-./certs}:/etc/nginx/certs:ro
+      - ${NGINX_HTPASSWD_FILE:-./secrets/nginx.htpasswd}:/etc/nginx/secrets/nginx.htpasswd:ro
+    networks:
+      - greenhouse-net
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/api/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    name: greenhouse-prod-postgres-data
+  influxdb_data:
+    name: greenhouse-prod-influxdb-data
+  mosquitto_data:
+    name: greenhouse-prod-mosquitto-data
+  mosquitto_log:
+    name: greenhouse-prod-mosquitto-log
+
+networks:
+  greenhouse-net:
+    driver: bridge
+    name: greenhouse-prod-net

@@ -1,5 +1,9 @@
 # Operations
 
+## Production deployment
+
+Production Docker deployment lives in `deploy/production/`. See `deploy/production/README.md` for the server `.env`, Docker nginx, TLS/access gate, Mosquitto credentials, backup, migration, and remote deployment workflow for `greenhouse.volsh.dev`.
+
 ## Local services
 
 Start dependencies with:
