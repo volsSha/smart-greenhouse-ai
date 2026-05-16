@@ -5,6 +5,9 @@ __pycache__/
 *.pyc
 *.mo
 .env
+/deploy/production/.env
+/deploy/production/secrets/
+/deploy/production/certs/
 .venv/
 /dogfood-output/
 /docs/brainstorms/
