@@ -16,6 +16,7 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 
 ## Dev Workflow
 
+- In most cases, run Python commands with `uv`.
 - `docker compose up -d --build app` — rebuild and start dev container
 - Source edits in `app/` and `locales/` hot-reload via uvicorn --reload
 - After `.po` edits, run `pybabel compile -d locales` then the container auto-reloads

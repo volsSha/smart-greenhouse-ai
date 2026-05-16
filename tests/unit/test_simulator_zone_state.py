@@ -26,13 +26,15 @@ def state() -> SimulatedZoneState:
 class TestInitialize:
     def test_creates_zones(self, state: SimulatedZoneState) -> None:
         assert state.is_initialized
-        keys = list(state._zones.keys())
-        assert len(keys) == 2  # 1 group × 1 gh × 2 zones
+        assert len(state.all_zone_refs()) == 2
+
+    def test_exposes_zone_refs_for_telemetry_generation(self, state: SimulatedZoneState) -> None:
+        assert ZONE_KEY in state.all_zone_refs()
 
     def test_reset_clears_state(self, state: SimulatedZoneState) -> None:
         state.reset()
         assert not state.is_initialized
-        assert len(list(state._zones.keys())) == 0
+        assert state.all_zone_refs() == []
 
 
 class TestApplyCommand:
@@ -205,4 +207,5 @@ class TestSimulatorTelemetryLoop:
 
         soil = next(row for row in repository.rows if row.metric == "soil_moisture")
         assert soil.zone_id == ZONE_KEY[2]
+        assert soil.sensor_id == f"{ZONE_KEY[2]}:soil_moisture"
         assert soil.value == await state.telemetry_value(*ZONE_KEY, "soil_moisture")

@@ -247,7 +247,7 @@ async def simulator() -> None:
             viz.clear()
             no_data_label.style("display: none")
             mqtt_placeholder.style("display: block")
-            mode_notice.set_text(_("Run ngrok TCP for local Mosquitto, then use firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
+            mode_notice.set_text(_("Use a public MQTT broker, then configure firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
 
     def select_scenario(scenario_key: str, *, notify: bool = True) -> None:
         """Update the active scenario display."""

@@ -199,6 +199,10 @@ SAFETY_LIMITS = {
 }
 ```
 
+## UI Flow Documentation
+
+Page-level flows, button actions, cross-page control-mode propagation, simulator operation, and operator approval journeys are documented in `docs/ui-flows/README.md`.
+
 ## Full Data Flow: Sensor to Group AI Response
 
 1. Edge node or simulator publishes scoped telemetry via MQTT

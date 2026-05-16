@@ -60,8 +60,8 @@ async def zone_management() -> None:
 
         with section_card(_("Wokwi / MQTT Setup"), _("Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and publish telemetry to the matching topic."), icon="developer_board"):
             with ui.column().classes("w-full gap-2 mt-4"):
-                ui.label(_("1. Run local Mosquitto with docker compose and expose it with ngrok tcp 11883."))
-                ui.label(_("2. Copy MQTT_HOST and MQTT_PORT from ngrok into config.py."))
+                ui.label(_("1. Use a public MQTT broker, such as Mosquitto on a VPS."))
+                ui.label(_("2. Copy MQTT_HOST, MQTT_PORT, MQTT_USER, and MQTT_PASSWORD into config.py."))
                 ui.label(_("3. Set GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME, and MQTT_TOKEN from a real zone below."))
                 ui.label(_("4. Wokwi sends telemetry; approved MQTT-mode commands are published back to the zone command topic."))
             topic_label = ui.label("").classes("text-xs font-mono mt-3 opacity-70")

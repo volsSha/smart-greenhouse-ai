@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from app.models.command import CommandLog
+from app.services.command_service import CommandError
 from app.services.simulator.mode_router import ModeRouter
 from app.services.simulator.zone_state import (
     SimulatedZoneState,
@@ -50,19 +51,19 @@ def session_mock():
 
 
 def _make_command(mode: str = "simulator", **kwargs) -> CommandLog:
-    return MagicMock(
-        spec=CommandLog,
-        mode=mode,
-        group_id="00000000-0000-0000-0000-000000000001",
-        greenhouse_id="00000000-0000-0000-0000-000000000002",
-        zone_id="00000000-0000-0000-0000-000000000003",
-        actuator_name="pump",
-        action="on",
-        value=50.0,
-        duration_seconds=30,
-        source="ai_agent",
+    attrs = {
+        "mode": mode,
+        "group_id": "00000000-0000-0000-0000-000000000001",
+        "greenhouse_id": "00000000-0000-0000-0000-000000000002",
+        "zone_id": "00000000-0000-0000-0000-000000000003",
+        "actuator_name": "pump",
+        "action": "on",
+        "value": 50.0,
+        "duration_seconds": 30,
+        "source": "ai_agent",
         **kwargs,
-    )
+    }
+    return MagicMock(spec=CommandLog, **attrs)
 
 
 class TestModeRouter:
@@ -103,4 +104,25 @@ class TestModeRouter:
         command = _make_command(mode="simulator")
 
         with pytest.raises(Exception, match="Simulator is not running"):
+            await router.route(command, session_mock)
+
+    async def test_simulator_mode_unknown_zone_raises_error(self, sim_state: SimulatedZoneState) -> None:
+        router = ModeRouter(sim_state)
+        command = _make_command(
+            mode="simulator",
+            group_id="unknown-group",
+            greenhouse_id="unknown-greenhouse",
+            zone_id="unknown-zone",
+        )
+        session = AsyncMock()
+        session.get = AsyncMock(return_value=None)
+
+        with pytest.raises(CommandError, match="Simulator zone or actuator is not available"):
+            await router.route(command, session)
+
+    async def test_simulator_mode_unknown_actuator_raises_error(self, sim_state: SimulatedZoneState, session_mock) -> None:
+        router = ModeRouter(sim_state)
+        command = _make_command(mode="simulator", actuator_name="sprinkler")
+
+        with pytest.raises(CommandError, match="Simulator zone or actuator is not available"):
             await router.route(command, session_mock)

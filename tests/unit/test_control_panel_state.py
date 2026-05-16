@@ -79,6 +79,17 @@ def test_telemetry_by_zone_groups_metrics() -> None:
     }
 
 
+def test_telemetry_by_zone_uses_latest_response_readings() -> None:
+    response = {
+        "readings": [
+            {"zone_id": "zone-1", "metric": "temperature", "_value": 22.5},
+        ],
+        "total": 1,
+    }
+
+    assert telemetry_by_zone(response["readings"]) == {"zone-1": {"temperature": 22.5}}
+
+
 def test_build_zone_context_keeps_zone_selectable_without_optional_data() -> None:
     context = build_zone_context(
         group=ScopeOption(id="group-1", label="Main Group"),

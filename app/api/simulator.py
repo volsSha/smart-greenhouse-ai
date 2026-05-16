@@ -83,7 +83,7 @@ async def _run_simulator(
             published = 0
             active_zones = zones or [
                 ProvisionedZone(group_id=group_id, greenhouse_id=greenhouse_id, zone_id=zone_id)
-                for group_id, greenhouse_id, zone_id in sim_state._zones
+                for group_id, greenhouse_id, zone_id in sim_state.all_zone_refs()
             ]
             for index, zone in enumerate(active_zones, start=1):
                 for metric in ("temperature", "air_humidity", "soil_moisture", "co2", "light"):
@@ -95,7 +95,7 @@ async def _run_simulator(
                             group_id=zone.group_id,
                             greenhouse_id=zone.greenhouse_id,
                             zone_id=zone.zone_id,
-                            sensor_id=f"{metric}-{index:02d}",
+                            sensor_id=f"{zone.zone_id}:{metric}",
                             metric=metric,
                             value=value,
                             timestamp=now,

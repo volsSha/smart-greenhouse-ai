@@ -342,6 +342,7 @@ async def control() -> None:
         nonlocal commands
         if demo_mode or selected_group is None:
             return
+        await load_control_mode()
         try:
             async with api_client(timeout=10.0) as client:
                 response = await client.get(f"/api/commands/groups/{selected_group.id}/recent")

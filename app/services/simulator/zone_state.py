@@ -234,7 +234,7 @@ class SimulatedZoneState:
     # Command application
     # ------------------------------------------------------------------
 
-    async def apply_command(self, command: dict[str, Any]) -> None:
+    async def apply_command(self, command: dict[str, Any]) -> bool:
         """Apply an actuator command to the appropriate zone state.
 
         Args:
@@ -249,7 +249,7 @@ class SimulatedZoneState:
         )
         if key not in self._zones:
             logger.warning("apply_command called for unknown zone: %s", key)
-            return
+            return False
 
         async with self._lock:
             zone = self._zones[key]
@@ -260,7 +260,7 @@ class SimulatedZoneState:
             act = self._get_actuator(zone, actuator_name)
             if act is None:
                 logger.warning("Unknown actuator '%s' for zone %s", actuator_name, key)
-                return
+                return False
 
             if action in ("on", "set_power"):
                 act.active = True
@@ -281,6 +281,7 @@ class SimulatedZoneState:
                 act.active,
                 duration,
             )
+            return True
 
     async def get_state(self, group_id: str, greenhouse_id: str, zone_id: str) -> ZoneState | None:
         """Return the state for a single zone, or None."""
@@ -291,6 +292,9 @@ class SimulatedZoneState:
         async with self._lock:
             self._tick_expired()
             return list(self._zones.values())
+
+    def all_zone_refs(self) -> list[tuple[str, str, str]]:
+        return list(self._zones)
 
     async def telemetry_value(self, group_id: str, greenhouse_id: str, zone_id: str, metric: str) -> float:
         """Return the current telemetry value for a metric in a zone,

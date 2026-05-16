@@ -11,7 +11,7 @@ services:
     networks:
       - greenhouse-net
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/#' -C 1 -W 3 || exit 1"]
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -u app -t 'greenhouse-groups/healthcheck' -C 1 -W 3 >/tmp/mqtt-healthcheck.out & pid=$$!; mosquitto_pub -h localhost -u app -t 'greenhouse-groups/healthcheck' -m ok; wait $$pid"]
       interval: 10s
       timeout: 5s
       retries: 5

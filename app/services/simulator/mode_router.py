@@ -77,7 +77,12 @@ class ModeRouter:
             "source": command.source,
         }
 
-        await self._sim_state.apply_command(cmd_dict)
+        applied = await self._sim_state.apply_command(cmd_dict)
+        if not applied:
+            from app.services.command_service import CommandError
+
+            raise CommandError("Simulator zone or actuator is not available for this command")
+
         logger.info(
             "Routed command %s to simulator: %s %s on %s/%s/%s",
             command.id,

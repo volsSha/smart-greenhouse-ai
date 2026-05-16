@@ -30,3 +30,4 @@ services:
       - ./tests:/app/tests
     environment:
       DEBUG: "true"
+      MQTT_USERNAME: app
