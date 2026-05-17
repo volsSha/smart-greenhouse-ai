@@ -29,10 +29,11 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application source
-COPY app/ ./app/
-COPY locales/ ./locales/
-COPY migrations/ ./migrations/
-COPY alembic.ini pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser app/ ./app/
+COPY --chown=appuser:appuser locales/ ./locales/
+COPY --chown=appuser:appuser migrations/ ./migrations/
+COPY --chown=appuser:appuser alembic.ini pyproject.toml uv.lock ./
+RUN mkdir -p /app/.nicegui && chown -R appuser:appuser /app/.nicegui
 
 # Switch to non-root user
 USER appuser

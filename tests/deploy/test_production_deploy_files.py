@@ -27,8 +27,8 @@ def test_production_compose_defines_expected_services_and_private_dependencies()
 
     assert "5432:" not in compose
     assert "8086:" not in compose
-    assert "1883:" not in compose
     assert "9001:" not in compose
+    assert '"${MQTT_HOST_BIND:-0.0.0.0}:${MQTT_HOST_PORT:-11883}:1883"' in compose
     assert "${NGINX_HTTP_PORT:-80}:80" in compose
     assert "${NGINX_HTTPS_PORT:-443}:443" in compose
     assert "APP_SECRET: ${APP_SECRET:?APP_SECRET is required}" in compose
@@ -40,9 +40,22 @@ def test_migration_service_has_migration_assets_in_image() -> None:
     dockerfile = read(ROOT / "Dockerfile")
     compose = read(PROD / "compose.production.yml")
 
-    assert "COPY migrations/ ./migrations/" in dockerfile
-    assert "COPY alembic.ini pyproject.toml uv.lock ./" in dockerfile
+    assert "COPY --chown=appuser:appuser migrations/ ./migrations/" in dockerfile
+    assert "COPY --chown=appuser:appuser alembic.ini pyproject.toml uv.lock ./" in dockerfile
     assert 'command: ["alembic", "upgrade", "head"]' in compose
+
+
+def test_production_image_allows_nicegui_storage_for_non_root_user() -> None:
+    dockerfile = read(ROOT / "Dockerfile")
+
+    assert "COPY --chown=appuser:appuser app/ ./app/" in dockerfile
+    assert "RUN mkdir -p /app/.nicegui && chown -R appuser:appuser /app/.nicegui" in dockerfile
+
+
+def test_production_app_uses_configured_api_base_url() -> None:
+    compose = read(PROD / "compose.production.yml")
+
+    assert "API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}" in compose
 
 
 def test_env_template_lists_required_names_without_real_secret_values() -> None:

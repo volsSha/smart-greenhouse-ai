@@ -40,7 +40,7 @@ Production access is gated by the app-level admin login. Keep only `/api/health/
 
 Production Mosquitto uses `allow_anonymous false` and a server-side password file. Generate `deploy/production/secrets/mosquitto_passwords` on the server with users that match `mosquitto/acl.conf` (`app`, `simulator`, and `wokwi` as needed). The app uses `MQTT_USERNAME` and `MQTT_PASSWORD` from `.env`; do not commit broker passwords.
 
-Do not publish MQTT ports on the host unless explicitly approved.
+MQTT is published on `${MQTT_HOST_BIND:-0.0.0.0}:${MQTT_HOST_PORT:-11883}` for Wokwi and hardware clients. Keep `allow_anonymous false`, require named users, and verify firewall exposure intentionally matches the deployment target.
 
 ## Data and migration gate
 

@@ -11,6 +11,8 @@ services:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/acl.conf:/mosquitto/config/acl.conf:ro
       - ${MQTT_PASSWORD_FILE:-./secrets/mosquitto_passwords}:/mosquitto/config/passwords:ro
+    ports:
+      - "${MQTT_HOST_BIND:-0.0.0.0}:${MQTT_HOST_PORT:-11883}:1883"
     networks:
       - greenhouse-net
     healthcheck:
