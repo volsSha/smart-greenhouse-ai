@@ -31,6 +31,9 @@ def test_production_compose_defines_expected_services_and_private_dependencies()
     assert "9001:" not in compose
     assert "${NGINX_HTTP_PORT:-80}:80" in compose
     assert "${NGINX_HTTPS_PORT:-443}:443" in compose
+    assert "APP_SECRET: ${APP_SECRET:?APP_SECRET is required}" in compose
+    assert "ADMIN_USERNAME: ${ADMIN_USERNAME:?ADMIN_USERNAME is required}" in compose
+    assert "ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?ADMIN_PASSWORD_HASH is required}" in compose
 
 
 def test_migration_service_has_migration_assets_in_image() -> None:
@@ -47,12 +50,13 @@ def test_env_template_lists_required_names_without_real_secret_values() -> None:
 
     required_names = [
         "APP_SECRET",
+        "ADMIN_USERNAME",
+        "ADMIN_PASSWORD_HASH",
         "API_BASE_URL",
         "POSTGRES_PASSWORD",
         "INFLUX_TOKEN",
         "MQTT_PASSWORD",
         "OPENROUTER_API_KEY",
-        "NGINX_HTPASSWD_FILE",
     ]
     for name in required_names:
         assert f"{name}=" in env
@@ -67,10 +71,9 @@ def test_nginx_gates_app_routes_and_leaves_liveness_public() -> None:
     assert "server_name greenhouse.volsh.dev;" in nginx
     assert "listen 443 ssl" in nginx
     assert "return 301 https://$host$request_uri;" in nginx
-    assert 'auth_basic "Smart Greenhouse";' in nginx
-    assert "auth_basic_user_file /etc/nginx/secrets/nginx.htpasswd;" in nginx
     assert "location = /api/health/live" in nginx
-    assert "auth_basic off;" in nginx
+    assert "auth_basic" not in nginx
+    assert "auth_basic_user_file" not in nginx
     assert "proxy_buffering off;" in nginx
 
 
@@ -90,7 +93,7 @@ def test_runbook_documents_safety_gates() -> None:
 
     for phrase in [
         "Do not commit or sync",
-        "only `/api/health/live`",
+        "app-level admin login",
         "allow_anonymous false",
         "empty volumes or restores existing",
         "Do not run reset/fresh/wipe/drop commands",

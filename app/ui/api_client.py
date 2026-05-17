@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 import httpx
 
+from app.auth import AUTH_COOKIE_NAME, is_auth_enabled, session_token
 from app.config import get_settings
 
 
@@ -14,9 +15,11 @@ from app.config import get_settings
 async def api_client(timeout: float = 10.0) -> AsyncIterator[httpx.AsyncClient]:
     """Yield an HTTP client configured for the local FastAPI API."""
     settings = get_settings()
+    cookies = {AUTH_COOKIE_NAME: session_token(settings)} if is_auth_enabled(settings) else None
     async with httpx.AsyncClient(
         base_url=settings.app.api_base_url,
         timeout=timeout,
+        cookies=cookies,
     ) as client:
         yield client
 

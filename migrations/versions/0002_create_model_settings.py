@@ -46,7 +46,7 @@ def upgrade() -> None:
         sa.Column("raw_metadata", postgresql.JSONB(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.PrimaryKeyConstraint("id", name="openrouter_model_catalog_pkey"),
-        sa.UniqueConstraint("openrouter_model_catalog_model_id_key", name="openrouter_model_catalog_model_id_key"),
+        sa.UniqueConstraint("model_id", name="openrouter_model_catalog_model_id_key"),
     )
     # ### end Alembic commands ###
 

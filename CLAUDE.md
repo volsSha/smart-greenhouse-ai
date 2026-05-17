@@ -26,6 +26,7 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 
 - Language switcher uses `ui.select` with label-to-code mapping (NiceGUI select events emit display labels, not dict keys)
 - NiceGUI components that need language must call `_()` from `app.i18n.core` at render time
+- All user-facing UI labels, descriptions, empty states, notifications, and placeholders must have English and Ukrainian translations in `locales/`
 - `ui.run_with(...)` requires a real `storage_secret` for `app.storage.user` persistence
 
 ## Debugging

@@ -56,6 +56,9 @@ def main_layout() -> None:
                 ui.label(_("Fleet Control System")).classes("text-xs opacity-65")
         ui.space()
         language_switcher()
+        with ui.link(target="/logout").classes("greenhouse-nav-link"):
+            ui.icon("logout", size="1.1rem")
+            ui.label(_("Logout")).classes("text-sm font-medium")
 
     with ui.left_drawer().classes("greenhouse-drawer p-4"):
         with ui.column().classes("gap-1 mb-5"):

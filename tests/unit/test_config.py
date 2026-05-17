@@ -51,6 +51,12 @@ class TestDatabaseSettings:
         )
         assert settings.url == "postgresql+asyncpg://me:pw@dbhost:5432/mydb"
 
+    def test_url_property_escapes_credentials(self) -> None:
+        settings = DatabaseSettings(
+            host="dbhost", port=5432, user="me@example", password="p@ss/word", db="mydb"
+        )
+        assert settings.url == "postgresql+asyncpg://me%40example:p%40ss%2Fword@dbhost:5432/mydb"
+
 
 class TestInfluxDBSettings:
     """Tests for InfluxDBSettings."""
@@ -106,7 +112,7 @@ class TestOpenRouterSettings:
         with patch.dict(os.environ, {}, clear=True):
             settings = OpenRouterSettings()
         assert settings.api_key == ""
-        assert settings.model == "anthropic/claude-sonnet-4"
+        assert settings.model == "google/gemini-3.1-flash-lite"
         assert settings.base_url == "https://openrouter.ai/api/v1"
         assert settings.embedding_model == "openai/text-embedding-3-small"
         assert settings.embedding_dimension == 1536
@@ -130,12 +136,24 @@ class TestAppSettings:
         with patch.dict(os.environ, {}, clear=True):
             settings = AppSettings()
         assert settings.app_secret == ""
+        assert settings.admin_username == "admin"
+        assert settings.admin_password_hash == ""
         assert settings.debug is False
 
     def test_debug_from_env(self) -> None:
         with patch.dict(os.environ, {"DEBUG": "true"}, clear=True):
             settings = AppSettings()
         assert settings.debug is True
+
+    def test_admin_auth_from_env(self) -> None:
+        env = {
+            "ADMIN_USERNAME": "operator",
+            "ADMIN_PASSWORD_HASH": "pbkdf2_sha256:1:salt:digest",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            settings = AppSettings()
+        assert settings.admin_username == "operator"
+        assert settings.admin_password_hash == "pbkdf2_sha256:1:salt:digest"
 
 
 class TestSettings:

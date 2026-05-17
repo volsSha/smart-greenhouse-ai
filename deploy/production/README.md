@@ -14,7 +14,6 @@ This directory contains the Docker-only production deployment for `greenhouse.vo
 Create these files only on the server. Do not commit or sync them from a workstation.
 
 - `.env`
-- `deploy/production/secrets/nginx.htpasswd`
 - `deploy/production/secrets/mosquitto_passwords`
 - TLS private keys under `deploy/production/certs/`
 
@@ -24,20 +23,18 @@ Use restrictive permissions for secret files, for example owner-readable only fo
 
 Start from `.env.production.example` and replace every placeholder on the server. Production requires non-empty values for:
 
-- `APP_SECRET`, `API_BASE_URL`, `DEBUG`
+- `APP_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `API_BASE_URL`, `DEBUG`
 - `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - `INFLUX_URL`, `INFLUX_PASSWORD`, `INFLUX_TOKEN`, `INFLUX_ORG`, `INFLUX_BUCKET`
 - `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME`, `MQTT_PASSWORD`, `MQTT_PASSWORD_FILE`
 - `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_BASE_URL`, `OPENROUTER_EMBEDDING_MODEL`, `OPENROUTER_EMBEDDING_DIMENSION`
-- `NGINX_HTTP_PORT`, `NGINX_HTTPS_PORT`, `NGINX_CERTS_DIR`, `NGINX_HTPASSWD_FILE`
+- `NGINX_HTTP_PORT`, `NGINX_HTTPS_PORT`, `NGINX_CERTS_DIR`
 
 ## TLS and access gate
 
 Docker nginx is the intended public entrypoint for `greenhouse.volsh.dev`. Before starting nginx, inspect the server for any existing listener on ports 80/443. If a shared Docker-managed proxy already owns TLS for the host, get explicit approval before integrating behind it. Do not replace or stop an existing proxy without approval.
 
-Default production access is gated at nginx with Basic Auth. Keep only `/api/health/live` public for uptime checks; all other UI and API routes should require authentication unless app-level auth replaces this temporary gate. If route-level gating is ever used instead, enumerate FastAPI routes and verify every non-public `/api/*` route is protected.
-
-Generate `deploy/production/secrets/nginx.htpasswd` on the server, mount it read-only, keep it out of sync/git, and rotate or remove it when app-level authentication is available.
+Production access is gated by the app-level admin login. Keep only `/api/health/live` public for uptime checks; `/dashboard`, `/ai-chat`, `/logs`, and non-public `/api/*` routes require a signed admin session cookie. Generate `ADMIN_PASSWORD_HASH` with `uv run python -c 'from getpass import getpass; from app.auth import hash_admin_password; print(hash_admin_password(getpass("Admin password: ")))'` and paste only the printed hash into the server `.env`.
 
 ## Mosquitto credentials
 
@@ -73,7 +70,7 @@ Prefer deploying from a known clean git commit on the server. If syncing files t
 ## Deployment flow
 
 1. Inspect remote Docker state, running containers, volumes, and ports before changing anything.
-2. Prepare `.env`, TLS cert files, nginx htpasswd, and Mosquitto password file on the server.
+2. Prepare `.env`, TLS cert files, and Mosquitto password file on the server.
 3. Validate the production Compose file from repo root.
 4. Start dependencies.
 5. Run `alembic upgrade head` through the `migrate` service.

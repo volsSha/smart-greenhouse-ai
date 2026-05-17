@@ -24,6 +24,8 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
+
+from app.auth import is_auth_enabled, is_authenticated, is_public_path, login_get, login_post, logout_get, settings_from_request, unauthenticated_response
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.config import Settings, get_settings
@@ -92,6 +94,15 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def admin_auth_middleware(request: Request, call_next):
+    settings = settings_from_request(request)
+    if is_auth_enabled(settings) and not is_public_path(request.url.path) and not is_authenticated(request, settings):
+        return unauthenticated_response(request)
+    return await call_next(request)
+
 
 async def _write_request_log(
     request: Request,
@@ -189,6 +200,10 @@ app.include_router(simulator_router)
 app.include_router(simulator_state_router)
 app.include_router(mqtt_status_router)
 app.include_router(settings_router)
+
+app.add_api_route("/login", login_get, methods=["GET"], include_in_schema=False)
+app.add_api_route("/login", login_post, methods=["POST"], include_in_schema=False)
+app.add_api_route("/logout", logout_get, methods=["GET"], include_in_schema=False)
 
 
 @app.get("/", include_in_schema=False)

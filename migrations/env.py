@@ -32,7 +32,7 @@ def _configure() -> None:
     from app.config import get_settings
 
     settings = get_settings()
-    config.set_main_option("sqlalchemy.url", settings.database.url)
+    config.set_main_option("sqlalchemy.url", settings.database.url.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:
