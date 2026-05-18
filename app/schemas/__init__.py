@@ -1,1 +1,1 @@
-"""Schema package for Smart Greenhouse Fleet Control."""
+"""Schema package for Smart Greenhouse Management."""

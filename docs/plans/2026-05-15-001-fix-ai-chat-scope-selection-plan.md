@@ -8,7 +8,7 @@ date: 2026-05-15
 
 ## Summary
 
-Redesign the AI chat page so group/greenhouse/zone scope is selected from real fleet entities inside the chat composer as a mention-like picker instead of typed into top-of-page ID fields. Treat fleet-wide chat as the existing unscoped/default state. Fix conversation rendering so rapid previous-chat selection and in-flight AI responses cannot mix messages from different conversations.
+Redesign the AI chat page so group/greenhouse/zone scope is selected from real fleet entities inside the chat composer as a mention-like picker instead of typed into top-of-page ID fields. Treat all-greenhouses chat as the existing unscoped/default state. Fix conversation rendering so rapid previous-chat selection and in-flight AI responses cannot mix messages from different conversations.
 
 ---
 
@@ -37,7 +37,7 @@ The current `/ai-chat` page asks users to type scope IDs manually, which is erro
 - Do not change the `/api/ai/chat` request shape; add only minimal response metadata needed to identify the persisted conversation for a send request.
 - Do not introduce full rich-text inline token parsing in the textarea; the mention-like interaction should remain a selector/chip UX that keeps message text clean.
 - Do not add persistent user preferences for default scope in this pass.
-- Do not create a new fleet-level scope field; fleet-wide chat remains the existing unscoped/default state.
+- Do not create a new fleet-level scope field; all-greenhouses chat remains the existing unscoped/default state.
 - Do not create new group/greenhouse/zone management flows from the chat page.
 
 ### Deferred to Follow-Up Work

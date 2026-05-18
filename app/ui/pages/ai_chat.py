@@ -264,7 +264,7 @@ async def ai_chat() -> None:
     selector_errors: dict[ScopeLevel, str | None] = {"group": None, "greenhouse": None, "zone": None}
 
     with page_container():
-        with section_card(_("Conversation Context"), _("Select a saved thread or start a fresh fleet-wide chat."), icon="hub"):
+        with section_card(_("Conversation Context"), _("Select a saved thread or start a fresh all-greenhouses chat."), icon="hub"):
             with ui.row().classes("w-full gap-4 mt-4 items-center flex-wrap"):
                 conversation_select = ui.select(
                     label=_("Conversation"),
@@ -299,7 +299,7 @@ async def ai_chat() -> None:
         scope_status.clear()
         with scope_status:
             if not any([scope_state.group_id, scope_state.greenhouse_id, scope_state.zone_id]):
-                ui.chip(_("Fleet-wide chat"), icon="public").props("outline")
+                ui.chip(_("All-greenhouses chat"), icon="public").props("outline")
             for level in ("group", "greenhouse", "zone"):
                 value = getattr(scope_state, f"{level}_id")
                 if not value:

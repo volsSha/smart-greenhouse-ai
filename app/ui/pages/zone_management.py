@@ -45,7 +45,7 @@ async def zone_management() -> None:
 
         with section_card(_("Create Zone"), _("Real zones are used by MQTT devices; simulator zones are created automatically when the simulator starts."), icon="add_location_alt"):
             with ui.row().classes("w-full gap-4 mt-4 flex-wrap items-end"):
-                zone_name = ui.input(_("Zone name"), placeholder="north-bed").classes("min-w-[220px] flex-1")
+                zone_name = ui.input(_("Zone name"), placeholder=_("north-bed")).classes("min-w-[220px] flex-1")
                 zone_description = ui.input(_("Description"), placeholder=_("Tomatoes, row A")).classes("min-w-[260px] flex-1")
                 source_select = ui.select(label=_("Type"), options={"real": _("Real MQTT zone"), "simulator": _("Simulator zone")}, value="real").classes("w-48")
                 ui.button(_("Add zone"), icon="add", on_click=lambda: ui.timer(0, create_zone, once=True)).props("color=primary")
@@ -53,9 +53,9 @@ async def zone_management() -> None:
         with section_card(_("Create Plant Batch"), _("Attach plants to a zone so the control page can show plant context."), icon="local_florist"):
             with ui.row().classes("w-full gap-4 mt-4 flex-wrap items-end"):
                 plant_zone_select = ui.select(label=_("Zone"), options=[]).classes("min-w-[220px] flex-1")
-                plant_name = ui.input(_("Batch name"), placeholder="Tomato batch").classes("min-w-[220px] flex-1")
-                plant_species = ui.input(_("Species"), placeholder="Tomato").classes("min-w-[180px] flex-1")
-                growth_stage = ui.input(_("Growth stage"), placeholder="vegetative").classes("min-w-[180px] flex-1")
+                plant_name = ui.input(_("Batch name"), placeholder=_("Tomato batch")).classes("min-w-[220px] flex-1")
+                plant_species = ui.input(_("Species"), placeholder=_("Tomato")).classes("min-w-[180px] flex-1")
+                growth_stage = ui.input(_("Growth stage"), placeholder=_("vegetative")).classes("min-w-[180px] flex-1")
                 ui.button(_("Add plants"), icon="add", on_click=lambda: ui.timer(0, create_plant_batch, once=True)).props("color=primary")
 
         with section_card(_("Wokwi / MQTT Setup"), _("Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and publish telemetry to the matching topic."), icon="developer_board"):

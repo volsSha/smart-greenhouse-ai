@@ -1,4 +1,4 @@
-# Smart Greenhouse Fleet Control System - Architecture
+# Smart Greenhouse Management System - Architecture
 
 ## Core Idea
 

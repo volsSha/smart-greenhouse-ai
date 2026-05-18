@@ -52,8 +52,8 @@ def main_layout() -> None:
         with ui.row().classes("items-center gap-3"):
             ui.icon("eco", size="1.35rem").classes("greenhouse-brand-mark p-2")
             with ui.column().classes("gap-0"):
-                ui.label(_("Smart Greenhouse Fleet")).classes("text-lg font-bold leading-tight")
-                ui.label(_("Fleet Control System")).classes("text-xs opacity-65")
+                ui.label(_("Smart Greenhouse Management")).classes("text-lg font-bold leading-tight")
+                ui.label(_("Greenhouse Control System")).classes("text-xs opacity-65")
         ui.space()
         language_switcher()
         with ui.link(target="/logout").classes("greenhouse-nav-link"):

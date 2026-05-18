@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-17 23:37+0300\n"
+"POT-Creation-Date: 2026-05-18 13:08+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -381,11 +381,11 @@ msgid "No pending proposals for this zone."
 msgstr ""
 
 #: app/ui/layouts/main_layout.py:55
-msgid "Smart Greenhouse Fleet"
+msgid "Smart Greenhouse Management"
 msgstr ""
 
 #: app/ui/layouts/main_layout.py:56
-msgid "Fleet Control System"
+msgid "Greenhouse Control System"
 msgstr ""
 
 #: app/ui/layouts/main_layout.py:61
@@ -433,7 +433,7 @@ msgid "Conversation Context"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:267
-msgid "Select a saved thread or start a fresh fleet-wide chat."
+msgid "Select a saved thread or start a fresh all-greenhouses chat."
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:270
@@ -484,7 +484,7 @@ msgid "Send"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:302
-msgid "Fleet-wide chat"
+msgid "All-greenhouses chat"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:311
@@ -605,7 +605,7 @@ msgstr ""
 msgid "Tomato Batch"
 msgstr ""
 
-#: app/ui/pages/control.py:108
+#: app/ui/pages/control.py:108 app/ui/pages/zone_management.py:57
 msgid "Tomato"
 msgstr ""
 
@@ -1605,6 +1605,10 @@ msgstr ""
 msgid "Zone name"
 msgstr ""
 
+#: app/ui/pages/zone_management.py:48
+msgid "north-bed"
+msgstr ""
+
 #: app/ui/pages/zone_management.py:49
 msgid "Description"
 msgstr ""
@@ -1641,12 +1645,20 @@ msgstr ""
 msgid "Batch name"
 msgstr ""
 
+#: app/ui/pages/zone_management.py:56
+msgid "Tomato batch"
+msgstr ""
+
 #: app/ui/pages/zone_management.py:57
 msgid "Species"
 msgstr ""
 
 #: app/ui/pages/zone_management.py:58
 msgid "Growth stage"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:58
+msgid "vegetative"
 msgstr ""
 
 #: app/ui/pages/zone_management.py:59

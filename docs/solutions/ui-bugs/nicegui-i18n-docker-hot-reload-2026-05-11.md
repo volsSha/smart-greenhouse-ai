@@ -108,7 +108,7 @@ from app.config import get_settings
 app_settings = get_settings()
 ui.run_with(
     app,
-    title="Smart Greenhouse Fleet",
+    title="Smart Greenhouse Management",
     storage_secret=app_settings.app.app_secret or "smart-greenhouse-dev-secret",
 )
 ```

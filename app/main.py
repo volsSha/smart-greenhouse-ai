@@ -90,7 +90,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
 
 # --- Create the FastAPI application ---
 app = FastAPI(
-    title="Smart Greenhouse Fleet Control",
+    title="Smart Greenhouse Management",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -232,7 +232,7 @@ app_settings = get_settings()
 
 ui.run_with(
     app,
-    title="Smart Greenhouse Fleet",
+    title="Smart Greenhouse Management",
     storage_secret=app_settings.app.app_secret or "smart-greenhouse-dev-secret",
 )
 

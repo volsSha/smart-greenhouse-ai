@@ -1,4 +1,4 @@
-# Smart Greenhouse Fleet Control System - Project Goal
+# Smart Greenhouse Management System - Project Goal
 
 ## What
 

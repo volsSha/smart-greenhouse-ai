@@ -1,15 +1,15 @@
-# Ukrainian translations for Smart Greenhouse Fleet Control.
+# Ukrainian translations for Smart Greenhouse Management.
 msgid ""
 msgstr ""
-"Project-Id-Version: Smart Greenhouse Fleet Control 0.1.0\n"
+"Project-Id-Version: Smart Greenhouse Management 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-17 23:37+0300\n"
+"POT-Creation-Date: 2026-05-18 13:08+0300\n"
 "PO-Revision-Date: 2026-05-08 00:00+0000\n"
-"Last-Translator: Smart Greenhouse Fleet Control\n"
+"Last-Translator: Smart Greenhouse Management\n"
 "Language: uk\n"
 "Language-Team: Ukrainian\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && "
-"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -93,11 +93,13 @@ msgstr "Зони не налаштовано"
 msgid "Create zones for this greenhouse before using the operator panel."
 msgstr "Створіть зони для цієї теплиці перед використанням панелі оператора."
 
-#: app/ui/components/language_switcher.py:13 app/ui/components/language_switcher.py:24
+#: app/ui/components/language_switcher.py:13
+#: app/ui/components/language_switcher.py:24
 msgid "Ukrainian"
 msgstr "Українська"
 
-#: app/ui/components/language_switcher.py:14 app/ui/components/language_switcher.py:24
+#: app/ui/components/language_switcher.py:14
+#: app/ui/components/language_switcher.py:24
 msgid "English"
 msgstr "Англійська"
 
@@ -127,12 +129,13 @@ msgstr "Шлях до прошивки: firmware/wokwi-greenhouse-zone/main.py"
 
 #: app/ui/components/mqtt_status_panel.py:57
 msgid ""
-"Use a public MQTT broker, then paste its host, port, and credentials into firmware"
-"/wokwi-greenhouse-zone/config.py for the hosted Wokwi MicroPython simulator."
+"Use a public MQTT broker, then paste its host, port, and credentials into"
+" firmware/wokwi-greenhouse-zone/config.py for the hosted Wokwi "
+"MicroPython simulator."
 msgstr ""
-"Використайте публічний MQTT-брокер, потім вставте його хост, порт і облікові дані у "
-"firmware/wokwi-greenhouse-zone/config.py для розміщеного симулятора Wokwi "
-"MicroPython."
+"Використайте публічний MQTT-брокер, потім вставте його хост, порт і "
+"облікові дані у firmware/wokwi-greenhouse-zone/config.py для розміщеного "
+"симулятора Wokwi MicroPython."
 
 #: app/ui/components/proposed_action_card.py:30
 msgid "Pending Approval"
@@ -163,16 +166,19 @@ msgstr "Помилка"
 msgid "for {duration}s"
 msgstr "на {duration} с"
 
-#: app/ui/components/proposed_action_card.py:93 app/ui/components/zone_control_drawer.py:70
+#: app/ui/components/proposed_action_card.py:93
+#: app/ui/components/zone_control_drawer.py:70
 #, python-brace-format
 msgid "Mode: {mode}"
 msgstr "Режим: {mode}"
 
 #: app/ui/components/proposed_action_card.py:96
 msgid ""
-"This proposal was created under a different control mode than the current project "
-"setting."
-msgstr "Цю пропозицію створено в іншому режимі керування, ніж поточне налаштування проєкту."
+"This proposal was created under a different control mode than the current"
+" project setting."
+msgstr ""
+"Цю пропозицію створено в іншому режимі керування, ніж поточне "
+"налаштування проєкту."
 
 #: app/ui/components/proposed_action_card.py:124
 msgid "Approve and Execute"
@@ -210,7 +216,8 @@ msgstr "{count} зон"
 msgid "Temp"
 msgstr "Темп."
 
-#: app/ui/components/telemetry_cards.py:145 app/ui/components/telemetry_cards.py:187
+#: app/ui/components/telemetry_cards.py:145
+#: app/ui/components/telemetry_cards.py:187
 #: app/ui/components/telemetry_charts.py:179
 msgid "Humidity"
 msgstr "Вологість"
@@ -219,45 +226,57 @@ msgstr "Вологість"
 msgid "Soil"
 msgstr "Ґрунт"
 
-#: app/ui/components/telemetry_cards.py:153 app/ui/components/telemetry_cards.py:202
+#: app/ui/components/telemetry_cards.py:153
+#: app/ui/components/telemetry_cards.py:202
 msgid "No recent data"
 msgstr "Немає нещодавніх даних"
 
-#: app/ui/components/telemetry_cards.py:186 app/ui/components/telemetry_charts.py:47
-#: app/ui/components/telemetry_charts.py:158 app/ui/components/telemetry_charts.py:160
+#: app/ui/components/telemetry_cards.py:186
+#: app/ui/components/telemetry_charts.py:47
+#: app/ui/components/telemetry_charts.py:158
+#: app/ui/components/telemetry_charts.py:160
 msgid "Temperature"
 msgstr "Температура"
 
-#: app/ui/components/telemetry_cards.py:188 app/ui/components/telemetry_charts.py:49
-#: app/ui/components/telemetry_charts.py:196 app/ui/components/telemetry_charts.py:198
+#: app/ui/components/telemetry_cards.py:188
+#: app/ui/components/telemetry_charts.py:49
+#: app/ui/components/telemetry_charts.py:196
+#: app/ui/components/telemetry_charts.py:198
 msgid "Soil Moisture"
 msgstr "Вологість ґрунту"
 
-#: app/ui/components/telemetry_cards.py:189 app/ui/components/telemetry_charts.py:50
+#: app/ui/components/telemetry_cards.py:189
+#: app/ui/components/telemetry_charts.py:50
 msgid "CO2"
 msgstr "CO2"
 
-#: app/ui/components/telemetry_cards.py:190 app/ui/components/telemetry_charts.py:51
+#: app/ui/components/telemetry_cards.py:190
+#: app/ui/components/telemetry_charts.py:51
 msgid "Light"
 msgstr "Освітлення"
 
-#: app/ui/components/telemetry_cards.py:191 app/ui/components/telemetry_charts.py:52
+#: app/ui/components/telemetry_cards.py:191
+#: app/ui/components/telemetry_charts.py:52
 msgid "Fan"
 msgstr "Вентилятор"
 
-#: app/ui/components/telemetry_cards.py:192 app/ui/components/telemetry_charts.py:53
+#: app/ui/components/telemetry_cards.py:192
+#: app/ui/components/telemetry_charts.py:53
 msgid "Pump"
 msgstr "Насос"
 
-#: app/ui/components/telemetry_cards.py:193 app/ui/components/telemetry_charts.py:54
+#: app/ui/components/telemetry_cards.py:193
+#: app/ui/components/telemetry_charts.py:54
 msgid "Heater"
 msgstr "Обігрівач"
 
-#: app/ui/components/telemetry_cards.py:194 app/ui/components/telemetry_charts.py:55
+#: app/ui/components/telemetry_cards.py:194
+#: app/ui/components/telemetry_charts.py:55
 msgid "Lamp"
 msgstr "Лампа"
 
-#: app/ui/components/telemetry_charts.py:48 app/ui/components/telemetry_charts.py:177
+#: app/ui/components/telemetry_charts.py:48
+#: app/ui/components/telemetry_charts.py:177
 msgid "Air Humidity"
 msgstr "Вологість повітря"
 
@@ -311,7 +330,9 @@ msgstr "Вибрана зона"
 
 #: app/ui/components/zone_control_drawer.py:58
 msgid "Choose a zone from the overview map to inspect and propose changes."
-msgstr "Виберіть зону на оглядовій мапі, щоб переглянути її та запропонувати зміни."
+msgstr ""
+"Виберіть зону на оглядовій мапі, щоб переглянути її та запропонувати "
+"зміни."
 
 #: app/ui/components/zone_control_drawer.py:59
 msgid "Select a zone"
@@ -327,11 +348,11 @@ msgstr "Керування пропозиціями"
 
 #: app/ui/components/zone_control_drawer.py:71
 msgid ""
-"Buttons and sliders create proposals only; approval is still required before "
-"execution."
+"Buttons and sliders create proposals only; approval is still required "
+"before execution."
 msgstr ""
-"Кнопки та повзунки лише створюють пропозиції; перед виконанням усе одно потрібне "
-"затвердження."
+"Кнопки та повзунки лише створюють пропозиції; перед виконанням усе одно "
+"потрібне затвердження."
 
 #: app/ui/components/zone_control_drawer.py:80
 msgid "Telemetry"
@@ -367,12 +388,12 @@ msgid "No pending proposals for this zone."
 msgstr "Для цієї зони немає пропозицій в очікуванні."
 
 #: app/ui/layouts/main_layout.py:55
-msgid "Smart Greenhouse Fleet"
-msgstr "Флот розумних теплиць"
+msgid "Smart Greenhouse Management"
+msgstr "Смарт керування теплицями"
 
 #: app/ui/layouts/main_layout.py:56
-msgid "Fleet Control System"
-msgstr "Система керування флотом"
+msgid "Greenhouse Control System"
+msgstr "Система керування теплицями"
 
 #: app/ui/layouts/main_layout.py:61
 msgid "Logout"
@@ -392,11 +413,11 @@ msgstr "Повідомлень ще немає"
 
 #: app/ui/pages/ai_chat.py:202
 msgid ""
-"Ask about greenhouse health, sensor anomalies, recent trends, or safe actuator "
-"actions."
+"Ask about greenhouse health, sensor anomalies, recent trends, or safe "
+"actuator actions."
 msgstr ""
-"Запитуйте про стан теплиць, аномалії сенсорів, нещодавні тенденції або безпечні дії "
-"виконавчих пристроїв."
+"Запитуйте про стан теплиць, аномалії сенсорів, нещодавні тенденції або "
+"безпечні дії виконавчих пристроїв."
 
 #: app/ui/pages/ai_chat.py:238
 msgid "Proposed Actions"
@@ -408,11 +429,11 @@ msgstr "AI-асистент"
 
 #: app/ui/pages/ai_chat.py:253
 msgid ""
-"Ask scoped operational questions and review transparent tool calls before approving "
-"physical actions."
+"Ask scoped operational questions and review transparent tool calls before"
+" approving physical actions."
 msgstr ""
-"Ставте операційні запитання в межах вибраної області та переглядайте прозорі виклики "
-"інструментів перед затвердженням фізичних дій."
+"Ставте операційні запитання в межах вибраної області та переглядайте "
+"прозорі виклики інструментів перед затвердженням фізичних дій."
 
 #: app/ui/pages/ai_chat.py:255
 msgid "Intelligence"
@@ -423,8 +444,8 @@ msgid "Conversation Context"
 msgstr "Контекст розмови"
 
 #: app/ui/pages/ai_chat.py:267
-msgid "Select a saved thread or start a fresh fleet-wide chat."
-msgstr "Виберіть збережену гілку або почніть новий чат для всього флоту."
+msgid "Select a saved thread or start a fresh all-greenhouses chat."
+msgstr "Виберіть збережену гілку або почніть новий чат для всіх теплиць."
 
 #: app/ui/pages/ai_chat.py:270
 msgid "Conversation"
@@ -439,18 +460,22 @@ msgid "Operator Chat"
 msgstr "Чат оператора"
 
 #: app/ui/pages/ai_chat.py:276
-msgid "Responses include observations, recommendations, proposed actions, and tool traces."
+msgid ""
+"Responses include observations, recommendations, proposed actions, and "
+"tool traces."
 msgstr ""
-"Відповіді містять спостереження, рекомендації, запропоновані дії та трасування "
-"інструментів."
+"Відповіді містять спостереження, рекомендації, запропоновані дії та "
+"трасування інструментів."
 
-#: app/ui/pages/ai_chat.py:289 app/ui/pages/control.py:60 app/ui/pages/control.py:266
-#: app/ui/pages/zone_management.py:42 app/ui/pages/zone_management.py:144
+#: app/ui/pages/ai_chat.py:289 app/ui/pages/control.py:60
+#: app/ui/pages/control.py:266 app/ui/pages/zone_management.py:42
+#: app/ui/pages/zone_management.py:144
 msgid "Group"
 msgstr "Група"
 
-#: app/ui/pages/ai_chat.py:290 app/ui/pages/control.py:61 app/ui/pages/control.py:296
-#: app/ui/pages/zone_management.py:43 app/ui/pages/zone_management.py:160
+#: app/ui/pages/ai_chat.py:290 app/ui/pages/control.py:61
+#: app/ui/pages/control.py:296 app/ui/pages/zone_management.py:43
+#: app/ui/pages/zone_management.py:160
 msgid "Greenhouse"
 msgstr "Теплиця"
 
@@ -472,14 +497,16 @@ msgid "Send"
 msgstr "Надіслати"
 
 #: app/ui/pages/ai_chat.py:302
-msgid "Fleet-wide chat"
-msgstr "Чат для всього флоту"
+msgid "All-greenhouses chat"
+msgstr "Чат для всіх теплиць"
 
 #: app/ui/pages/ai_chat.py:311
-msgid "Saved scope contains unavailable entities. Clear or reselect scope before sending."
+msgid ""
+"Saved scope contains unavailable entities. Clear or reselect scope before"
+" sending."
 msgstr ""
-"Збережена область містить недоступні сутності. Очистіть або повторно виберіть область"
-" перед надсиланням."
+"Збережена область містить недоступні сутності. Очистіть або повторно "
+"виберіть область перед надсиланням."
 
 #: app/ui/pages/ai_chat.py:435
 msgid "Command approved and executed"
@@ -526,11 +553,11 @@ msgstr "Керування виконавчими пристроями"
 
 #: app/ui/pages/control.py:53
 msgid ""
-"Select greenhouse zones visually, propose bounded actuator changes, and keep approval"
-" as the safety gate."
+"Select greenhouse zones visually, propose bounded actuator changes, and "
+"keep approval as the safety gate."
 msgstr ""
-"Вибирайте зони теплиці візуально, пропонуйте обмежені зміни виконавчих пристроїв і "
-"залишайте затвердження захисним бар’єром."
+"Вибирайте зони теплиці візуально, пропонуйте обмежені зміни виконавчих "
+"пристроїв і залишайте затвердження захисним бар’єром."
 
 #: app/ui/pages/control.py:55
 msgid "Operator panel"
@@ -563,11 +590,11 @@ msgstr "Нещодавні результати команд"
 
 #: app/ui/pages/control.py:71
 msgid ""
-"Completed, rejected, failed, and expired commands remain secondary to selected-zone "
-"proposals."
+"Completed, rejected, failed, and expired commands remain secondary to "
+"selected-zone proposals."
 msgstr ""
-"Виконані, відхилені, невдалі та прострочені команди залишаються другорядними щодо "
-"пропозицій для вибраної зони."
+"Виконані, відхилені, невдалі та прострочені команди залишаються "
+"другорядними щодо пропозицій для вибраної зони."
 
 #: app/ui/pages/control.py:90
 msgid "Demo Group"
@@ -597,7 +624,7 @@ msgstr "Зелень"
 msgid "Tomato Batch"
 msgstr "Партія томатів"
 
-#: app/ui/pages/control.py:108
+#: app/ui/pages/control.py:108 app/ui/pages/zone_management.py:57
 msgid "Tomato"
 msgstr "Томат"
 
@@ -647,19 +674,19 @@ msgstr "Керування симулятором"
 
 #: app/ui/pages/control.py:156
 msgid ""
-"Approved commands are sent to the MQTT broker; physical device movement requires "
-"subscribed hardware."
+"Approved commands are sent to the MQTT broker; physical device movement "
+"requires subscribed hardware."
 msgstr ""
-"Затверджені команди надсилаються до MQTT-брокера; рух фізичних пристроїв потребує "
-"підписаного обладнання."
+"Затверджені команди надсилаються до MQTT-брокера; рух фізичних пристроїв "
+"потребує підписаного обладнання."
 
 #: app/ui/pages/control.py:158
 msgid ""
-"Simulator mode is selected, but the simulator is not running. Start it on the "
-"simulator page before proposing commands."
+"Simulator mode is selected, but the simulator is not running. Start it on"
+" the simulator page before proposing commands."
 msgstr ""
-"Вибрано режим симулятора, але симулятор не запущено. Запустіть його на сторінці "
-"симулятора перед створенням пропозицій команд."
+"Вибрано режим симулятора, але симулятор не запущено. Запустіть його на "
+"сторінці симулятора перед створенням пропозицій команд."
 
 #: app/ui/pages/control.py:164
 msgid "Select or create a greenhouse group before using the operator panel."
@@ -682,10 +709,12 @@ msgid "Control mode could not be loaded; proposals are disabled."
 msgstr "Не вдалося завантажити режим керування; пропозиції вимкнено."
 
 #: app/ui/pages/control.py:190
-msgid "Simulator is not running. Start it from the simulator page before proposing commands."
+msgid ""
+"Simulator is not running. Start it from the simulator page before "
+"proposing commands."
 msgstr ""
-"Симулятор не запущено. Запустіть його зі сторінки симулятора перед створенням "
-"пропозицій команд."
+"Симулятор не запущено. Запустіть його зі сторінки симулятора перед "
+"створенням пропозицій команд."
 
 #: app/ui/pages/control.py:206
 msgid "No recent completed commands"
@@ -770,8 +799,12 @@ msgid "Dashboard"
 msgstr "Панель керування"
 
 #: app/ui/pages/dashboard.py:134
-msgid "Live greenhouse telemetry, alerts, and zone trends for the active fleet group."
-msgstr "Поточна телеметрія теплиць, попередження та тенденції зон для активної групи флоту."
+msgid ""
+"Live greenhouse telemetry, alerts, and zone trends for the active fleet "
+"group."
+msgstr ""
+"Поточна телеметрія теплиць, попередження та тенденції зон для активної "
+"групи флоту."
 
 #: app/ui/pages/dashboard.py:136
 msgid "Operations"
@@ -782,10 +815,12 @@ msgid "No greenhouse groups available"
 msgstr "Немає доступних груп теплиць"
 
 #: app/ui/pages/dashboard.py:154
-msgid "Create a group or start the simulator after switching to Internal simulator mode."
+msgid ""
+"Create a group or start the simulator after switching to Internal "
+"simulator mode."
 msgstr ""
-"Створіть групу або запустіть симулятор після перемикання в режим внутрішнього "
-"симулятора."
+"Створіть групу або запустіть симулятор після перемикання в режим "
+"внутрішнього симулятора."
 
 #: app/ui/pages/dashboard.py:177
 msgid "Error loading data"
@@ -940,10 +975,12 @@ msgid "Plants"
 msgstr "Рослини"
 
 #: app/ui/pages/plants.py:17
-msgid "Plan crop profiles, track batches, and connect growth stages to greenhouse zones."
+msgid ""
+"Plan crop profiles, track batches, and connect growth stages to "
+"greenhouse zones."
 msgstr ""
-"Плануйте профілі культур, відстежуйте партії та пов’язуйте стадії росту із зонами "
-"теплиць."
+"Плануйте профілі культур, відстежуйте партії та пов’язуйте стадії росту "
+"із зонами теплиць."
 
 #: app/ui/pages/plants.py:19
 msgid "Crop planning"
@@ -959,11 +996,11 @@ msgstr "Багаторазові цільові умови середовища 
 
 #: app/ui/pages/plants.py:29
 msgid ""
-"Profiles will define preferred temperature, humidity, soil moisture, CO2, and light "
-"ranges."
+"Profiles will define preferred temperature, humidity, soil moisture, CO2,"
+" and light ranges."
 msgstr ""
-"Профілі визначатимуть бажані діапазони температури, вологості, вологості ґрунту, CO2 "
-"та освітлення."
+"Профілі визначатимуть бажані діапазони температури, вологості, вологості "
+"ґрунту, CO2 та освітлення."
 
 #: app/ui/pages/plants.py:30 app/ui/pages/plants.py:39
 msgid "Planned"
@@ -978,7 +1015,9 @@ msgid "Operational batches assigned to zones across the fleet."
 msgstr "Операційні партії, призначені зонам у всьому флоті."
 
 #: app/ui/pages/plants.py:38
-msgid "Batch tracking will connect planting dates, growth stages, and zone assignments."
+msgid ""
+"Batch tracking will connect planting dates, growth stages, and zone "
+"assignments."
 msgstr "Відстеження партій пов’яже дати посадки, стадії росту та призначення зон."
 
 #: app/ui/pages/plants.py:41
@@ -986,16 +1025,20 @@ msgid "Coming Next"
 msgstr "Далі"
 
 #: app/ui/pages/plants.py:41
-msgid "This page is ready for the full plant-management workflow without looking unfinished."
-msgstr "Ця сторінка готова для повного процесу керування рослинами й не виглядає незавершеною."
+msgid ""
+"This page is ready for the full plant-management workflow without looking"
+" unfinished."
+msgstr ""
+"Ця сторінка готова для повного процесу керування рослинами й не виглядає "
+"незавершеною."
 
 #: app/ui/pages/plants.py:42
 msgid ""
-"Use the dashboard and simulator today; crop-specific planning can be added here when "
-"APIs are available."
+"Use the dashboard and simulator today; crop-specific planning can be "
+"added here when APIs are available."
 msgstr ""
-"Поки використовуйте панель і симулятор; планування для конкретних культур можна "
-"додати тут, коли API буде доступне."
+"Поки використовуйте панель і симулятор; планування для конкретних культур"
+" можна додати тут, коли API буде доступне."
 
 #: app/ui/pages/rag.py:19
 msgid "Knowledge Base"
@@ -1003,7 +1046,9 @@ msgstr "База знань"
 
 #: app/ui/pages/rag.py:20
 msgid "Manage agronomic documents that ground AI answers and semantic search."
-msgstr "Керуйте агрономічними документами, що підкріплюють AI-відповіді та семантичний пошук."
+msgstr ""
+"Керуйте агрономічними документами, що підкріплюють AI-відповіді та "
+"семантичний пошук."
 
 #: app/ui/pages/rag.py:22
 msgid "RAG"
@@ -1023,7 +1068,9 @@ msgstr "Документів ще немає"
 
 #: app/ui/pages/rag.py:49
 msgid "Add agronomic notes, manuals, or documentation to ground AI answers."
-msgstr "Додайте агрономічні нотатки, посібники або документацію, щоб підкріпити AI-відповіді."
+msgstr ""
+"Додайте агрономічні нотатки, посібники або документацію, щоб підкріпити "
+"AI-відповіді."
 
 #: app/ui/pages/rag.py:60
 #, python-brace-format
@@ -1093,10 +1140,12 @@ msgid "Reindex"
 msgstr "Переіндексувати"
 
 #: app/ui/pages/rag.py:141
-msgid "Re-chunk and re-embed all documents. Use after changing the embedding model."
+msgid ""
+"Re-chunk and re-embed all documents. Use after changing the embedding "
+"model."
 msgstr ""
-"Повторно розбийте та переіндексуйте всі документи. Використовуйте після зміни моделі "
-"ембедингів."
+"Повторно розбийте та переіндексуйте всі документи. Використовуйте після "
+"зміни моделі ембедингів."
 
 #: app/ui/pages/rag.py:158
 #, python-brace-format
@@ -1198,11 +1247,11 @@ msgstr "Модель ембедингів"
 
 #: app/ui/pages/settings.py:43
 msgid ""
-"The embedding model is fixed by configuration. Changing it requires reindexing all "
-"RAG documents."
+"The embedding model is fixed by configuration. Changing it requires "
+"reindexing all RAG documents."
 msgstr ""
-"Модель ембедингів фіксується конфігурацією. Її зміна потребує повторної індексації "
-"всіх документів RAG."
+"Модель ембедингів фіксується конфігурацією. Її зміна потребує повторної "
+"індексації всіх документів RAG."
 
 #: app/ui/pages/settings.py:47 app/ui/pages/settings.py:68
 msgid "Loading..."
@@ -1226,11 +1275,11 @@ msgstr "Внутрішній симулятор"
 
 #: app/ui/pages/settings.py:57
 msgid ""
-"MQTT mode sends approved commands to subscribed remote devices. Simulator mode "
-"changes the internal simulator state."
+"MQTT mode sends approved commands to subscribed remote devices. Simulator"
+" mode changes the internal simulator state."
 msgstr ""
-"Режим MQTT надсилає затверджені команди підписаним віддаленим пристроям. Режим "
-"симулятора змінює стан внутрішнього симулятора."
+"Режим MQTT надсилає затверджені команди підписаним віддаленим пристроям. "
+"Режим симулятора змінює стан внутрішнього симулятора."
 
 #: app/ui/pages/settings.py:64
 msgid "Save Control Mode"
@@ -1284,7 +1333,8 @@ msgstr "Контекст"
 msgid "Selected:"
 msgstr "Обрано:"
 
-#: app/ui/pages/settings.py:122 app/ui/pages/settings.py:189 app/ui/pages/settings.py:266
+#: app/ui/pages/settings.py:122 app/ui/pages/settings.py:189
+#: app/ui/pages/settings.py:266
 msgid "None"
 msgstr "Немає"
 
@@ -1421,11 +1471,11 @@ msgstr "Симулятор"
 
 #: app/ui/pages/simulator.py:114
 msgid ""
-"Generate realistic telemetry and actuator state changes for demos, validation, and "
-"operator training."
+"Generate realistic telemetry and actuator state changes for demos, "
+"validation, and operator training."
 msgstr ""
-"Генеруйте реалістичну телеметрію та зміни стану виконавчих пристроїв для демо, "
-"валідації та навчання операторів."
+"Генеруйте реалістичну телеметрію та зміни стану виконавчих пристроїв для "
+"демо, валідації та навчання операторів."
 
 #: app/ui/pages/simulator.py:116
 msgid "Telemetry lab"
@@ -1465,7 +1515,9 @@ msgstr "Конфігурація запуску"
 
 #: app/ui/pages/simulator.py:160
 msgid "Scale the generated fleet and choose local simulation or external MQTT."
-msgstr "Масштабуйте згенерований флот і виберіть локальну симуляцію або зовнішній MQTT."
+msgstr ""
+"Масштабуйте згенерований флот і виберіть локальну симуляцію або зовнішній"
+" MQTT."
 
 #: app/ui/pages/simulator.py:162
 msgid "Groups"
@@ -1502,8 +1554,8 @@ msgstr "Візуалізація зони"
 #: app/ui/pages/simulator.py:175
 msgid "Animated zone and actuator feedback for the active telemetry stream."
 msgstr ""
-"Анімований зворотний зв’язок зони та виконавчих пристроїв для активного потоку "
-"телеметрії."
+"Анімований зворотний зв’язок зони та виконавчих пристроїв для активного "
+"потоку телеметрії."
 
 #: app/ui/pages/simulator.py:179
 msgid "Start the simulator to see zone data."
@@ -1511,11 +1563,11 @@ msgstr "Запустіть симулятор, щоб побачити дані 
 
 #: app/ui/pages/simulator.py:250
 msgid ""
-"Use a public MQTT broker, then configure firmware/wokwi-greenhouse-zone/main.py and "
-"config.py in hosted Wokwi."
+"Use a public MQTT broker, then configure firmware/wokwi-greenhouse-"
+"zone/main.py and config.py in hosted Wokwi."
 msgstr ""
-"Використайте публічний MQTT-брокер, потім налаштуйте firmware/wokwi-greenhouse-"
-"zone/main.py і config.py у розміщеному Wokwi."
+"Використайте публічний MQTT-брокер, потім налаштуйте firmware/wokwi-"
+"greenhouse-zone/main.py і config.py у розміщеному Wokwi."
 
 #: app/ui/pages/simulator.py:268
 #, python-brace-format
@@ -1524,19 +1576,20 @@ msgstr "Сценарій змінено на {scenario}"
 
 #: app/ui/pages/simulator.py:275
 msgid ""
-"The internal simulator cannot be started in Wokwi / MQTT mode. Switch Mode to "
-"Internal Simulator first."
+"The internal simulator cannot be started in Wokwi / MQTT mode. Switch "
+"Mode to Internal Simulator first."
 msgstr ""
-"Внутрішній симулятор не можна запустити в режимі Wokwi / MQTT. Спочатку перемкніть "
-"режим на внутрішній симулятор."
+"Внутрішній симулятор не можна запустити в режимі Wokwi / MQTT. Спочатку "
+"перемкніть режим на внутрішній симулятор."
 
 #: app/ui/pages/simulator.py:294
 msgid ""
-"Simulator cannot run while MQTT remote devices mode is selected. Switch control mode "
-"to Internal simulator in Settings first."
+"Simulator cannot run while MQTT remote devices mode is selected. Switch "
+"control mode to Internal simulator in Settings first."
 msgstr ""
-"Симулятор не може працювати, коли вибрано режим віддалених MQTT-пристроїв. Спочатку "
-"перемкніть режим керування на внутрішній симулятор у налаштуваннях."
+"Симулятор не може працювати, коли вибрано режим віддалених "
+"MQTT-пристроїв. Спочатку перемкніть режим керування на внутрішній "
+"симулятор у налаштуваннях."
 
 #: app/ui/pages/simulator.py:312
 msgid "Simulator started successfully"
@@ -1586,11 +1639,11 @@ msgstr "Зони та рослини"
 
 #: app/ui/pages/zone_management.py:35
 msgid ""
-"Register real zones, inspect simulator-generated zones, and copy Wokwi MQTT "
-"identifiers."
+"Register real zones, inspect simulator-generated zones, and copy Wokwi "
+"MQTT identifiers."
 msgstr ""
-"Реєструйте реальні зони, переглядайте зони, створені симулятором, і копіюйте "
-"MQTT-ідентифікатори для Wokwi."
+"Реєструйте реальні зони, переглядайте зони, створені симулятором, і "
+"копіюйте MQTT-ідентифікатори для Wokwi."
 
 #: app/ui/pages/zone_management.py:37
 msgid "Registry"
@@ -1606,15 +1659,19 @@ msgstr "Створити зону"
 
 #: app/ui/pages/zone_management.py:46
 msgid ""
-"Real zones are used by MQTT devices; simulator zones are created automatically when "
-"the simulator starts."
+"Real zones are used by MQTT devices; simulator zones are created "
+"automatically when the simulator starts."
 msgstr ""
-"Реальні зони використовуються MQTT-пристроями; симуляторні зони створюються "
-"автоматично під час запуску симулятора."
+"Реальні зони використовуються MQTT-пристроями; симуляторні зони "
+"створюються автоматично під час запуску симулятора."
 
 #: app/ui/pages/zone_management.py:48
 msgid "Zone name"
 msgstr "Назва зони"
+
+#: app/ui/pages/zone_management.py:48
+msgid "north-bed"
+msgstr "північна-грядка"
 
 #: app/ui/pages/zone_management.py:49
 msgid "Description"
@@ -1646,11 +1703,17 @@ msgstr "Створити партію рослин"
 
 #: app/ui/pages/zone_management.py:53
 msgid "Attach plants to a zone so the control page can show plant context."
-msgstr "Прив’яжіть рослини до зони, щоб сторінка керування показувала контекст рослин."
+msgstr ""
+"Прив’яжіть рослини до зони, щоб сторінка керування показувала контекст "
+"рослин."
 
 #: app/ui/pages/zone_management.py:56
 msgid "Batch name"
 msgstr "Назва партії"
+
+#: app/ui/pages/zone_management.py:56
+msgid "Tomato batch"
+msgstr "Партія томатів"
 
 #: app/ui/pages/zone_management.py:57
 msgid "Species"
@@ -1659,6 +1722,10 @@ msgstr "Вид"
 #: app/ui/pages/zone_management.py:58
 msgid "Growth stage"
 msgstr "Стадія росту"
+
+#: app/ui/pages/zone_management.py:58
+msgid "vegetative"
+msgstr "вегетативна"
 
 #: app/ui/pages/zone_management.py:59
 msgid "Add plants"
@@ -1670,11 +1737,11 @@ msgstr "Налаштування Wokwi / MQTT"
 
 #: app/ui/pages/zone_management.py:61
 msgid ""
-"Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and publish "
-"telemetry to the matching topic."
+"Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and "
+"publish telemetry to the matching topic."
 msgstr ""
-"Використайте ці ідентифікатори у firmware/wokwi-greenhouse-zone/config.py і "
-"публікуйте телеметрію у відповідний топік."
+"Використайте ці ідентифікатори у firmware/wokwi-greenhouse-zone/config.py"
+" і публікуйте телеметрію у відповідний топік."
 
 #: app/ui/pages/zone_management.py:63
 msgid "1. Use a public MQTT broker, such as Mosquitto on a VPS."
@@ -1686,19 +1753,19 @@ msgstr "2. Скопіюйте MQTT_HOST, MQTT_PORT, MQTT_USER і MQTT_PASSWORD �
 
 #: app/ui/pages/zone_management.py:65
 msgid ""
-"3. Set GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME, and MQTT_TOKEN from a real "
-"zone below."
+"3. Set GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME, and MQTT_TOKEN "
+"from a real zone below."
 msgstr ""
-"3. Встановіть GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME і MQTT_TOKEN з реальної"
-" зони нижче."
+"3. Встановіть GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME і "
+"MQTT_TOKEN з реальної зони нижче."
 
 #: app/ui/pages/zone_management.py:66
 msgid ""
-"4. Wokwi sends telemetry; approved MQTT-mode commands are published back to the zone "
-"command topic."
+"4. Wokwi sends telemetry; approved MQTT-mode commands are published back "
+"to the zone command topic."
 msgstr ""
-"4. Wokwi надсилає телеметрію; затверджені команди MQTT-режиму публікуються назад у "
-"командний топік зони."
+"4. Wokwi надсилає телеметрію; затверджені команди MQTT-режиму "
+"публікуються назад у командний топік зони."
 
 #: app/ui/pages/zone_management.py:69
 msgid "Registered Zones"
@@ -1706,11 +1773,11 @@ msgstr "Зареєстровані зони"
 
 #: app/ui/pages/zone_management.py:69
 msgid ""
-"Simulator-generated rows survive page refresh and can be deleted here when no longer "
-"needed."
+"Simulator-generated rows survive page refresh and can be deleted here "
+"when no longer needed."
 msgstr ""
-"Рядки, створені симулятором, зберігаються після оновлення сторінки; їх можна видалити"
-" тут, коли вони більше не потрібні."
+"Рядки, створені симулятором, зберігаються після оновлення сторінки; їх "
+"можна видалити тут, коли вони більше не потрібні."
 
 #: app/ui/pages/zone_management.py:112
 msgid "Select a greenhouse before managing zones."
@@ -1721,8 +1788,12 @@ msgid "No zones yet"
 msgstr "Зон ще немає"
 
 #: app/ui/pages/zone_management.py:115
-msgid "Create a real zone here or start the simulator to provision simulator zones."
-msgstr "Створіть тут реальну зону або запустіть симулятор, щоб підготувати симуляторні зони."
+msgid ""
+"Create a real zone here or start the simulator to provision simulator "
+"zones."
+msgstr ""
+"Створіть тут реальну зону або запустіть симулятор, щоб підготувати "
+"симуляторні зони."
 
 #: app/ui/pages/zone_management.py:124
 msgid "Real MQTT"
@@ -1775,103 +1846,4 @@ msgstr "Не вдалося видалити зону: {error}"
 #: app/ui/pages/zone_management.py:247
 msgid "Zone deleted"
 msgstr "Зону видалено"
-
-#~ msgid "label"
-#~ msgstr ""
-
-#~ msgid "description"
-#~ msgstr ""
-
-#~ msgid "Menu"
-#~ msgstr "Меню"
-
-#~ msgid "AI Chat"
-#~ msgstr "AI-чат"
-
-#~ msgid "Unknown error"
-#~ msgstr "Невідома помилка"
-
-#~ msgid "Ask a question about your greenhouses, zones, or sensor data."
-#~ msgstr "Поставте запитання про теплиці, зони або дані сенсорів."
-
-#~ msgid "Group ID"
-#~ msgstr "ID групи"
-
-#~ msgid "Propose, validate, approve, and execute actuator commands."
-#~ msgstr "Пропонуйте, перевіряйте, затверджуйте та виконуйте команди виконавчих пристроїв."
-
-#~ msgid "Actuator"
-#~ msgstr "Виконавчий пристрій"
-
-#~ msgid "Action"
-#~ msgstr "Дія"
-
-#~ msgid "Value"
-#~ msgstr "Значення"
-
-#~ msgid "Reason"
-#~ msgstr "Причина"
-
-#~ msgid "Manual greenhouse adjustment"
-#~ msgstr "Ручне налаштування теплиці"
-
-#~ msgid "Propose"
-#~ msgstr "Запропонувати"
-
-#~ msgid "Pending Commands"
-#~ msgstr "Команди в очікуванні"
-
-#~ msgid "Invalid command form: {error}"
-#~ msgstr "Некоректна форма команди: {error}"
-
-#~ msgid "{prefix}: {error}"
-#~ msgstr "{prefix}: {error}"
-
-#~ msgid "Propose failed"
-#~ msgstr "Не вдалося запропонувати"
-
-#~ msgid "Enter a valid Group ID to load commands."
-#~ msgstr "Введіть коректний ID групи, щоб завантажити команди."
-
-#~ msgid "No pending commands."
-#~ msgstr "Немає команд в очікуванні."
-
-#~ msgid "Command Logs"
-#~ msgstr "Журнали команд"
-
-#~ msgid "Audit log of all actuator commands with filtering and search."
-#~ msgstr "Журнал аудиту всіх команд виконавчих пристроїв із фільтрацією та пошуком."
-
-#~ msgid "Status"
-#~ msgstr "Статус"
-
-#~ msgid "Source"
-#~ msgstr "Джерело"
-
-#~ msgid "Command History"
-#~ msgstr "Історія команд"
-
-#~ msgid "Placeholder -- full logs UI will be implemented in a later unit."
-#~ msgstr "Заповнювач -- повний інтерфейс журналів буде реалізовано пізніше."
-
-#~ msgid "Manage reusable environmental condition profiles for different crops."
-#~ msgstr "Керуйте багаторазовими профілями умов середовища для різних культур."
-
-#~ msgid "Placeholder -- profiles management will appear here."
-#~ msgstr "Заповнювач -- керування профілями з’явиться тут."
-
-#~ msgid "Track growing batches across greenhouse zones."
-#~ msgstr "Відстежуйте партії вирощування в зонах теплиць."
-
-#~ msgid "Placeholder -- batch management will appear here."
-#~ msgstr "Заповнювач -- керування партіями з’явиться тут."
-
-#~ msgid "Placeholder -- full plant management UI will be implemented."
-#~ msgstr "Заповнювач -- повний інтерфейс керування рослинами буде реалізовано."
-
-#~ msgid "Control the telemetry data simulator for testing and demos."
-#~ msgstr "Керуйте симулятором телеметричних даних для тестування та демонстрацій."
-
-#~ msgid "Active Scenario"
-#~ msgstr "Активний сценарій"
 

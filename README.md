@@ -1,4 +1,4 @@
-# Smart Greenhouse Fleet Control
+# Smart Greenhouse Management
 
 FastAPI, NiceGUI, MQTT, PostgreSQL/pgvector, InfluxDB, and AI-assisted greenhouse fleet monitoring.
 
