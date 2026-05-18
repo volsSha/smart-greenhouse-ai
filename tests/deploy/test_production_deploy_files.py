@@ -52,6 +52,14 @@ def test_production_image_allows_nicegui_storage_for_non_root_user() -> None:
     assert "RUN mkdir -p /app/.nicegui && chown -R appuser:appuser /app/.nicegui" in dockerfile
 
 
+def test_production_image_compiles_gettext_catalogs() -> None:
+    dockerfile = read(ROOT / "Dockerfile")
+
+    assert "RUN uv pip install --python /opt/venv/bin/python babel" in dockerfile
+    assert "RUN /opt/venv/bin/pybabel compile -d locales" in dockerfile
+    assert "COPY --from=builder --chown=appuser:appuser /build/locales ./locales/" in dockerfile
+
+
 def test_production_app_uses_configured_api_base_url() -> None:
     compose = read(PROD / "compose.production.yml")
 

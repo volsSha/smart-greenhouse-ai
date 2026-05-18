@@ -34,3 +34,8 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 - Check `/logs` first when debugging API, UI, or AI command failures; it displays persisted `debug_log` entries.
 - For failed AI commands, inspect `debug_log` rows with `level="error"`, `component="ai_agent"`, and `event_type="ai_chat_failed"`.
 - Correlate error-log entries with AI conversation messages and `ai_tool_calls` when the failure involves tool execution.
+
+## App-wide Testing
+
+- When asked to test the whole app or all features, use `docs/APP_TEST_CHECKLIST.md` as the minimal feature checklist.
+- For production app-wide tests, verify behavior through the deployed domain/nginx route; use localhost or internal Docker requests only as diagnostics.
