@@ -12,6 +12,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from app.schemas.commands import CommandPropose
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -45,6 +46,7 @@ def _make_fake_command(**overrides) -> SimpleNamespace:
         "valid_until": datetime.now(timezone.utc),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
+        "mode": "mqtt",
     }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -102,6 +104,7 @@ class TestProposeEndpoint:
         cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
+            patch("app.api.commands.ModelSettingsRepository") as MockSettingsRepo,
             patch(
                 "app.services.command_service.CommandRepository.create",
                 new_callable=AsyncMock,
@@ -113,6 +116,7 @@ class TestProposeEndpoint:
                 return_value=_make_fake_command(status="validated"),
             ),
         ):
+            MockSettingsRepo.return_value.bootstrap_settings = AsyncMock(return_value=SimpleNamespace(control_mode="mqtt"))
             transport = ASGITransport(app=cmd_test_app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
                 response = await client.post(
@@ -149,6 +153,7 @@ class TestProposeEndpoint:
         cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
 
         with (
+            patch("app.api.commands.ModelSettingsRepository") as MockSettingsRepo,
             patch(
                 "app.services.command_service.CommandRepository.create",
                 new_callable=AsyncMock,
@@ -160,6 +165,7 @@ class TestProposeEndpoint:
                 return_value=fake_cmd,
             ),
         ):
+            MockSettingsRepo.return_value.bootstrap_settings = AsyncMock(return_value=SimpleNamespace(control_mode="mqtt"))
             transport = ASGITransport(app=cmd_test_app)
             async with AsyncClient(transport=transport, base_url="http://test") as client:
                 response = await client.post(
@@ -177,6 +183,39 @@ class TestProposeEndpoint:
         data = response.json()
         assert data["status"] == "proposed"
         assert data["validation_errors"] is not None
+
+    @pytest.mark.anyio
+    async def test_propose_uses_persisted_mode_over_payload_mode(self) -> None:
+        mock_session = _make_mock_session()
+        captured: dict[str, CommandPropose] = {}
+
+        async def _session_override():
+            yield mock_session
+
+        async def _capture_propose(self, data: CommandPropose):
+            captured["data"] = data
+            return _make_fake_command(status="validated", mode=data.mode)
+
+        cmd_test_app.dependency_overrides[get_db_session] = _session_override
+        cmd_test_app.dependency_overrides[get_command_publisher] = _publisher_override
+
+        payload = _make_propose_payload()
+        payload["mode"] = "mqtt"
+
+        with (
+            patch("app.api.commands.ModelSettingsRepository") as MockSettingsRepo,
+            patch("app.api.commands.CommandService.propose", new=_capture_propose),
+        ):
+            MockSettingsRepo.return_value.bootstrap_settings = AsyncMock(return_value=SimpleNamespace(control_mode="simulator"))
+            transport = ASGITransport(app=cmd_test_app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                response = await client.post("/api/commands/propose", json=payload)
+
+        cmd_test_app.dependency_overrides.clear()
+
+        assert response.status_code == 201
+        assert captured["data"].mode == "simulator"
+        assert response.json()["mode"] == "simulator"
 
 
 class TestApproveEndpoint:

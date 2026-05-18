@@ -9,13 +9,13 @@ date: 2026-05-08
 
 ## Summary
 
-Implement a comprehensive bilingual internationalization (i18n) system for the Smart Greenhouse Fleet Control application, enabling full Ukrainian and English language support across all UI components, pages, labels, and user-facing messages. The system will use Python's built-in gettext with Babel tooling, store user language preferences persistently, and provide a language switcher component for easy language toggling.
+Implement a comprehensive bilingual internationalization (i18n) system for the Smart Greenhouse Management application, enabling full Ukrainian and English language support across all UI components, pages, labels, and user-facing messages. The system will use Python's built-in gettext with Babel tooling, store user language preferences persistently, and provide a language switcher component for easy language toggling.
 
 ---
 
 ## Problem Frame
 
-The Smart Greenhouse Fleet Control application currently has all user-facing text hardcoded in English throughout the NiceGUI UI components and pages. Users who prefer Ukrainian language cannot use the application in their native language, limiting accessibility and user experience for Ukrainian-speaking users. As the application evolves, adding new features requires manual attention to language support, leading to inconsistent bilingual coverage and maintenance burden.
+The Smart Greenhouse Management application currently has all user-facing text hardcoded in English throughout the NiceGUI UI components and pages. Users who prefer Ukrainian language cannot use the application in their native language, limiting accessibility and user experience for Ukrainian-speaking users. As the application evolves, adding new features requires manual attention to language support, leading to inconsistent bilingual coverage and maintenance burden.
 
 ---
 
@@ -354,7 +354,7 @@ ui.button(_('Refresh'), on_click=handler)
 
 **Approach:**
 - Wrap all header and sidebar strings with `_()` function
-- Strings include: "Smart Greenhouse Fleet", "Fleet Control System", "Menu", "Operations", "Intelligence", "System", all navigation link text
+- Strings include: "Smart Greenhouse Management", "Greenhouse Control System", "Menu", "Operations", "Intelligence", "System", all navigation link text
 - Run `pybabel extract` to update template
 - Run `pybabel update` to merge into existing catalogs
 - Provide Ukrainian translations for all extracted strings

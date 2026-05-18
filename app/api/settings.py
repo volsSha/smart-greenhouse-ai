@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings as get_app_settings
@@ -12,6 +12,7 @@ from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.schemas.settings import (
     CatalogModelResponse,
     CatalogRefreshResponse,
+    ControlModeUpdateRequest,
     SettingsResponse,
     SettingsUpdateRequest,
 )
@@ -19,6 +20,7 @@ from app.services.openrouter_models import (
     OpenRouterModelCatalogError,
     OpenRouterModelsClient,
 )
+from app.api.simulator import stop_simulator_task
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
@@ -68,6 +70,25 @@ async def update_settings(
     settings = await repo.set_selected_chat_model(body.selected_chat_model)
     await session.commit()
 
+    return SettingsResponse.model_validate(settings)
+
+
+@router.put("/control-mode", response_model=SettingsResponse)
+async def update_control_mode(
+    body: ControlModeUpdateRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_db_session),
+) -> SettingsResponse:
+    """Update the project-wide actuator execution mode."""
+    repo = ModelSettingsRepository(session)
+    await repo.bootstrap_settings(
+        embedding_model=get_app_settings().openrouter.embedding_model,
+        embedding_dimension=get_app_settings().openrouter.embedding_dimension,
+    )
+    settings = await repo.set_control_mode(body.control_mode)
+    await session.commit()
+    if body.control_mode == "mqtt":
+        await stop_simulator_task(request.app.state)
     return SettingsResponse.model_validate(settings)
 
 

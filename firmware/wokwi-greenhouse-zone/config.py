@@ -1,15 +1,15 @@
 """Editable Wokwi MicroPython MQTT settings.
 
-For hosted Wokwi, expose the local Docker Mosquitto port with an ngrok TCP
-tunnel, then paste the generated host and port below. Keep secrets out of git.
+For hosted Wokwi, use a public MQTT broker such as Mosquitto on a VPS,
+then paste the broker host, port, and demo credentials below. Keep secrets out of git.
 """
 
 WIFI_SSID = "Wokwi-GUEST"
 WIFI_PASSWORD = ""
 
-# Replace these with the host and port from `ngrok tcp 11883`.
-MQTT_HOST = "0.tcp.ngrok.io"
-MQTT_PORT = 1883
+# Replace these with the public MQTT broker endpoint.
+MQTT_HOST = "mqtt.example.com"
+MQTT_PORT = 8883
 MQTT_USER = ""
 MQTT_PASSWORD = ""
 MQTT_KEEPALIVE_SECONDS = 60

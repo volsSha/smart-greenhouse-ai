@@ -13,6 +13,10 @@ COPY pyproject.toml uv.lock ./
 
 # Install dependencies into a virtual environment
 RUN uv sync --frozen --no-dev --no-install-project
+RUN uv pip install --python /opt/venv/bin/python babel
+
+COPY locales/ ./locales/
+RUN /opt/venv/bin/pybabel compile -d locales
 
 # ---- Stage 2: Runtime ----
 FROM python:3.13-slim AS runtime
@@ -29,9 +33,11 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy application source
-COPY app/ ./app/
-COPY locales/ ./locales/
-COPY pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser app/ ./app/
+COPY --from=builder --chown=appuser:appuser /build/locales ./locales/
+COPY --chown=appuser:appuser migrations/ ./migrations/
+COPY --chown=appuser:appuser alembic.ini pyproject.toml uv.lock ./
+RUN mkdir -p /app/.nicegui && chown -R appuser:appuser /app/.nicegui
 
 # Switch to non-root user
 USER appuser

@@ -38,9 +38,9 @@ class TelemetryReading(BaseModel):
     """A single sensor reading from a greenhouse zone.
 
     Attributes:
-        group_id: Fleet group identifier (e.g. ``"group-001"``).
-        greenhouse_id: Greenhouse within the group (e.g. ``"gh-001"``).
-        zone_id: Zone within the greenhouse (e.g. ``"zone-01"``).
+        group_id: Fleet group identifier (e.g. ``"group-001-vegetable-production"``).
+        greenhouse_id: Greenhouse within the group (e.g. ``"gh-001-tomatoes"``).
+        zone_id: Zone within the greenhouse (e.g. ``"zone-01-seedlings"``).
         sensor_id: Logical sensor identifier (e.g. ``"temp-01"``).
         metric: The measured quantity — must be one of ``VALID_METRICS``.
         value: Numeric sensor value.

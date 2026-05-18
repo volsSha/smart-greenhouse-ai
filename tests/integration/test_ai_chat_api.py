@@ -101,6 +101,7 @@ def _fake_tool_call(conversation_id: uuid.UUID) -> SimpleNamespace:
     )
 
 
+_SAMPLE_CONVERSATION_ID = uuid.uuid4()
 _SAMPLE_AI_RESPONSE = AIResponse(
     scope=AIScope(group_id="group-001"),
     status=AIResponseStatus.OK,
@@ -128,6 +129,7 @@ class TestChatEndpoint:
 
         with patch("app.api.ai_chat.GreenhouseAIAgent") as MockAgent:
             mock_agent_instance = MockAgent.return_value
+            mock_agent_instance.last_conversation_id = _SAMPLE_CONVERSATION_ID
             mock_agent_instance.chat = AsyncMock(return_value=_SAMPLE_AI_RESPONSE)
 
             transport = ASGITransport(app=ai_test_app)
@@ -148,6 +150,7 @@ class TestChatEndpoint:
         assert data["status"] == "ok"
         assert len(data["observations"]) == 1
         assert data["scope"]["group_id"] == "group-001"
+        assert data["conversation_id"] == str(_SAMPLE_CONVERSATION_ID)
 
     @pytest.mark.anyio
     async def test_chat_with_existing_conversation_id(self) -> None:
@@ -159,6 +162,7 @@ class TestChatEndpoint:
 
         with patch("app.api.ai_chat.GreenhouseAIAgent") as MockAgent:
             mock_agent_instance = MockAgent.return_value
+            mock_agent_instance.last_conversation_id = _SAMPLE_CONVERSATION_ID
             mock_agent_instance.chat = AsyncMock(return_value=_SAMPLE_AI_RESPONSE)
 
             transport = ASGITransport(app=ai_test_app)
@@ -207,6 +211,7 @@ class TestChatEndpoint:
 
         with patch("app.api.ai_chat.GreenhouseAIAgent") as MockAgent:
             mock_agent_instance = MockAgent.return_value
+            mock_agent_instance.last_conversation_id = _SAMPLE_CONVERSATION_ID
             mock_agent_instance.chat = AsyncMock(return_value=response_with_actions)
 
             transport = ASGITransport(app=ai_test_app)
@@ -233,6 +238,7 @@ class TestChatEndpoint:
 
         with patch("app.api.ai_chat.GreenhouseAIAgent") as MockAgent:
             mock_agent_instance = MockAgent.return_value
+            mock_agent_instance.last_conversation_id = _SAMPLE_CONVERSATION_ID
             mock_agent_instance.chat = AsyncMock(return_value=_SAMPLE_AI_RESPONSE)
 
             transport = ASGITransport(app=ai_test_app)

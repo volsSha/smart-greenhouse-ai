@@ -25,6 +25,8 @@ class EdgeNodeRepository:
         name: str,
         node_type: str,
         firmware_version: str | None = None,
+        mqtt_username: str | None = None,
+        mqtt_token: str | None = None,
     ) -> EdgeNode:
         """Create a new edge node."""
         node = EdgeNode(
@@ -33,6 +35,8 @@ class EdgeNodeRepository:
             name=name,
             node_type=node_type,
             firmware_version=firmware_version,
+            mqtt_username=mqtt_username,
+            mqtt_token=mqtt_token,
         )
         self.session.add(node)
         await self.session.flush()

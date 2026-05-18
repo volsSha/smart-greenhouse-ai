@@ -1,5 +1,7 @@
 """Application configuration using pydantic-settings with nested models."""
 
+from urllib.parse import quote
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,7 +19,9 @@ class DatabaseSettings(BaseSettings):
 
     @property
     def url(self) -> str:
-        return f"postgresql+asyncpg://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
+        user = quote(self.user, safe="")
+        password = quote(self.password, safe="")
+        return f"postgresql+asyncpg://{user}:{password}@{self.host}:{self.port}/{self.db}"
 
 
 class InfluxDBSettings(BaseSettings):
@@ -54,7 +58,7 @@ class OpenRouterSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="OPENROUTER_", extra="ignore")
 
     api_key: str = ""
-    model: str = "anthropic/claude-sonnet-4"
+    model: str = "google/gemini-3.1-flash-lite"
     base_url: str = "https://openrouter.ai/api/v1"
     embedding_model: str = "openai/text-embedding-3-small"
     embedding_dimension: int = 1536
@@ -66,6 +70,8 @@ class AppSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="", extra="ignore")
 
     app_secret: str = ""
+    admin_username: str = "admin"
+    admin_password_hash: str = ""
     debug: bool = False
     api_base_url: str = "http://127.0.0.1:8080"
 

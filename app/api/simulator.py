@@ -9,7 +9,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from app.config import get_settings
+from app.repositories.model_settings_repository import ModelSettingsRepository
 from app.schemas.telemetry import TelemetryReading
+from app.services.simulator.provisioning import ProvisionedZone, provision_simulator_topology
 from app.services.simulator.zone_state import SimulatedZoneState
 
 router = APIRouter(prefix="/api/simulator", tags=["simulator"])
@@ -68,27 +71,37 @@ def _metric_value(metric: str, scenario: str, group: int, greenhouse: int, zone:
     return base_values[metric] + scenario_offsets.get(scenario, {}).get(metric, 0.0) + group + greenhouse + zone
 
 
-async def _run_simulator(config: SimulatorStartRequest, telemetry_repository: Any) -> None:
+async def _run_simulator(
+    config: SimulatorStartRequest,
+    telemetry_repository: Any,
+    sim_state: SimulatedZoneState,
+    zones: list[ProvisionedZone] | None = None,
+) -> None:
     try:
         while _state["running"]:
             now = datetime.now(timezone.utc)
             published = 0
-            for group in range(1, config.groups + 1):
-                for greenhouse in range(1, config.greenhouses_per_group + 1):
-                    for zone in range(1, config.zones_per_greenhouse + 1):
-                        for metric in ("temperature", "air_humidity", "soil_moisture", "co2", "light"):
-                            telemetry_repository.write_telemetry(
-                                TelemetryReading(
-                                    group_id=f"group-{group:03d}",
-                                    greenhouse_id=f"gh-{greenhouse:03d}",
-                                    zone_id=f"zone-{zone:02d}",
-                                    sensor_id=f"{metric}-{zone:02d}",
-                                    metric=metric,
-                                    value=_metric_value(metric, config.scenario, group, greenhouse, zone),
-                                    timestamp=now,
-                                )
-                            )
-                            published += 1
+            active_zones = zones or [
+                ProvisionedZone(group_id=group_id, greenhouse_id=greenhouse_id, zone_id=zone_id)
+                for group_id, greenhouse_id, zone_id in sim_state.all_zone_refs()
+            ]
+            for index, zone in enumerate(active_zones, start=1):
+                for metric in ("temperature", "air_humidity", "soil_moisture", "co2", "light"):
+                    value = _metric_value(metric, config.scenario, 0, 0, index)
+                    if sim_state.is_initialized:
+                        value = await sim_state.telemetry_value(zone.group_id, zone.greenhouse_id, zone.zone_id, metric)
+                    telemetry_repository.write_telemetry(
+                        TelemetryReading(
+                            group_id=zone.group_id,
+                            greenhouse_id=zone.greenhouse_id,
+                            zone_id=zone.zone_id,
+                            sensor_id=f"{zone.zone_id}:{metric}",
+                            metric=metric,
+                            value=value,
+                            timestamp=now,
+                        )
+                    )
+                    published += 1
             _state["messages_published"] += published
             _state["last_publish"] = now.isoformat()
             await asyncio.sleep(config.interval_seconds)
@@ -110,6 +123,30 @@ async def start_simulator(request: Request, body: SimulatorStartRequest) -> Simu
         raise HTTPException(status_code=409, detail="Simulator is already running")
 
     telemetry_repository = request.app.state.telemetry_repository
+    session_factory = getattr(request.app.state, "session_factory", None)
+    if session_factory is None:
+        raise HTTPException(status_code=503, detail="Database session factory is not available")
+
+    async with session_factory() as session:
+        settings_repo = ModelSettingsRepository(session)
+        app_settings = get_settings()
+        settings = await settings_repo.bootstrap_settings(
+            embedding_model=app_settings.openrouter.embedding_model,
+            embedding_dimension=app_settings.openrouter.embedding_dimension,
+        )
+        if settings.control_mode == "mqtt":
+            raise HTTPException(
+                status_code=409,
+                detail="Simulator cannot run while MQTT remote devices mode is selected. Switch control mode to Internal simulator in Settings first.",
+            )
+
+        provisioned_zones = await provision_simulator_topology(
+            session,
+            groups=body.groups,
+            greenhouses_per_group=body.greenhouses_per_group,
+            zones_per_greenhouse=body.zones_per_greenhouse,
+        )
+
     _state.update(
         {
             "running": True,
@@ -120,20 +157,17 @@ async def start_simulator(request: Request, body: SimulatorStartRequest) -> Simu
         }
     )
     sim_state = SimulatedZoneState()
-    sim_state.initialize(
-        num_groups=body.groups,
-        greenhouses_per_group=body.greenhouses_per_group,
-        zones_per_greenhouse=body.zones_per_greenhouse,
+    sim_state.initialize_from_zones(
+        [(zone.group_id, zone.greenhouse_id, zone.zone_id) for zone in provisioned_zones],
         scenario=body.scenario,
     )
     request.app.state.simulated_zone_state = sim_state
 
-    _state["task"] = asyncio.create_task(_run_simulator(body, telemetry_repository))
+    _state["task"] = asyncio.create_task(_run_simulator(body, telemetry_repository, sim_state, provisioned_zones))
     return _status()
 
 
-@router.post("/stop", response_model=SimulatorStatus)
-async def stop_simulator(request: Request) -> SimulatorStatus:
+async def stop_simulator_task(app_state: Any | None = None) -> None:
     _state["running"] = False
     task: asyncio.Task | None = _state.get("task")
     if task and not task.done():
@@ -144,9 +178,16 @@ async def stop_simulator(request: Request) -> SimulatorStatus:
             pass
     _state["task"] = None
 
-    sim_state: SimulatedZoneState | None = getattr(request.app.state, "simulated_zone_state", None)
+    if app_state is None:
+        return
+
+    sim_state: SimulatedZoneState | None = getattr(app_state, "simulated_zone_state", None)
     if sim_state is not None:
         sim_state.reset()
-        delattr(request.app.state, "simulated_zone_state")
+        delattr(app_state, "simulated_zone_state")
 
+
+@router.post("/stop", response_model=SimulatorStatus)
+async def stop_simulator(request: Request) -> SimulatorStatus:
+    await stop_simulator_task(request.app.state)
     return _status()

@@ -39,6 +39,8 @@ def test_settings() -> Settings:
         ),
         app=AppSettings(
             app_secret="test-secret",
+            admin_username="admin",
+            admin_password_hash="",
             debug=True,
         ),
     )

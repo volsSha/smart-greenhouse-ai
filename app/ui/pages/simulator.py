@@ -18,7 +18,7 @@ from nicegui import ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
-from app.ui.components.design import empty_state, page_container, page_hero, section_card
+from app.ui.components.design import page_container, page_hero, section_card
 from app.ui.components.mqtt_status_panel import MQTTStatusPanel
 from app.ui.components.zone_visualization import ZoneVisualization
 from app.ui.layouts.main_layout import main_layout
@@ -247,9 +247,9 @@ async def simulator() -> None:
             viz.clear()
             no_data_label.style("display: none")
             mqtt_placeholder.style("display: block")
-            mode_notice.set_text(_("Run ngrok TCP for local Mosquitto, then use firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
+            mode_notice.set_text(_("Use a public MQTT broker, then configure firmware/wokwi-greenhouse-zone/main.py and config.py in hosted Wokwi."))
 
-    def select_scenario(scenario_key: str) -> None:
+    def select_scenario(scenario_key: str, *, notify: bool = True) -> None:
         """Update the active scenario display."""
         scenario = SCENARIOS[scenario_key]
         state["scenario"] = scenario_key
@@ -263,13 +263,21 @@ async def simulator() -> None:
         active_scenario_label.style(f"color: {scenario['color']}")
         scenario_desc.set_text(_scenario_description(scenario_key))
 
-        ui.notify(
-            _("Scenario changed to {scenario}", scenario=_scenario_label(scenario_key)),
-            type="info",
-        )
+        if notify:
+            ui.notify(
+                _("Scenario changed to {scenario}", scenario=_scenario_label(scenario_key)),
+                type="info",
+            )
 
     async def start_simulator() -> None:
         """Attempt to start the simulator via the API."""
+        if state["mode"] == "mqtt":
+            detail = _("The internal simulator cannot be started in Wokwi / MQTT mode. Switch Mode to Internal Simulator first.")
+            result_label.set_text(detail)
+            result_label.style("color: #f44336")
+            ui.notify(detail, type="warning")
+            return
+
         config = {
             "scenario": state["scenario"],
             "groups": int(groups_input.value),
@@ -280,6 +288,15 @@ async def simulator() -> None:
 
         try:
             async with api_client(timeout=10.0) as client:
+                settings_resp = await client.get("/api/settings")
+                settings_resp.raise_for_status()
+                if settings_resp.json().get("control_mode") == "mqtt":
+                    detail = _("Simulator cannot run while MQTT remote devices mode is selected. Switch control mode to Internal simulator in Settings first.")
+                    result_label.set_text(detail)
+                    result_label.style("color: #f44336")
+                    ui.notify(detail, type="warning")
+                    return
+
                 resp = await client.post("/api/simulator/start", json=config)
                 resp.raise_for_status()
                 result = resp.json()
@@ -350,6 +367,28 @@ async def simulator() -> None:
         else:
             last_publish_label.set_text("--")
 
+    async def _hydrate_simulator_status() -> None:
+        try:
+            async with api_client(timeout=5.0) as client:
+                resp = await client.get("/api/simulator/status")
+                resp.raise_for_status()
+                status = resp.json()
+        except httpx.HTTPError:
+            logger.debug("Simulator status hydration failed")
+            return
+
+        state["running"] = bool(status.get("running"))
+        state["messages_published"] = status.get("messages_published", 0)
+        state["last_publish"] = status.get("last_publish")
+        scenario = status.get("scenario", state["scenario"])
+        if scenario in SCENARIOS:
+            select_scenario(scenario, notify=False)
+
+        _update_status()
+        if state["running"] and state["mode"] == "simulator":
+            zone_timer.activate()
+            await _refresh_zones()
+
     # --- Control buttons ---
     with ui.row().classes("w-full gap-4 mt-6"):
         start_btn = ui.button(
@@ -365,3 +404,5 @@ async def simulator() -> None:
             color="negative",
             on_click=stop_simulator,
         ).props("disable")
+
+    await _hydrate_simulator_status()

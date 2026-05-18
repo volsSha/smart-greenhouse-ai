@@ -66,12 +66,15 @@ def proposed_action_card(
     group_id = action.get("group_id")
     greenhouse_id = action.get("greenhouse_id")
     zone_id = action.get("zone_id")
+    scope_label = action.get("scope_label")
     actuator = action.get("actuator", "unknown")
     action_type = action.get("action", "unknown")
     value = action.get("value")
     duration = action.get("duration_seconds")
     reason = action.get("reason", "")
     status = action.get("status", "pending")
+    mode = action.get("mode")
+    mode_mismatch = bool(action.get("mode_mismatch"))
 
     config = _ACTION_STATUS_CONFIG.get(status, _ACTION_STATUS_CONFIG["pending"])
 
@@ -86,19 +89,27 @@ def proposed_action_card(
             if duration is not None:
                 ui.label(_("for {duration}s", duration=duration)).classes("text-xs opacity-50")
             _status_badge(status)
+            if mode:
+                ui.badge(_("Mode: {mode}", mode=str(mode).upper()), color="orange" if mode == "simulator" else "blue").props("outline")
+
+        if mode_mismatch:
+            ui.label(_("This proposal was created under a different control mode than the current project setting.")).classes("text-xs text-amber-700 mt-2")
 
         # Scope breadcrumbs
         scope_parts = []
-        if group_id:
-            scope_parts.append(str(group_id))
-        if greenhouse_id:
-            scope_parts.append(str(greenhouse_id))
-        if zone_id:
-            scope_parts.append(str(zone_id))
+        if scope_label:
+            scope_parts.append(str(scope_label))
+        else:
+            if group_id:
+                scope_parts.append(str(group_id))
+            if greenhouse_id:
+                scope_parts.append(str(greenhouse_id))
+            if zone_id:
+                scope_parts.append(str(zone_id))
         if scope_parts:
             with ui.row().classes("items-center gap-1 mt-1"):
                 ui.icon("location_on", size="0.8rem").classes("opacity-40")
-                ui.label(" / ".join(scope_parts)).classes("text-xs font-mono opacity-50")
+                ui.label(" / ".join(scope_parts)).classes("text-xs opacity-60")
 
         # Reason
         if reason:

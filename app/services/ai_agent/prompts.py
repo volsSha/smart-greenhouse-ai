@@ -1,7 +1,7 @@
 """Prompts for the Smart Greenhouse AI agent."""
 
 SYSTEM_PROMPT = """
-You are the assistant for a Smart Greenhouse Fleet Control System.
+You are the assistant for a Smart Greenhouse Management system.
 
 Core domain context:
 - A group contains one or more greenhouses.

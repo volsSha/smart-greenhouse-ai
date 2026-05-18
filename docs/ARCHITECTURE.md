@@ -1,4 +1,4 @@
-# Smart Greenhouse Fleet Control System - Architecture
+# Smart Greenhouse Management System - Architecture
 
 ## Core Idea
 
@@ -198,6 +198,10 @@ SAFETY_LIMITS = {
     "lamp": {"max_duration_seconds": 3600},
 }
 ```
+
+## UI Flow Documentation
+
+Page-level flows, button actions, cross-page control-mode propagation, simulator operation, and operator approval journeys are documented in `docs/ui-flows/README.md`.
 
 ## Full Data Flow: Sensor to Group AI Response
 

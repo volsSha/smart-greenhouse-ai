@@ -54,6 +54,12 @@ class AIMessageResponse(BaseModel):
     token_output: int | None
 
 
+class AIChatResponse(AIResponse):
+    """API response for one chat turn with persistence metadata."""
+
+    conversation_id: UUID
+
+
 class AIConversationDetail(AIConversationSummary):
     """Conversation with messages."""
 
@@ -74,12 +80,12 @@ class AIToolCallResponse(BaseModel):
     error: str | None
 
 
-@router.post("/chat", response_model=AIResponse)
+@router.post("/chat", response_model=AIChatResponse)
 async def chat(
     body: AIChatRequest,
     request: Request,
     session: AsyncSession = Depends(get_db_session),
-) -> AIResponse:
+) -> AIChatResponse:
     """Send one scoped chat message and return a structured AI response."""
     try:
         service = GreenhouseAIAgent(
@@ -119,7 +125,12 @@ async def chat(
         raise
 
     await session.commit()
-    return response
+    if service.last_conversation_id is None:
+        raise RuntimeError("AI agent did not expose the persisted conversation id")
+    return AIChatResponse(
+        **response.model_dump(),
+        conversation_id=service.last_conversation_id,
+    )
 
 
 @router.get("/conversations", response_model=list[AIConversationSummary])

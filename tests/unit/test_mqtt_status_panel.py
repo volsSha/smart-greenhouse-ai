@@ -28,10 +28,10 @@ class TestMQTTStatusPanelHelpers:
         assert status_color(status) == "negative"
         assert status_label(status) == "Disconnected"
 
-    def test_panel_guidance_mentions_micropython_ngrok_workflow(self) -> None:
+    def test_panel_guidance_mentions_micropython_public_broker_workflow(self) -> None:
         assert "firmware/wokwi-greenhouse-zone/main.py" in PANEL_SOURCE
         assert "firmware/wokwi-greenhouse-zone/config.py" in PANEL_SOURCE
-        assert "ngrok" in PANEL_SOURCE
+        assert "public MQTT broker" in PANEL_SOURCE
         assert "MicroPython" in PANEL_SOURCE
 
     def test_panel_guidance_no_longer_uses_private_gateway_or_cpp_wording(self) -> None:

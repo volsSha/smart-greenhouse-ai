@@ -24,6 +24,8 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
+
+from app.auth import is_auth_enabled, is_authenticated, is_public_path, login_get, login_post, logout_get, settings_from_request, unauthenticated_response
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.config import Settings, get_settings
@@ -32,6 +34,7 @@ from app.services.influx_client import InfluxClient
 from app.repositories.debug_log_repository import create_debug_log_best_effort
 from app.repositories.telemetry_repository import TelemetryRepository
 from app.services.mqtt_runtime import MQTTRuntime
+from app.api.simulator import stop_simulator_task
 from app.services.telemetry_ingestion import TelemetryIngestion
 
 logger = logging.getLogger(__name__)
@@ -77,6 +80,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # --- Shutdown ---
+    await stop_simulator_task(fastapi_app.state)
     await mqtt_runtime.stop()
     await db_engine.dispose()
     influx_wrapper.close()
@@ -86,10 +90,19 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
 
 # --- Create the FastAPI application ---
 app = FastAPI(
-    title="Smart Greenhouse Fleet Control",
+    title="Smart Greenhouse Management",
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def admin_auth_middleware(request: Request, call_next):
+    settings = settings_from_request(request)
+    if is_auth_enabled(settings) and not is_public_path(request.url.path) and not is_authenticated(request, settings):
+        return unauthenticated_response(request)
+    return await call_next(request)
+
 
 async def _write_request_log(
     request: Request,
@@ -188,6 +201,10 @@ app.include_router(simulator_state_router)
 app.include_router(mqtt_status_router)
 app.include_router(settings_router)
 
+app.add_api_route("/login", login_get, methods=["GET"], include_in_schema=False)
+app.add_api_route("/login", login_post, methods=["POST"], include_in_schema=False)
+app.add_api_route("/logout", logout_get, methods=["GET"], include_in_schema=False)
+
 
 @app.get("/", include_in_schema=False)
 async def root() -> RedirectResponse:
@@ -198,7 +215,7 @@ async def root() -> RedirectResponse:
 # Importing the page modules registers their @ui.page() decorators
 # with NiceGUI's internal router. The pages are not accessible until
 # NiceGUI is mounted via ui.run_with() or ui.run().
-from app.ui.pages import dashboard, settings as settings_page, control, logs, ai_chat, rag, simulator, plants  # noqa: E402, F401
+from app.ui.pages import dashboard, settings as settings_page, control, logs, ai_chat, rag, simulator, plants, zone_management  # noqa: E402, F401
 from nicegui import ui  # noqa: E402
 
 
@@ -215,7 +232,7 @@ app_settings = get_settings()
 
 ui.run_with(
     app,
-    title="Smart Greenhouse Fleet",
+    title="Smart Greenhouse Management",
     storage_secret=app_settings.app.app_secret or "smart-greenhouse-dev-secret",
 )
 

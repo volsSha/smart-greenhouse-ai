@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-09 00:17+0300\n"
+"POT-Creation-Date: 2026-05-18 13:08+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
+#: app/ui/components/actuator_controls.py:94
+#, python-brace-format
+msgid "Operator requested {actuator} {action}"
+msgstr ""
+
+#: app/ui/components/actuator_controls.py:107
+msgid "Proposal only"
+msgstr ""
+
+#: app/ui/components/actuator_controls.py:113
+msgid "Duration (s)"
+msgstr ""
+
 #: app/ui/components/alert_panel.py:47
 msgid "Unknown Alert"
 msgstr ""
 
-#: app/ui/components/alert_panel.py:83
+#: app/ui/components/alert_panel.py:84
 msgid "Active Alerts"
 msgstr ""
 
-#: app/ui/components/alert_panel.py:86
+#: app/ui/components/alert_panel.py:90
 msgid "No active alerts"
 msgstr ""
 
@@ -49,12 +62,78 @@ msgstr ""
 msgid "Assistant"
 msgstr ""
 
-#: app/ui/components/language_switcher.py:20
+#: app/ui/components/greenhouse_map.py:98
+msgid "selected"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:100
+#, python-brace-format
+msgid "{count} pending proposals"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:102
+msgid "no telemetry"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:146
+msgid "No telemetry"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:146
+msgid "Live context"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:164
+msgid "Greenhouse zone map"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:175
+msgid "No zones configured"
+msgstr ""
+
+#: app/ui/components/greenhouse_map.py:176
+msgid "Create zones for this greenhouse before using the operator panel."
+msgstr ""
+
+#: app/ui/components/language_switcher.py:13
+#: app/ui/components/language_switcher.py:24
 msgid "Ukrainian"
 msgstr ""
 
-#: app/ui/components/language_switcher.py:20
+#: app/ui/components/language_switcher.py:14
+#: app/ui/components/language_switcher.py:24
 msgid "English"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:22
+msgid "Connected"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:24
+msgid "Reconnecting"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:25
+msgid "Disconnected"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:42
+msgid "Wokwi / MQTT Status"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:43 app/ui/pages/settings.py:374
+msgid "Unknown"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:52
+msgid "Firmware path: firmware/wokwi-greenhouse-zone/main.py"
+msgstr ""
+
+#: app/ui/components/mqtt_status_panel.py:57
+msgid ""
+"Use a public MQTT broker, then paste its host, port, and credentials into"
+" firmware/wokwi-greenhouse-zone/config.py for the hosted Wokwi "
+"MicroPython simulator."
 msgstr ""
 
 #: app/ui/components/proposed_action_card.py:30
@@ -81,16 +160,28 @@ msgstr ""
 msgid "Failed"
 msgstr ""
 
-#: app/ui/components/proposed_action_card.py:87
+#: app/ui/components/proposed_action_card.py:90
 #, python-brace-format
 msgid "for {duration}s"
 msgstr ""
 
-#: app/ui/components/proposed_action_card.py:113
+#: app/ui/components/proposed_action_card.py:93
+#: app/ui/components/zone_control_drawer.py:70
+#, python-brace-format
+msgid "Mode: {mode}"
+msgstr ""
+
+#: app/ui/components/proposed_action_card.py:96
+msgid ""
+"This proposal was created under a different control mode than the current"
+" project setting."
+msgstr ""
+
+#: app/ui/components/proposed_action_card.py:124
 msgid "Approve and Execute"
 msgstr ""
 
-#: app/ui/components/proposed_action_card.py:118
+#: app/ui/components/proposed_action_card.py:129
 msgid "Reject"
 msgstr ""
 
@@ -99,75 +190,84 @@ msgstr ""
 msgid "{label}:"
 msgstr ""
 
+#: app/ui/components/telemetry_cards.py:105
+#, python-brace-format
+msgid "{count} alerts"
+msgstr ""
+
 #: app/ui/components/telemetry_cards.py:107
+msgid "Healthy"
+msgstr ""
+
+#: app/ui/components/telemetry_cards.py:111
 #, python-brace-format
 msgid "{count} greenhouses"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:131
+#: app/ui/components/telemetry_cards.py:137
 #, python-brace-format
 msgid "{count} zones"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:138
+#: app/ui/components/telemetry_cards.py:144
 msgid "Temp"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:139
-#: app/ui/components/telemetry_cards.py:181
+#: app/ui/components/telemetry_cards.py:145
+#: app/ui/components/telemetry_cards.py:187
 #: app/ui/components/telemetry_charts.py:179
 msgid "Humidity"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:140
+#: app/ui/components/telemetry_cards.py:146
 msgid "Soil"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:147
-#: app/ui/components/telemetry_cards.py:196
+#: app/ui/components/telemetry_cards.py:153
+#: app/ui/components/telemetry_cards.py:202
 msgid "No recent data"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:180
+#: app/ui/components/telemetry_cards.py:186
 #: app/ui/components/telemetry_charts.py:47
 #: app/ui/components/telemetry_charts.py:158
 #: app/ui/components/telemetry_charts.py:160
 msgid "Temperature"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:182
+#: app/ui/components/telemetry_cards.py:188
 #: app/ui/components/telemetry_charts.py:49
 #: app/ui/components/telemetry_charts.py:196
 #: app/ui/components/telemetry_charts.py:198
 msgid "Soil Moisture"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:183
+#: app/ui/components/telemetry_cards.py:189
 #: app/ui/components/telemetry_charts.py:50
 msgid "CO2"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:184
+#: app/ui/components/telemetry_cards.py:190
 #: app/ui/components/telemetry_charts.py:51
 msgid "Light"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:185
+#: app/ui/components/telemetry_cards.py:191
 #: app/ui/components/telemetry_charts.py:52
 msgid "Fan"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:186
+#: app/ui/components/telemetry_cards.py:192
 #: app/ui/components/telemetry_charts.py:53
 msgid "Pump"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:187
+#: app/ui/components/telemetry_cards.py:193
 #: app/ui/components/telemetry_charts.py:54
 msgid "Heater"
 msgstr ""
 
-#: app/ui/components/telemetry_cards.py:188
+#: app/ui/components/telemetry_cards.py:194
 #: app/ui/components/telemetry_charts.py:55
 msgid "Lamp"
 msgstr ""
@@ -221,756 +321,1453 @@ msgstr ""
 msgid "Tool Calls: {summary}"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:21
-msgid "Smart Greenhouse Fleet"
+#: app/ui/components/zone_control_drawer.py:58
+msgid "Selected Zone"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:23
-msgid "Fleet Control System"
+#: app/ui/components/zone_control_drawer.py:58
+msgid "Choose a zone from the overview map to inspect and propose changes."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:28
-msgid "Menu"
+#: app/ui/components/zone_control_drawer.py:59
+msgid "Select a zone"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:31
-msgid "Operations"
+#: app/ui/components/zone_control_drawer.py:59
+msgid "Zone context and proposal controls will appear here."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:32 app/ui/pages/dashboard.py:134
-msgid "Dashboard"
+#: app/ui/components/zone_control_drawer.py:68
+msgid "Proposal Controls"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:33 app/ui/pages/simulator.py:91
-msgid "Simulator"
+#: app/ui/components/zone_control_drawer.py:71
+msgid ""
+"Buttons and sliders create proposals only; approval is still required "
+"before execution."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:34 app/ui/pages/plants.py:13
-msgid "Plants"
+#: app/ui/components/zone_control_drawer.py:80
+msgid "Telemetry"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:35
-msgid "Control"
+#: app/ui/components/zone_control_drawer.py:82
+msgid "No recent telemetry available for this zone."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:38
-msgid "Intelligence"
+#: app/ui/components/zone_control_drawer.py:98
+msgid "Plant Context"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:39
-msgid "AI Chat"
+#: app/ui/components/zone_control_drawer.py:100
+msgid "No plant batch assigned to this zone."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:40
-msgid "RAG"
+#: app/ui/components/zone_control_drawer.py:103
+msgid "Plant batch"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:41
-msgid "Logs"
+#: app/ui/components/zone_control_drawer.py:108
+#, python-brace-format
+msgid "+{count} more batches"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:44
-msgid "System"
+#: app/ui/components/zone_control_drawer.py:119
+msgid "Pending Proposals"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:45
-msgid "Settings"
+#: app/ui/components/zone_control_drawer.py:121
+msgid "No pending proposals for this zone."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:90
-msgid "No messages yet"
+#: app/ui/layouts/main_layout.py:55
+msgid "Smart Greenhouse Management"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:92
-msgid "Ask a question about your greenhouses, zones, or sensor data."
+#: app/ui/layouts/main_layout.py:56
+msgid "Greenhouse Control System"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:134 app/ui/pages/ai_chat.py:340
-msgid "Proposed Actions"
+#: app/ui/layouts/main_layout.py:61
+msgid "Logout"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:146
-msgid "AI Assistant"
+#: app/ui/layouts/main_layout.py:65
+msgid "Greenhouse Ops"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:161
-msgid "Conversation"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:168
-msgid "Scope:"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:170 app/ui/pages/control.py:43
-msgid "Group ID"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:175
-msgid "Greenhouse"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:180
-msgid "Zone"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:198
-msgid "Ask about your greenhouses..."
+#: app/ui/layouts/main_layout.py:66
+msgid "Telemetry, control, and AI guidance"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:201
-msgid "Send"
+msgid "No messages yet"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:208
-msgid "New Conversation"
+#: app/ui/pages/ai_chat.py:202
+msgid ""
+"Ask about greenhouse health, sensor anomalies, recent trends, or safe "
+"actuator actions."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:238
+msgid "Proposed Actions"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:252
+msgid "AI Assistant"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:253
+msgid ""
+"Ask scoped operational questions and review transparent tool calls before"
+" approving physical actions."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:255
+msgid "Intelligence"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:267
+msgid "Conversation Context"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:267
+msgid "Select a saved thread or start a fresh all-greenhouses chat."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:270
+msgid "Conversation"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:274
+msgid "New Conversation"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:276
+msgid "Operator Chat"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:276
+msgid ""
+"Responses include observations, recommendations, proposed actions, and "
+"tool traces."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:289 app/ui/pages/control.py:60
+#: app/ui/pages/control.py:266 app/ui/pages/zone_management.py:42
+#: app/ui/pages/zone_management.py:144
+msgid "Group"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:290 app/ui/pages/control.py:61
+#: app/ui/pages/control.py:296 app/ui/pages/zone_management.py:43
+#: app/ui/pages/zone_management.py:160
+msgid "Greenhouse"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:291 app/ui/pages/control.py:329
+#: app/ui/pages/zone_management.py:55
+msgid "Zone"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:292
+msgid "Clear scope"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:295
+msgid "Ask about your greenhouses..."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:296
+msgid "Send"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:302
+msgid "All-greenhouses chat"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:311
+msgid ""
+"Saved scope contains unavailable entities. Clear or reselect scope before"
+" sending."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:435
+msgid "Command approved and executed"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:438
+#, python-brace-format
+msgid "Approval failed: {detail}"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:446 app/ui/pages/control.py:455
+msgid "Command rejected"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:449
+#, python-brace-format
+msgid "Rejection failed: {detail}"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:484
 #, python-brace-format
 msgid "Error loading conversation: {error}"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:290
+#: app/ui/pages/ai_chat.py:522
+msgid "Clear or reselect unavailable scope before sending"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:539
 msgid "Thinking..."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:356
+#: app/ui/pages/ai_chat.py:568
 msgid "Request failed"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:360 app/ui/pages/settings.py:257
+#: app/ui/pages/ai_chat.py:571 app/ui/pages/settings.py:309
 msgid "Retry"
 msgstr ""
 
-#: app/ui/pages/control.py:33
+#: app/ui/pages/control.py:52
 msgid "Actuator Control"
 msgstr ""
 
-#: app/ui/pages/control.py:34
-msgid "Propose, validate, approve, and execute actuator commands."
-msgstr ""
-
-#: app/ui/pages/control.py:41
-msgid "Propose Command"
-msgstr ""
-
-#: app/ui/pages/control.py:44
-msgid "Greenhouse ID"
-msgstr ""
-
-#: app/ui/pages/control.py:45
-msgid "Zone ID"
-msgstr ""
-
-#: app/ui/pages/control.py:48 app/ui/pages/logs.py:47
-msgid "Actuator"
-msgstr ""
-
 #: app/ui/pages/control.py:53
-msgid "Action"
+msgid ""
+"Select greenhouse zones visually, propose bounded actuator changes, and "
+"keep approval as the safety gate."
 msgstr ""
 
-#: app/ui/pages/control.py:57
-msgid "Value"
+#: app/ui/pages/control.py:55
+msgid "Operator panel"
+msgstr ""
+
+#: app/ui/pages/control.py:58 app/ui/pages/zone_management.py:40
+msgid "Scope"
 msgstr ""
 
 #: app/ui/pages/control.py:58
-msgid "Duration (s)"
+msgid "Choose the group and greenhouse, then select zones from the map."
 msgstr ""
 
-#: app/ui/pages/control.py:59
-msgid "Reason"
-msgstr ""
-
-#: app/ui/pages/control.py:59
-msgid "Manual greenhouse adjustment"
-msgstr ""
-
-#: app/ui/pages/control.py:61
-msgid "Propose"
+#: app/ui/pages/control.py:62 app/ui/pages/logs.py:151 app/ui/pages/rag.py:76
+#: app/ui/pages/zone_management.py:44
+msgid "Refresh"
 msgstr ""
 
 #: app/ui/pages/control.py:67
-msgid "Pending Commands"
+msgid "Greenhouse Overview"
 msgstr ""
 
-#: app/ui/pages/control.py:69
+#: app/ui/pages/control.py:67
+msgid "Click a zone to inspect context and propose changes."
+msgstr ""
+
+#: app/ui/pages/control.py:71
+msgid "Recent Command Outcomes"
+msgstr ""
+
+#: app/ui/pages/control.py:71
 msgid ""
-"Validated and AI-generated proposals require approval before MQTT "
-"execution."
+"Completed, rejected, failed, and expired commands remain secondary to "
+"selected-zone proposals."
 msgstr ""
 
-#: app/ui/pages/control.py:74
-msgid "Recent Commands"
+#: app/ui/pages/control.py:90
+msgid "Demo Group"
 msgstr ""
 
-#: app/ui/pages/control.py:75
-msgid "Executed, rejected, failed, and expired commands appear here."
+#: app/ui/pages/control.py:91
+msgid "Demo Greenhouse"
 msgstr ""
 
-#: app/ui/pages/control.py:99
-#, python-brace-format
-msgid "Invalid command form: {error}"
+#: app/ui/pages/control.py:93
+msgid "North Bed"
 msgstr ""
 
-#: app/ui/pages/control.py:117 app/ui/pages/control.py:120
-#, python-brace-format
-msgid "{prefix}: {error}"
+#: app/ui/pages/control.py:94
+msgid "South Bed"
 msgstr ""
 
-#: app/ui/pages/control.py:133
-msgid "Command proposed"
+#: app/ui/pages/control.py:95
+msgid "Propagation"
 msgstr ""
 
-#: app/ui/pages/control.py:134
-msgid "Propose failed"
+#: app/ui/pages/control.py:96
+msgid "Herbs"
 msgstr ""
 
-#: app/ui/pages/control.py:142
-msgid "Command approved"
+#: app/ui/pages/control.py:108
+msgid "Tomato Batch"
 msgstr ""
 
-#: app/ui/pages/control.py:143
-msgid "Approve failed"
+#: app/ui/pages/control.py:108 app/ui/pages/zone_management.py:57
+msgid "Tomato"
+msgstr ""
+
+#: app/ui/pages/control.py:108
+msgid "Vegetative"
+msgstr ""
+
+#: app/ui/pages/control.py:109
+msgid "Seedlings"
+msgstr ""
+
+#: app/ui/pages/control.py:109
+msgid "Mixed greens"
+msgstr ""
+
+#: app/ui/pages/control.py:109
+msgid "Germination"
+msgstr ""
+
+#: app/ui/pages/control.py:135
+msgid "Demo data"
+msgstr ""
+
+#: app/ui/pages/control.py:137 app/ui/pages/control.py:164
+msgid "No group selected"
+msgstr ""
+
+#: app/ui/pages/control.py:144
+msgid "Offline demo fallback"
+msgstr ""
+
+#: app/ui/pages/control.py:147
+msgid "Control mode unavailable"
 msgstr ""
 
 #: app/ui/pages/control.py:151
-msgid "Command rejected"
+msgid "Loading control mode"
 msgstr ""
 
-#: app/ui/pages/control.py:152
-msgid "Reject failed"
+#: app/ui/pages/control.py:153
+msgid "MQTT remote control"
 msgstr ""
 
-#: app/ui/pages/control.py:163
-msgid "Enter a valid Group ID to load commands."
+#: app/ui/pages/control.py:153
+msgid "Simulator control"
 msgstr ""
 
-#: app/ui/pages/control.py:171 app/ui/pages/control.py:176
+#: app/ui/pages/control.py:156
+msgid ""
+"Approved commands are sent to the MQTT broker; physical device movement "
+"requires subscribed hardware."
+msgstr ""
+
+#: app/ui/pages/control.py:158
+msgid ""
+"Simulator mode is selected, but the simulator is not running. Start it on"
+" the simulator page before proposing commands."
+msgstr ""
+
+#: app/ui/pages/control.py:164
+msgid "Select or create a greenhouse group before using the operator panel."
+msgstr ""
+
+#: app/ui/pages/control.py:167 app/ui/pages/zone_management.py:112
+msgid "No greenhouse selected"
+msgstr ""
+
+#: app/ui/pages/control.py:167
+msgid "Select or create a greenhouse to show its zones."
+msgstr ""
+
+#: app/ui/pages/control.py:184
+msgid "Control mode is still loading."
+msgstr ""
+
+#: app/ui/pages/control.py:187
+msgid "Control mode could not be loaded; proposals are disabled."
+msgstr ""
+
+#: app/ui/pages/control.py:190
+msgid ""
+"Simulator is not running. Start it from the simulator page before "
+"proposing commands."
+msgstr ""
+
+#: app/ui/pages/control.py:206
+msgid "No recent completed commands"
+msgstr ""
+
+#: app/ui/pages/control.py:206
+msgid "Approved, rejected, failed, and expired commands will be listed here."
+msgstr ""
+
+#: app/ui/pages/control.py:241 app/ui/pages/control.py:252
 #, python-brace-format
-msgid "Failed to load commands: {error}"
+msgid "Failed to load control mode: {error}"
 msgstr ""
 
-#: app/ui/pages/control.py:189
-msgid "No pending commands."
-msgstr ""
-
-#: app/ui/pages/control.py:199
-msgid "No recent completed commands."
-msgstr ""
-
-#: app/ui/pages/dashboard.py:156
+#: app/ui/pages/control.py:262 app/ui/pages/control.py:272
+#: app/ui/pages/zone_management.py:142
 #, python-brace-format
-msgid "Error loading data: {error}"
+msgid "Failed to load groups: {error}"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:158
-msgid "Make sure the API is running and InfluxDB is available."
+#: app/ui/pages/control.py:294 app/ui/pages/control.py:299
+#: app/ui/pages/zone_management.py:158
+#, python-brace-format
+msgid "Failed to load greenhouses: {error}"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:168
+#: app/ui/pages/control.py:325
+#, python-brace-format
+msgid "Failed to load zones: {error}"
+msgstr ""
+
+#: app/ui/pages/control.py:337
+#, python-brace-format
+msgid "Failed to load control data: {error}"
+msgstr ""
+
+#: app/ui/pages/control.py:377
+msgid "Control mode is not available; proposal was not created."
+msgstr ""
+
+#: app/ui/pages/control.py:380
+msgid "Start the simulator before creating simulator-mode proposals."
+msgstr ""
+
+#: app/ui/pages/control.py:407
+msgid "Demo command proposed"
+msgstr ""
+
+#: app/ui/pages/control.py:415 app/ui/pages/control.py:420
+#, python-brace-format
+msgid "Propose failed: {error}"
+msgstr ""
+
+#: app/ui/pages/control.py:417
+msgid "Command proposed"
+msgstr ""
+
+#: app/ui/pages/control.py:428
+msgid "Demo command approved"
+msgstr ""
+
+#: app/ui/pages/control.py:435 app/ui/pages/control.py:440
+#, python-brace-format
+msgid "Approve failed: {error}"
+msgstr ""
+
+#: app/ui/pages/control.py:437
+msgid "Command approved"
+msgstr ""
+
+#: app/ui/pages/control.py:446
+msgid "Demo command rejected"
+msgstr ""
+
+#: app/ui/pages/control.py:453 app/ui/pages/control.py:458
+#, python-brace-format
+msgid "Reject failed: {error}"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:133
+msgid "Dashboard"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:134
+msgid ""
+"Live greenhouse telemetry, alerts, and zone trends for the active fleet "
+"group."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:136
+msgid "Operations"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:153
+msgid "No greenhouse groups available"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:154
+msgid ""
+"Create a group or start the simulator after switching to Internal "
+"simulator mode."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:177
+msgid "Error loading data"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:178
+#, python-brace-format
+msgid "Make sure the API is running and InfluxDB is available. Details: {error}"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:189
 msgid "No telemetry data available"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:170
-msgid "Start the simulator to generate data and see it here."
+#: app/ui/pages/dashboard.py:190
+msgid "Start the simulator to generate data and see the fleet cockpit come alive."
 msgstr ""
 
-#: app/ui/pages/dashboard.py:187
+#: app/ui/pages/dashboard.py:208
 msgid "Greenhouses"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:205
+#: app/ui/pages/dashboard.py:208
+msgid "Select a house to inspect zone-level metrics and trends."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:222
+msgid "View zones"
+msgstr ""
+
+#: app/ui/pages/dashboard.py:238
 #, python-brace-format
 msgid "Greenhouse: {greenhouse_id}"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:210
+#: app/ui/pages/dashboard.py:239
+msgid "Zone detail cards and recent six-hour telemetry trends."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:245
 msgid "No zone data available"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:221
+#: app/ui/pages/dashboard.py:245
+msgid "This greenhouse has not reported zone telemetry yet."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:254
 msgid "Zone Charts"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:269
+#: app/ui/pages/dashboard.py:302
 msgid "No historical data for charts"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:272
+#: app/ui/pages/dashboard.py:302
+msgid "Recent range data will appear here after telemetry accumulates."
+msgstr ""
+
+#: app/ui/pages/dashboard.py:305
+msgid "Error loading chart data"
+msgstr ""
+
+#: app/ui/pages/logs.py:36
+msgid "Project Error Logs"
+msgstr ""
+
+#: app/ui/pages/logs.py:37
+msgid "Database-backed debug and error events captured by the application."
+msgstr ""
+
+#: app/ui/pages/logs.py:39
+msgid "Diagnostics"
+msgstr ""
+
+#: app/ui/pages/logs.py:69
 #, python-brace-format
-msgid "Error loading chart data: {error}"
+msgid "Error loading logs: {error}"
 msgstr ""
 
-#: app/ui/pages/logs.py:21
-msgid "Command Logs"
+#: app/ui/pages/logs.py:70
+msgid "Check that the API and database are available."
 msgstr ""
 
-#: app/ui/pages/logs.py:23
-msgid "Audit log of all actuator commands with filtering and search."
+#: app/ui/pages/logs.py:76
+msgid "No log entries match the selected filters."
 msgstr ""
 
-#: app/ui/pages/logs.py:27
+#: app/ui/pages/logs.py:76
+msgid "Try broadening level, component, or event type filters."
+msgstr ""
+
+#: app/ui/pages/logs.py:89
+#, python-brace-format
+msgid "{component} · {event_type} · {created_at}"
+msgstr ""
+
+#: app/ui/pages/logs.py:100
+#, python-brace-format
+msgid "{method} {path} · HTTP {status_code}"
+msgstr ""
+
+#: app/ui/pages/logs.py:107
+msgid "Details"
+msgstr ""
+
+#: app/ui/pages/logs.py:113
+#, python-brace-format
+msgid "Error type: {error_type}"
+msgstr ""
+
+#: app/ui/pages/logs.py:115
+#, python-brace-format
+msgid "Request ID: {request_id}"
+msgstr ""
+
+#: app/ui/pages/logs.py:117
+#, python-brace-format
+msgid "Duration: {duration_ms} ms"
+msgstr ""
+
+#: app/ui/pages/logs.py:119
+msgid "Metadata"
+msgstr ""
+
+#: app/ui/pages/logs.py:122
+msgid "Stack trace"
+msgstr ""
+
+#: app/ui/pages/logs.py:126
 msgid "Filters"
 msgstr ""
 
-#: app/ui/pages/logs.py:31 app/ui/pages/simulator.py:107
-msgid "Status"
+#: app/ui/pages/logs.py:126
+msgid "Narrow persisted debug events before reviewing details."
 msgstr ""
 
-#: app/ui/pages/logs.py:52
-msgid "Source"
+#: app/ui/pages/logs.py:130
+msgid "Level"
 msgstr ""
 
-#: app/ui/pages/logs.py:56 app/ui/pages/rag.py:77
-msgid "Refresh"
+#: app/ui/pages/logs.py:135
+msgid "Component"
 msgstr ""
 
-#: app/ui/pages/logs.py:59
-msgid "Command History"
+#: app/ui/pages/logs.py:140
+msgid "Event type"
 msgstr ""
 
-#: app/ui/pages/logs.py:60
-msgid "Command log entries will appear here."
+#: app/ui/pages/plants.py:16
+msgid "Plants"
 msgstr ""
 
-#: app/ui/pages/logs.py:64
-msgid "Placeholder -- full logs UI will be implemented in a later unit."
+#: app/ui/pages/plants.py:17
+msgid ""
+"Plan crop profiles, track batches, and connect growth stages to "
+"greenhouse zones."
 msgstr ""
 
-#: app/ui/pages/plants.py:14
-msgid "Plant batches, profiles, growth stages, and zone assignments."
+#: app/ui/pages/plants.py:19
+msgid "Crop planning"
 msgstr ""
 
-#: app/ui/pages/plants.py:21
+#: app/ui/pages/plants.py:24
 msgid "Plant Profiles"
 msgstr ""
 
-#: app/ui/pages/plants.py:23
-msgid "Manage reusable environmental condition profiles for different crops."
-msgstr ""
-
 #: app/ui/pages/plants.py:25
-msgid "Placeholder -- profiles management will appear here."
+msgid "Reusable environmental targets for crops and growth stages."
 msgstr ""
 
-#: app/ui/pages/plants.py:31
-msgid "Plant Batches"
+#: app/ui/pages/plants.py:29
+msgid ""
+"Profiles will define preferred temperature, humidity, soil moisture, CO2,"
+" and light ranges."
+msgstr ""
+
+#: app/ui/pages/plants.py:30 app/ui/pages/plants.py:39
+msgid "Planned"
 msgstr ""
 
 #: app/ui/pages/plants.py:33
-msgid "Track growing batches across greenhouse zones."
+msgid "Plant Batches"
 msgstr ""
 
-#: app/ui/pages/plants.py:35
-msgid "Placeholder -- batch management will appear here."
+#: app/ui/pages/plants.py:34
+msgid "Operational batches assigned to zones across the fleet."
 msgstr ""
 
-#: app/ui/pages/plants.py:39
-msgid "Placeholder -- full plant management UI will be implemented."
+#: app/ui/pages/plants.py:38
+msgid ""
+"Batch tracking will connect planting dates, growth stages, and zone "
+"assignments."
 msgstr ""
 
-#: app/ui/pages/rag.py:16
+#: app/ui/pages/plants.py:41
+msgid "Coming Next"
+msgstr ""
+
+#: app/ui/pages/plants.py:41
+msgid ""
+"This page is ready for the full plant-management workflow without looking"
+" unfinished."
+msgstr ""
+
+#: app/ui/pages/plants.py:42
+msgid ""
+"Use the dashboard and simulator today; crop-specific planning can be "
+"added here when APIs are available."
+msgstr ""
+
+#: app/ui/pages/rag.py:19
 msgid "Knowledge Base"
 msgstr ""
 
-#: app/ui/pages/rag.py:18
-msgid "Manage agronomic knowledge documents for AI-powered search."
+#: app/ui/pages/rag.py:20
+msgid "Manage agronomic documents that ground AI answers and semantic search."
 msgstr ""
 
-#: app/ui/pages/rag.py:28
+#: app/ui/pages/rag.py:22
+msgid "RAG"
+msgstr ""
+
+#: app/ui/pages/rag.py:32
 msgid "Documents"
 msgstr ""
 
-#: app/ui/pages/rag.py:45
-msgid "No documents yet."
+#: app/ui/pages/rag.py:32
+msgid "Indexed source material available to the assistant."
 msgstr ""
 
-#: app/ui/pages/rag.py:59
+#: app/ui/pages/rag.py:49
+msgid "No documents yet"
+msgstr ""
+
+#: app/ui/pages/rag.py:49
+msgid "Add agronomic notes, manuals, or documentation to ground AI answers."
+msgstr ""
+
+#: app/ui/pages/rag.py:60
 #, python-brace-format
 msgid "{source_type} | {count} chars"
 msgstr ""
 
-#: app/ui/pages/rag.py:71
-msgid "Failed to load documents."
+#: app/ui/pages/rag.py:72
+msgid "Failed to load documents"
 msgstr ""
 
-#: app/ui/pages/rag.py:81 app/ui/pages/rag.py:122
+#: app/ui/pages/rag.py:72
+msgid "Check API and database availability, then refresh."
+msgstr ""
+
+#: app/ui/pages/rag.py:80 app/ui/pages/rag.py:135
 msgid "Add Document"
 msgstr ""
 
-#: app/ui/pages/rag.py:83
+#: app/ui/pages/rag.py:80
+msgid "Paste, type, or upload knowledge content for indexing."
+msgstr ""
+
+#: app/ui/pages/rag.py:82
 msgid "Title"
 msgstr ""
 
-#: app/ui/pages/rag.py:85
+#: app/ui/pages/rag.py:84
 msgid "Source Type"
 msgstr ""
 
-#: app/ui/pages/rag.py:90
+#: app/ui/pages/rag.py:89
 msgid "Content"
 msgstr ""
 
-#: app/ui/pages/rag.py:91
+#: app/ui/pages/rag.py:90
 msgid "Paste or type the agronomic knowledge content here..."
 msgstr ""
 
-#: app/ui/pages/rag.py:99
+#: app/ui/pages/rag.py:101
+msgid "Loaded file content. Review it, then add the document."
+msgstr ""
+
+#: app/ui/pages/rag.py:104
+msgid "Upload text file"
+msgstr ""
+
+#: app/ui/pages/rag.py:112
 msgid "Title and content are required."
 msgstr ""
 
-#: app/ui/pages/rag.py:113
+#: app/ui/pages/rag.py:126
 msgid "Document added successfully!"
 msgstr ""
 
-#: app/ui/pages/rag.py:118
+#: app/ui/pages/rag.py:131
 #, python-brace-format
 msgid "Failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:120
+#: app/ui/pages/rag.py:133
 #, python-brace-format
 msgid "Error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:126
+#: app/ui/pages/rag.py:140
 msgid "Reindex"
 msgstr ""
 
-#: app/ui/pages/rag.py:128
+#: app/ui/pages/rag.py:141
 msgid ""
 "Re-chunk and re-embed all documents. Use after changing the embedding "
 "model."
 msgstr ""
 
-#: app/ui/pages/rag.py:143
+#: app/ui/pages/rag.py:158
 #, python-brace-format
 msgid "Reindex complete: {total} documents processed."
 msgstr ""
 
-#: app/ui/pages/rag.py:149
+#: app/ui/pages/rag.py:164
 #, python-brace-format
 msgid "Reindex failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:153
+#: app/ui/pages/rag.py:168
 #, python-brace-format
 msgid "Reindex error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:155
+#: app/ui/pages/rag.py:170
 msgid "Reindex All Documents"
 msgstr ""
 
-#: app/ui/pages/rag.py:161
+#: app/ui/pages/rag.py:176
 msgid "Search Knowledge Base"
 msgstr ""
 
-#: app/ui/pages/rag.py:164
+#: app/ui/pages/rag.py:176
+msgid "Probe semantic matches before relying on documents in AI answers."
+msgstr ""
+
+#: app/ui/pages/rag.py:179
 msgid "Search Query"
 msgstr ""
 
-#: app/ui/pages/rag.py:165
+#: app/ui/pages/rag.py:180
 msgid "e.g. tomato wilting, CO2 optimal levels..."
 msgstr ""
 
-#: app/ui/pages/rag.py:175
+#: app/ui/pages/rag.py:190
 msgid "Enter a search query."
 msgstr ""
 
-#: app/ui/pages/rag.py:193
-msgid "No results found."
+#: app/ui/pages/rag.py:208
+msgid "No results found"
 msgstr ""
 
-#: app/ui/pages/rag.py:204
+#: app/ui/pages/rag.py:208
+msgid "Try a broader crop, symptom, or environmental query."
+msgstr ""
+
+#: app/ui/pages/rag.py:217
 #, python-brace-format
 msgid "Score: {score:.4f}"
 msgstr ""
 
-#: app/ui/pages/rag.py:213
+#: app/ui/pages/rag.py:226
 #, python-brace-format
 msgid "Search failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:219
+#: app/ui/pages/rag.py:232
 #, python-brace-format
 msgid "Search error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:221
+#: app/ui/pages/rag.py:234
 msgid "Search"
 msgstr ""
 
-#: app/ui/pages/rag.py:224
+#: app/ui/pages/rag.py:237
 msgid "Search on Enter"
 msgstr ""
 
-#: app/ui/pages/settings.py:22
+#: app/ui/pages/settings.py:25
 msgid "Model Settings"
 msgstr ""
 
-#: app/ui/pages/settings.py:24
+#: app/ui/pages/settings.py:26
 msgid "Configure the AI chat model and manage the OpenRouter model catalog."
 msgstr ""
 
 #: app/ui/pages/settings.py:28
+msgid "System"
+msgstr ""
+
+#: app/ui/pages/settings.py:31
 msgid "Current Settings"
 msgstr ""
 
-#: app/ui/pages/settings.py:34
+#: app/ui/pages/settings.py:31
+msgid "Active chat and embedding model state."
+msgstr ""
+
+#: app/ui/pages/settings.py:37
 msgid "Loading settings..."
 msgstr ""
 
-#: app/ui/pages/settings.py:38
+#: app/ui/pages/settings.py:40
 msgid "Embedding Model"
 msgstr ""
 
-#: app/ui/pages/settings.py:41
+#: app/ui/pages/settings.py:43
 msgid ""
 "The embedding model is fixed by configuration. Changing it requires "
 "reindexing all RAG documents."
 msgstr ""
 
-#: app/ui/pages/settings.py:45
+#: app/ui/pages/settings.py:47 app/ui/pages/settings.py:68
 msgid "Loading..."
 msgstr ""
 
-#: app/ui/pages/settings.py:48
-msgid "OpenRouter Model Catalog"
+#: app/ui/pages/settings.py:49 app/ui/pages/settings.py:60
+msgid "Control Mode"
+msgstr ""
+
+#: app/ui/pages/settings.py:49
+msgid "Choose where approved greenhouse commands execute."
 msgstr ""
 
 #: app/ui/pages/settings.py:53
-msgid "Search models..."
+msgid "MQTT remote devices"
 msgstr ""
 
-#: app/ui/pages/settings.py:58 app/ui/pages/settings.py:83
-msgid "Provider"
+#: app/ui/pages/settings.py:54
+msgid "Internal simulator"
 msgstr ""
 
-#: app/ui/pages/settings.py:59 app/ui/pages/settings.py:65
-msgid "All"
+#: app/ui/pages/settings.py:57
+msgid ""
+"MQTT mode sends approved commands to subscribed remote devices. Simulator"
+" mode changes the internal simulator state."
 msgstr ""
 
 #: app/ui/pages/settings.py:64
+msgid "Save Control Mode"
+msgstr ""
+
+#: app/ui/pages/settings.py:72
+msgid "OpenRouter Model Catalog"
+msgstr ""
+
+#: app/ui/pages/settings.py:72
+msgid "Search, refresh, and choose the model used by AI chat."
+msgstr ""
+
+#: app/ui/pages/settings.py:76
+msgid "Search models..."
+msgstr ""
+
+#: app/ui/pages/settings.py:81 app/ui/pages/settings.py:104
+msgid "Provider"
+msgstr ""
+
+#: app/ui/pages/settings.py:82 app/ui/pages/settings.py:88
+msgid "All"
+msgstr ""
+
+#: app/ui/pages/settings.py:87
 msgid "Capability"
 msgstr ""
 
-#: app/ui/pages/settings.py:70
+#: app/ui/pages/settings.py:93
 msgid "Refresh Catalog"
 msgstr ""
 
-#: app/ui/pages/settings.py:82
+#: app/ui/pages/settings.py:103 app/ui/pages/settings.py:117
 msgid "Model"
 msgstr ""
 
-#: app/ui/pages/settings.py:84
+#: app/ui/pages/settings.py:105
 msgid "Prompt $/M"
 msgstr ""
 
-#: app/ui/pages/settings.py:85
+#: app/ui/pages/settings.py:106
 msgid "Completion $/M"
 msgstr ""
 
-#: app/ui/pages/settings.py:86
+#: app/ui/pages/settings.py:107
 msgid "Context"
 msgstr ""
 
-#: app/ui/pages/settings.py:96
+#: app/ui/pages/settings.py:121
 msgid "Selected:"
 msgstr ""
 
-#: app/ui/pages/settings.py:97 app/ui/pages/settings.py:162
+#: app/ui/pages/settings.py:122 app/ui/pages/settings.py:189
+#: app/ui/pages/settings.py:266
 msgid "None"
 msgstr ""
 
-#: app/ui/pages/settings.py:99
+#: app/ui/pages/settings.py:124
 msgid "Use Selected Model"
 msgstr ""
 
-#: app/ui/pages/settings.py:131
+#: app/ui/pages/settings.py:161
 msgid "Chat Model:"
 msgstr ""
 
-#: app/ui/pages/settings.py:133
+#: app/ui/pages/settings.py:163
 msgid "Not selected"
 msgstr ""
 
-#: app/ui/pages/settings.py:137
+#: app/ui/pages/settings.py:167
 msgid "(Unavailable)"
 msgstr ""
 
-#: app/ui/pages/settings.py:140
+#: app/ui/pages/settings.py:170
 #, python-brace-format
 msgid "Last refresh: {timestamp}"
 msgstr ""
 
-#: app/ui/pages/settings.py:147 app/ui/pages/settings.py:255
+#: app/ui/pages/settings.py:177 app/ui/pages/settings.py:307
 #, python-brace-format
 msgid "Refresh failed: {error}"
 msgstr ""
 
-#: app/ui/pages/settings.py:155
+#: app/ui/pages/settings.py:184
 #, python-brace-format
 msgid "{model} ({dimension} dimensions)"
 msgstr ""
 
-#: app/ui/pages/settings.py:156
+#: app/ui/pages/settings.py:185
 msgid "Not configured"
 msgstr ""
 
-#: app/ui/pages/settings.py:169
+#: app/ui/pages/settings.py:192 app/ui/pages/settings.py:357
+#, python-brace-format
+msgid "Saved: {mode}"
+msgstr ""
+
+#: app/ui/pages/settings.py:198
 msgid "Failed to load settings"
 msgstr ""
 
-#: app/ui/pages/settings.py:221
+#: app/ui/pages/settings.py:273
 msgid "Refreshing catalog..."
 msgstr ""
 
-#: app/ui/pages/settings.py:237
+#: app/ui/pages/settings.py:289
 #, python-brace-format
 msgid "Catalog refreshed: {count} models loaded"
 msgstr ""
 
-#: app/ui/pages/settings.py:244
+#: app/ui/pages/settings.py:296
 msgid "Refresh failed"
 msgstr ""
 
-#: app/ui/pages/settings.py:279
+#: app/ui/pages/settings.py:325
+msgid "Select a model first"
+msgstr ""
+
+#: app/ui/pages/settings.py:336
+msgid "Chat model saved"
+msgstr ""
+
+#: app/ui/pages/settings.py:339
+#, python-brace-format
+msgid "Failed to save model: {error}"
+msgstr ""
+
+#: app/ui/pages/settings.py:346
+msgid "Select a control mode first"
+msgstr ""
+
+#: app/ui/pages/settings.py:358
+msgid "Control mode saved"
+msgstr ""
+
+#: app/ui/pages/settings.py:362
+#, python-brace-format
+msgid "Failed to save control mode: {error}"
+msgstr ""
+
+#: app/ui/pages/settings.py:369
 msgid "Never"
 msgstr ""
 
-#: app/ui/pages/settings.py:284
-msgid "Unknown"
-msgstr ""
-
-#: app/ui/pages/simulator.py:61 app/ui/pages/simulator.py:120
+#: app/ui/pages/simulator.py:68 app/ui/pages/simulator.py:156
 msgid "Normal"
 msgstr ""
 
-#: app/ui/pages/simulator.py:62
+#: app/ui/pages/simulator.py:69
 msgid "Dry Soil"
 msgstr ""
 
-#: app/ui/pages/simulator.py:63
+#: app/ui/pages/simulator.py:70
 msgid "Overheating"
 msgstr ""
 
-#: app/ui/pages/simulator.py:64
+#: app/ui/pages/simulator.py:71
 msgid "Low Light"
 msgstr ""
 
-#: app/ui/pages/simulator.py:65
+#: app/ui/pages/simulator.py:72
 msgid "Sensor Fault"
 msgstr ""
 
-#: app/ui/pages/simulator.py:72 app/ui/pages/simulator.py:124
+#: app/ui/pages/simulator.py:79 app/ui/pages/simulator.py:157
 msgid "Stable conditions within optimal ranges"
 msgstr ""
 
-#: app/ui/pages/simulator.py:73
+#: app/ui/pages/simulator.py:80
 msgid "Low soil moisture across all zones"
 msgstr ""
 
-#: app/ui/pages/simulator.py:74
+#: app/ui/pages/simulator.py:81
 msgid "Rising temperatures above safe thresholds"
 msgstr ""
 
-#: app/ui/pages/simulator.py:75
+#: app/ui/pages/simulator.py:82
 msgid "Insufficient light levels for photosynthesis"
 msgstr ""
 
-#: app/ui/pages/simulator.py:76
+#: app/ui/pages/simulator.py:83
 msgid "Erratic readings from one or more sensors"
 msgstr ""
 
-#: app/ui/pages/simulator.py:93
-msgid "Control the telemetry data simulator for testing and demos."
-msgstr ""
-
-#: app/ui/pages/simulator.py:108 app/ui/pages/simulator.py:246
-msgid "Stopped"
-msgstr ""
-
-#: app/ui/pages/simulator.py:111
-msgid "Messages published:"
+#: app/ui/pages/simulator.py:113 app/ui/pages/zone_management.py:124
+msgid "Simulator"
 msgstr ""
 
 #: app/ui/pages/simulator.py:114
+msgid ""
+"Generate realistic telemetry and actuator state changes for demos, "
+"validation, and operator training."
+msgstr ""
+
+#: app/ui/pages/simulator.py:116
+msgid "Telemetry lab"
+msgstr ""
+
+#: app/ui/pages/simulator.py:133
+msgid "Simulator Status"
+msgstr ""
+
+#: app/ui/pages/simulator.py:133
+msgid "Live run state and publish counters."
+msgstr ""
+
+#: app/ui/pages/simulator.py:135 app/ui/pages/simulator.py:358
+msgid "Stopped"
+msgstr ""
+
+#: app/ui/pages/simulator.py:137
+msgid "Messages published:"
+msgstr ""
+
+#: app/ui/pages/simulator.py:140
 msgid "Last publish:"
 msgstr ""
 
-#: app/ui/pages/simulator.py:119
-msgid "Active Scenario"
+#: app/ui/pages/simulator.py:144
+msgid "Scenario"
 msgstr ""
 
-#: app/ui/pages/simulator.py:129
-msgid "Select Scenario"
+#: app/ui/pages/simulator.py:144
+msgid "Choose the environmental story the simulator should emit."
 msgstr ""
 
-#: app/ui/pages/simulator.py:142
-msgid "Configuration"
+#: app/ui/pages/simulator.py:160
+msgid "Run Configuration"
 msgstr ""
 
-#: app/ui/pages/simulator.py:146
+#: app/ui/pages/simulator.py:160
+msgid "Scale the generated fleet and choose local simulation or external MQTT."
+msgstr ""
+
+#: app/ui/pages/simulator.py:162
 msgid "Groups"
 msgstr ""
 
-#: app/ui/pages/simulator.py:150
+#: app/ui/pages/simulator.py:163
 msgid "Greenhouses per Group"
 msgstr ""
 
-#: app/ui/pages/simulator.py:154
+#: app/ui/pages/simulator.py:164
 msgid "Zones per Greenhouse"
 msgstr ""
 
-#: app/ui/pages/simulator.py:158
+#: app/ui/pages/simulator.py:165
 msgid "Interval (seconds)"
 msgstr ""
 
-#: app/ui/pages/simulator.py:178
+#: app/ui/pages/simulator.py:167
+msgid "Mode"
+msgstr ""
+
+#: app/ui/pages/simulator.py:168
+msgid "Internal Simulator"
+msgstr ""
+
+#: app/ui/pages/simulator.py:168
+msgid "Wokwi / MQTT"
+msgstr ""
+
+#: app/ui/pages/simulator.py:175
+msgid "Zone Visualization"
+msgstr ""
+
+#: app/ui/pages/simulator.py:175
+msgid "Animated zone and actuator feedback for the active telemetry stream."
+msgstr ""
+
+#: app/ui/pages/simulator.py:179
+msgid "Start the simulator to see zone data."
+msgstr ""
+
+#: app/ui/pages/simulator.py:250
+msgid ""
+"Use a public MQTT broker, then configure firmware/wokwi-greenhouse-"
+"zone/main.py and config.py in hosted Wokwi."
+msgstr ""
+
+#: app/ui/pages/simulator.py:268
 #, python-brace-format
 msgid "Scenario changed to {scenario}"
 msgstr ""
 
-#: app/ui/pages/simulator.py:203
+#: app/ui/pages/simulator.py:275
+msgid ""
+"The internal simulator cannot be started in Wokwi / MQTT mode. Switch "
+"Mode to Internal Simulator first."
+msgstr ""
+
+#: app/ui/pages/simulator.py:294
+msgid ""
+"Simulator cannot run while MQTT remote devices mode is selected. Switch "
+"control mode to Internal simulator in Settings first."
+msgstr ""
+
+#: app/ui/pages/simulator.py:312
 msgid "Simulator started successfully"
 msgstr ""
 
-#: app/ui/pages/simulator.py:205
+#: app/ui/pages/simulator.py:314
 msgid "Simulator started"
 msgstr ""
 
-#: app/ui/pages/simulator.py:211
+#: app/ui/pages/simulator.py:320
 #, python-brace-format
 msgid "Failed to start: {detail}"
 msgstr ""
 
-#: app/ui/pages/simulator.py:213
+#: app/ui/pages/simulator.py:322
 msgid "Failed to start simulator"
 msgstr ""
 
-#: app/ui/pages/simulator.py:227 app/ui/pages/simulator.py:229
+#: app/ui/pages/simulator.py:339 app/ui/pages/simulator.py:341
 msgid "Simulator stopped"
 msgstr ""
 
-#: app/ui/pages/simulator.py:233
+#: app/ui/pages/simulator.py:345
 #, python-brace-format
 msgid "Failed to stop: {detail}"
 msgstr ""
 
-#: app/ui/pages/simulator.py:235
+#: app/ui/pages/simulator.py:347
 msgid "Failed to stop simulator"
 msgstr ""
 
-#: app/ui/pages/simulator.py:240
+#: app/ui/pages/simulator.py:352
 msgid "Running"
 msgstr ""
 
-#: app/ui/pages/simulator.py:261
+#: app/ui/pages/simulator.py:395
 msgid "Start Simulator"
 msgstr ""
 
-#: app/ui/pages/simulator.py:268
+#: app/ui/pages/simulator.py:402
 msgid "Stop Simulator"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:34
+msgid "Zones and Plants"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:35
+msgid ""
+"Register real zones, inspect simulator-generated zones, and copy Wokwi "
+"MQTT identifiers."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:37
+msgid "Registry"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:40
+msgid "Choose where new zones and devices should be registered."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:46
+msgid "Create Zone"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:46
+msgid ""
+"Real zones are used by MQTT devices; simulator zones are created "
+"automatically when the simulator starts."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:48
+msgid "Zone name"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:48
+msgid "north-bed"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:49
+msgid "Description"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:49
+msgid "Tomatoes, row A"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:50
+msgid "Type"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:50
+msgid "Real MQTT zone"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:50
+msgid "Simulator zone"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:51
+msgid "Add zone"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:53
+msgid "Create Plant Batch"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:53
+msgid "Attach plants to a zone so the control page can show plant context."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:56
+msgid "Batch name"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:56
+msgid "Tomato batch"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:57
+msgid "Species"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:58
+msgid "Growth stage"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:58
+msgid "vegetative"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:59
+msgid "Add plants"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:61
+msgid "Wokwi / MQTT Setup"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:61
+msgid ""
+"Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and "
+"publish telemetry to the matching topic."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:63
+msgid "1. Use a public MQTT broker, such as Mosquitto on a VPS."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:64
+msgid "2. Copy MQTT_HOST, MQTT_PORT, MQTT_USER, and MQTT_PASSWORD into config.py."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:65
+msgid ""
+"3. Set GROUP_ID, GREENHOUSE_ID, ZONE_ID, MQTT_USERNAME, and MQTT_TOKEN "
+"from a real zone below."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:66
+msgid ""
+"4. Wokwi sends telemetry; approved MQTT-mode commands are published back "
+"to the zone command topic."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:69
+msgid "Registered Zones"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:69
+msgid ""
+"Simulator-generated rows survive page refresh and can be deleted here "
+"when no longer needed."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:112
+msgid "Select a greenhouse before managing zones."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:115
+msgid "No zones yet"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:115
+msgid ""
+"Create a real zone here or start the simulator to provision simulator "
+"zones."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:124
+msgid "Real MQTT"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:129
+msgid "Show topic"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:130
+msgid "Delete"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:182
+#, python-brace-format
+msgid "Failed to load registry: {error}"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:188
+msgid "Select a greenhouse and enter a zone name."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:196
+#, python-brace-format
+msgid "Create zone failed: {error}"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:213
+msgid "Zone created"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:218
+msgid "Select a zone and enter a plant batch name."
+msgstr ""
+
+#: app/ui/pages/zone_management.py:231
+#, python-brace-format
+msgid "Create plant batch failed: {error}"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:236
+msgid "Plant batch created"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:245
+#, python-brace-format
+msgid "Delete zone failed: {error}"
+msgstr ""
+
+#: app/ui/pages/zone_management.py:247
+msgid "Zone deleted"
 msgstr ""
 

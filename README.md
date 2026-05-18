@@ -1,4 +1,4 @@
-# Smart Greenhouse Fleet Control
+# Smart Greenhouse Management
 
 FastAPI, NiceGUI, MQTT, PostgreSQL/pgvector, InfluxDB, and AI-assisted greenhouse fleet monitoring.
 
@@ -36,6 +36,10 @@ uv run python -m services.simulator.main --once
 - RAG worker: `uv run python -m services.worker.main --job rag-reindex`
 - Baseline control observer: `uv run python -m services.control_engine.main --group-id <uuid> --greenhouse-id <uuid> --zone-id <uuid> --soil-moisture 18`
 
+## UI flows
+
+Implemented page, button, simulator, control-panel, AI chat, settings, and observability flows are documented in `docs/ui-flows/README.md`.
+
 ## Model Settings
 
 The application includes a model settings page at `/settings` where you can:
@@ -44,8 +48,9 @@ The application includes a model settings page at `/settings` where you can:
 - **View Embedding Configuration**: See the fixed embedding model (changing requires RAG reindex)
 - **Manage Catalog**: Refresh the OpenRouter model catalog, search/filter by provider and capability
 - **View Pricing**: See prompt and completion prices per million tokens for each model
+- **Set Control Mode**: Choose whether approved commands execute through MQTT remote devices or the internal simulator
 
-The selected chat model is stored in the database and used for all AI chat requests. If the selected model becomes unavailable, the AI will block with a clear error message.
+The selected chat model is stored in the database and used for all AI chat requests. If the selected model becomes unavailable, the AI will block with a clear error message. The selected control mode is also stored in the database and is read by `/settings`, `/simulator`, `/control`, and command execution.
 
 ## Safety model
 

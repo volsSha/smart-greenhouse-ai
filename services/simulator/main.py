@@ -26,6 +26,11 @@ from app.config import get_settings
 from app.core.mqtt_topics import telemetry_topic
 from app.schemas.telemetry import TelemetryEnvelope, TelemetryReading
 from app.services.mqtt_service import MQTTService
+from app.services.simulator.zone_state import (
+    simulator_greenhouse_id,
+    simulator_group_id,
+    simulator_zone_id,
+)
 from services.simulator.scenarios import (
     ALL_SCENARIOS,
     Scenario,
@@ -83,11 +88,11 @@ async def publish_burst(
     """Publish one telemetry burst for all groups/greenhouses/zones. Returns count of messages."""
     count = 0
     for g in range(1, num_groups + 1):
-        group_id = f"group-{g:03d}"
+        group_id = simulator_group_id(g)
         for gh in range(1, greenhouses_per_group + 1):
-            greenhouse_id = f"gh-{g:03d}{gh}"
+            greenhouse_id = simulator_greenhouse_id(gh)
             for z in range(1, zones_per_greenhouse + 1):
-                zone_id = f"zone-{z:02d}"
+                zone_id = simulator_zone_id(z)
                 topic = telemetry_topic(group_id, greenhouse_id, zone_id)
                 readings = scenario.generate_all_metrics(f"sensor-{group_id}")
                 for reading in readings:

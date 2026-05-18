@@ -9,7 +9,7 @@ date: 2026-05-07
 
 ## Summary
 
-Build the complete Smart Greenhouse Fleet Control System described in the project docs: multi-greenhouse telemetry simulation and ingestion, group/greenhouse/zone dashboard UI, fleet metadata, plant batches/profiles, alerts, AI chat with transparent scoped tool use, RAG knowledge search, and safety-validated proposed actions that require user approval before MQTT execution.
+Build the complete Smart Greenhouse Management System described in the project docs: multi-greenhouse telemetry simulation and ingestion, group/greenhouse/zone dashboard UI, fleet metadata, plant batches/profiles, alerts, AI chat with transparent scoped tool use, RAG knowledge search, and safety-validated proposed actions that require user approval before MQTT execution.
 
 The implementation follows the documented MVP order so each phase can be completed and verified independently while preserving the system invariant that the AI never directly controls actuators and every physical command is scoped to group, greenhouse, and zone.
 

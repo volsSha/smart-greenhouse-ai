@@ -106,7 +106,7 @@ from nicegui import ui  # noqa: E402
 
 ui.run_with(
     app,
-    title="Smart Greenhouse Fleet",
+    title="Smart Greenhouse Management",
     storage_secret="",
 )
 ```

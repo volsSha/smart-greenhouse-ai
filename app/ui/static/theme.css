@@ -158,6 +158,101 @@ body.body--light {
     box-shadow: 0 0 0 3px rgba(31, 122, 77, 0.14);
 }
 
+.control-operator-layout {
+    display: flex;
+    align-items: stretch;
+}
+
+.control-map-section {
+    min-width: 0;
+}
+
+.control-drawer-section {
+    flex: 0 0 420px;
+}
+
+.control-greenhouse-map {
+    display: block;
+    min-height: 16rem;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.control-greenhouse-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.control-svg-house {
+    fill: rgba(255, 255, 255, 0.42);
+    stroke: rgba(39, 84, 61, 0.16);
+    stroke-width: 2;
+}
+
+.control-svg-zone rect {
+    fill: rgba(255, 255, 255, 0.88);
+    stroke: rgba(39, 84, 61, 0.18);
+    stroke-width: 2;
+    cursor: pointer;
+    transition: fill 160ms ease, stroke 160ms ease, filter 160ms ease;
+}
+
+.control-svg-zone:hover rect,
+.control-svg-zone:focus-visible rect {
+    stroke: rgba(31, 122, 77, 0.5);
+    filter: drop-shadow(0 8px 14px rgba(21, 73, 44, 0.16));
+}
+
+.control-svg-zone.selected rect {
+    fill: rgba(231, 244, 236, 0.96);
+    stroke: var(--gh-green);
+    stroke-width: 4;
+}
+
+.control-svg-zone.pending rect {
+    stroke: rgba(199, 120, 20, 0.58);
+}
+
+.control-svg-zone.warning rect {
+    fill: rgba(255, 247, 229, 0.96);
+}
+
+.control-svg-zone.no-data rect {
+    fill: rgba(246, 248, 245, 0.78);
+}
+
+.control-svg-zone-label {
+    fill: var(--gh-ink);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.control-svg-zone-status {
+    fill: var(--gh-muted);
+    font-size: 13px;
+}
+
+.control-svg-pending-dot {
+    fill: var(--gh-amber);
+}
+
+.control-svg-pending-text {
+    fill: white;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.control-map-fallback-list {
+    border-top: 1px solid var(--gh-line);
+    padding-top: 0.75rem;
+}
+
+.control-actuator-card {
+    border: 1px solid var(--gh-line) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+}
+
 @media (max-width: 900px) {
     .greenhouse-page {
         padding: 1rem 0.75rem 2rem;
@@ -165,5 +260,14 @@ body.body--light {
 
     .greenhouse-hero {
         border-radius: 20px;
+    }
+
+    .control-operator-layout {
+        flex-direction: column;
+    }
+
+    .control-drawer-section {
+        flex: 1 1 auto;
+        width: 100% !important;
     }
 }

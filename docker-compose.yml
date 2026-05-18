@@ -11,7 +11,7 @@ services:
     networks:
       - greenhouse-net
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/#' -C 1 -W 3 || exit 1"]
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -u app -t 'greenhouse-groups/healthcheck' -C 1 -W 3 >/tmp/mqtt-healthcheck.out & pid=$$!; mosquitto_pub -h localhost -u app -t 'greenhouse-groups/healthcheck' -m ok; wait $$pid"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -73,6 +73,9 @@ services:
       INFLUX_URL: http://influxdb:8086
       INFLUX_TOKEN: ${INFLUX_TOKEN:-your-influxdb-token}
       MQTT_HOST: mosquitto
+      APP_SECRET: ${APP_SECRET:-smart-greenhouse-dev-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
       API_BASE_URL: ${API_BASE_URL:-http://127.0.0.1:8080}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-anthropic/claude-sonnet-4}

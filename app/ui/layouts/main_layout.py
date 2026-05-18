@@ -16,6 +16,7 @@ _NAV_GROUPS = [
         [
             ("Dashboard", "dashboard", "/dashboard", "dashboard"),
             ("Simulator", "precision_manufacturing", "/simulator", "simulator"),
+            ("Zones", "view_in_ar", "/zones", "zones"),
             ("Plants", "local_florist", "/plants", "plants"),
             ("Control", "tune", "/control", "control"),
         ],
@@ -51,10 +52,13 @@ def main_layout() -> None:
         with ui.row().classes("items-center gap-3"):
             ui.icon("eco", size="1.35rem").classes("greenhouse-brand-mark p-2")
             with ui.column().classes("gap-0"):
-                ui.label(_("Smart Greenhouse Fleet")).classes("text-lg font-bold leading-tight")
-                ui.label(_("Fleet Control System")).classes("text-xs opacity-65")
+                ui.label(_("Smart Greenhouse Management")).classes("text-lg font-bold leading-tight")
+                ui.label(_("Greenhouse Control System")).classes("text-xs opacity-65")
         ui.space()
         language_switcher()
+        with ui.link(target="/logout").classes("greenhouse-nav-link"):
+            ui.icon("logout", size="1.1rem")
+            ui.label(_("Logout")).classes("text-sm font-medium")
 
     with ui.left_drawer().classes("greenhouse-drawer p-4"):
         with ui.column().classes("gap-1 mb-5"):

@@ -22,6 +22,8 @@ class EdgeNode(Base, IdTimestampMixin):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     node_type: Mapped[str] = mapped_column(String(50), nullable=False)  # esp32 | simulator | gateway
     firmware_version: Mapped[str | None] = mapped_column(String(50))
+    mqtt_username: Mapped[str | None] = mapped_column(String(255))
+    mqtt_token: Mapped[str | None] = mapped_column(String(255))
     last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # -- relationships --

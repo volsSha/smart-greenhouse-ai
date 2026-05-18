@@ -15,6 +15,77 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+GROUP_LABELS = (
+    "vegetable-production",
+    "herb-nursery",
+    "fruit-crops",
+    "research-trials",
+    "seedling-starts",
+    "flower-production",
+    "organic-farm",
+    "hydroponic-range",
+    "climate-lab",
+    "market-garden",
+)
+
+GREENHOUSE_LABELS = (
+    "tomatoes",
+    "cucumbers",
+    "bell-peppers",
+    "lettuce",
+    "strawberries",
+    "basil",
+    "spinach",
+    "microgreens",
+    "eggplants",
+    "cherry-tomatoes",
+    "herbs",
+    "peppers",
+    "kale",
+    "mint",
+    "arugula",
+    "seedlings",
+    "flowers",
+    "melons",
+    "beans",
+    "experimental-crops",
+)
+
+ZONE_LABELS = (
+    "seedlings",
+    "vegetative-growth",
+    "flowering",
+    "fruiting",
+    "propagation",
+    "irrigation-test",
+    "high-light-bed",
+    "shade-bed",
+    "nutrient-trial",
+    "harvest-ready",
+    "cool-zone",
+    "warm-zone",
+    "humidity-control",
+    "co2-enrichment",
+    "soil-moisture-test",
+    "young-plants",
+    "mature-plants",
+    "quarantine",
+    "pollination",
+    "storage-bench",
+)
+
+
+def simulator_group_id(index: int) -> str:
+    return f"group-{index:03d}-{GROUP_LABELS[(index - 1) % len(GROUP_LABELS)]}"
+
+
+def simulator_greenhouse_id(index: int) -> str:
+    return f"gh-{index:03d}-{GREENHOUSE_LABELS[(index - 1) % len(GREENHOUSE_LABELS)]}"
+
+
+def simulator_zone_id(index: int) -> str:
+    return f"zone-{index:02d}-{ZONE_LABELS[(index - 1) % len(ZONE_LABELS)]}"
+
 
 # ---------------------------------------------------------------------------
 # Data types
@@ -121,26 +192,33 @@ class SimulatedZoneState:
         scenario: str = "normal",
     ) -> None:
         """Build zone topology and apply scenario baselines."""
+        zone_refs = []
+        for g in range(1, num_groups + 1):
+            for gh in range(1, greenhouses_per_group + 1):
+                for z in range(1, zones_per_greenhouse + 1):
+                    zone_refs.append((simulator_group_id(g), simulator_greenhouse_id(gh), simulator_zone_id(z)))
+        self.initialize_from_zones(zone_refs, scenario=scenario)
+
+    def initialize_from_zones(
+        self,
+        zone_refs: list[tuple[str, str, str]],
+        scenario: str = "normal",
+    ) -> None:
         self._zones.clear()
         scenario_offsets = self._scenario_offsets(scenario)
 
-        for g in range(1, num_groups + 1):
-            group_id = f"group-{g:03d}"
-            for gh in range(1, greenhouses_per_group + 1):
-                greenhouse_id = f"gh-{gh:03d}"
-                for z in range(1, zones_per_greenhouse + 1):
-                    zone_id = f"zone-{z:02d}"
-                    key = (group_id, greenhouse_id, zone_id)
-                    base_metrics = self._base_metrics()
-                    for metric in base_metrics:
-                        offset = scenario_offsets.get(metric, 0.0)
-                        base_metrics[metric] += offset + g + gh + z
-                    self._zones[key] = ZoneState(
-                        group_id=group_id,
-                        greenhouse_id=greenhouse_id,
-                        zone_id=zone_id,
-                        **base_metrics,
-                    )
+        for index, (group_id, greenhouse_id, zone_id) in enumerate(zone_refs, start=1):
+            key = (group_id, greenhouse_id, zone_id)
+            base_metrics = self._base_metrics()
+            for metric in base_metrics:
+                offset = scenario_offsets.get(metric, 0.0)
+                base_metrics[metric] += offset + index
+            self._zones[key] = ZoneState(
+                group_id=group_id,
+                greenhouse_id=greenhouse_id,
+                zone_id=zone_id,
+                **base_metrics,
+            )
         self._initialized = True
 
     def reset(self) -> None:
@@ -156,7 +234,7 @@ class SimulatedZoneState:
     # Command application
     # ------------------------------------------------------------------
 
-    async def apply_command(self, command: dict[str, Any]) -> None:
+    async def apply_command(self, command: dict[str, Any]) -> bool:
         """Apply an actuator command to the appropriate zone state.
 
         Args:
@@ -171,7 +249,7 @@ class SimulatedZoneState:
         )
         if key not in self._zones:
             logger.warning("apply_command called for unknown zone: %s", key)
-            return
+            return False
 
         async with self._lock:
             zone = self._zones[key]
@@ -182,7 +260,7 @@ class SimulatedZoneState:
             act = self._get_actuator(zone, actuator_name)
             if act is None:
                 logger.warning("Unknown actuator '%s' for zone %s", actuator_name, key)
-                return
+                return False
 
             if action in ("on", "set_power"):
                 act.active = True
@@ -203,6 +281,7 @@ class SimulatedZoneState:
                 act.active,
                 duration,
             )
+            return True
 
     async def get_state(self, group_id: str, greenhouse_id: str, zone_id: str) -> ZoneState | None:
         """Return the state for a single zone, or None."""
@@ -213,6 +292,9 @@ class SimulatedZoneState:
         async with self._lock:
             self._tick_expired()
             return list(self._zones.values())
+
+    def all_zone_refs(self) -> list[tuple[str, str, str]]:
+        return list(self._zones)
 
     async def telemetry_value(self, group_id: str, greenhouse_id: str, zone_id: str, metric: str) -> float:
         """Return the current telemetry value for a metric in a zone,

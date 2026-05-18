@@ -4,7 +4,16 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.simulator.zone_state import SimulatedZoneState
+from app.api import simulator
+from app.api.simulator import SimulatorStartRequest
+from app.services.simulator.zone_state import (
+    SimulatedZoneState,
+    simulator_greenhouse_id,
+    simulator_group_id,
+    simulator_zone_id,
+)
+
+ZONE_KEY = (simulator_group_id(1), simulator_greenhouse_id(1), simulator_zone_id(1))
 
 
 @pytest.fixture
@@ -17,26 +26,28 @@ def state() -> SimulatedZoneState:
 class TestInitialize:
     def test_creates_zones(self, state: SimulatedZoneState) -> None:
         assert state.is_initialized
-        keys = list(state._zones.keys())
-        assert len(keys) == 2  # 1 group × 1 gh × 2 zones
+        assert len(state.all_zone_refs()) == 2
+
+    def test_exposes_zone_refs_for_telemetry_generation(self, state: SimulatedZoneState) -> None:
+        assert ZONE_KEY in state.all_zone_refs()
 
     def test_reset_clears_state(self, state: SimulatedZoneState) -> None:
         state.reset()
         assert not state.is_initialized
-        assert len(list(state._zones.keys())) == 0
+        assert state.all_zone_refs() == []
 
 
 class TestApplyCommand:
     @pytest.mark.asyncio
     async def test_watering_increases_soil_moisture(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         zone = await state.get_state(*key)
         before = zone.soil_moisture
 
         await state.apply_command({
-            "group_id": "group-001",
-            "greenhouse_id": "gh-001",
-            "zone_id": "zone-01",
+            "group_id": key[0],
+            "greenhouse_id": key[1],
+            "zone_id": key[2],
             "actuator_name": "pump",
             "action": "on",
             "value": 50.0,
@@ -49,7 +60,7 @@ class TestApplyCommand:
 
     @pytest.mark.asyncio
     async def test_turn_off_resets_actuator(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "pump", "action": "on", "value": 50.0,
@@ -65,7 +76,7 @@ class TestApplyCommand:
 
     @pytest.mark.asyncio
     async def test_heater_raises_temperature(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "heater", "action": "on", "value": 50.0,
@@ -77,7 +88,7 @@ class TestApplyCommand:
 
     @pytest.mark.asyncio
     async def test_fan_lowers_temperature(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "fan", "action": "set_power", "value": 80.0,
@@ -89,7 +100,7 @@ class TestApplyCommand:
 
     @pytest.mark.asyncio
     async def test_lamp_increases_light(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "lamp", "action": "on", "value": 100.0,
@@ -109,7 +120,7 @@ class TestApplyCommand:
 
     @pytest.mark.asyncio
     async def test_unknown_actuator_is_noop(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "flux_capacitor", "action": "on", "source": "ai_agent",
@@ -121,7 +132,7 @@ class TestApplyCommand:
 class TestTelemetryValue:
     @pytest.mark.asyncio
     async def test_no_actuator_returns_baseline(self, state: SimulatedZoneState) -> None:
-        val = await state.telemetry_value("group-001", "gh-001", "zone-01", "temperature")
+        val = await state.telemetry_value(*ZONE_KEY, "temperature")
         assert val > 0
 
     @pytest.mark.asyncio
@@ -132,7 +143,7 @@ class TestTelemetryValue:
     @pytest.mark.asyncio
     async def test_expired_duration_returns_baseline(self, state: SimulatedZoneState) -> None:
         """Short-duration commands expire and stop affecting telemetry."""
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         zone = await state.get_state(*key)
         before_light = zone.light
 
@@ -151,7 +162,7 @@ class TestTelemetryValue:
 class TestAnimationFlags:
     @pytest.mark.asyncio
     async def test_active_actuators_have_animation_flag(self, state: SimulatedZoneState) -> None:
-        key = ("group-001", "gh-001", "zone-01")
+        key = ZONE_KEY
         await state.apply_command({
             "group_id": key[0], "greenhouse_id": key[1], "zone_id": key[2],
             "actuator_name": "fan", "action": "set_power", "value": 80.0,
@@ -161,3 +172,40 @@ class TestAnimationFlags:
         flags = zone.animation_flags()
         assert flags["fan"] is True
         assert flags["pump"] is False
+
+
+class TestSimulatorTelemetryLoop:
+    @pytest.mark.asyncio
+    async def test_loop_writes_actuator_adjusted_values(self, state: SimulatedZoneState) -> None:
+        class TelemetryRepository:
+            def __init__(self) -> None:
+                self.rows = []
+
+            def write_telemetry(self, reading) -> None:
+                self.rows.append(reading)
+                if len(self.rows) >= 5:
+                    simulator._state["running"] = False
+
+        await state.apply_command({
+            "group_id": ZONE_KEY[0],
+            "greenhouse_id": ZONE_KEY[1],
+            "zone_id": ZONE_KEY[2],
+            "actuator_name": "pump",
+            "action": "on",
+            "value": 50.0,
+            "duration_seconds": 30,
+            "source": "manual",
+        })
+        repository = TelemetryRepository()
+        simulator._state["running"] = True
+
+        await simulator._run_simulator(
+            SimulatorStartRequest(groups=1, greenhouses_per_group=1, zones_per_greenhouse=1, interval_seconds=1),
+            repository,
+            state,
+        )
+
+        soil = next(row for row in repository.rows if row.metric == "soil_moisture")
+        assert soil.zone_id == ZONE_KEY[2]
+        assert soil.sensor_id == f"{ZONE_KEY[2]}:soil_moisture"
+        assert soil.value == await state.telemetry_value(*ZONE_KEY, "soil_moisture")

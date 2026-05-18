@@ -82,31 +82,41 @@
 | POST | `/api/rag/reindex` | Rebuild embeddings |
 | GET | `/api/rag/search` | Semantic search in knowledge base |
 
-## Model Settings
+## Settings
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/settings` | Get current model settings (selected chat model, embedding config, refresh status) |
+| GET | `/api/settings` | Get current model settings, embedding config, catalog refresh status, and persisted control mode |
 | PUT | `/api/settings` | Update selected chat model (must exist in catalog) |
+| PUT | `/api/settings/control-mode` | Update persisted command execution mode (`mqtt` or `simulator`) |
 | GET | `/api/settings/catalog` | List OpenRouter model catalog with optional search/provider/capability filters |
 | POST | `/api/settings/catalog/refresh` | Refresh catalog from OpenRouter API |
 
+## Simulator and MQTT Status
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/simulator/status` | Get internal simulator runtime status and active configuration |
+| POST | `/api/simulator/start` | Start internal simulator with scenario, topology, and interval config |
+| POST | `/api/simulator/stop` | Stop internal simulator runtime |
+| GET | `/api/simulator/zones` | Get live simulator zone state for UI visualization |
+| GET | `/api/mqtt/status` | Get MQTT broker/client status for Wokwi or remote-device operation |
+
 ## NiceGUI Pages
 
-`/` redirects to `/dashboard`. NiceGUI pages are registered by importing page modules before `ui.run_with(app, ...)`; see `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` for the dashboard launch fix.
+`/` redirects to `/dashboard`. NiceGUI pages are registered by importing page modules before `ui.run_with(app, ...)`; see `docs/solutions/ui-bugs/docker-compose-fastapi-nicegui-dashboard-launch-fix-2026-05-07.md` for the dashboard launch fix. Detailed page and button flows live in `docs/ui-flows/README.md`.
 
 | Page | Description |
 |------|-------------|
-| `/dashboard` | Group overview, greenhouse cards, zone status, alerts, AI summary |
-| `/greenhouses` | Greenhouse and zone management |
-| `/devices` | Edge node, sensor, and actuator registry |
-| `/simulator` | Multi-greenhouse sensor emulation with edge-node scenarios |
-| `/plants` | Plant batches, profiles, growth stages, zone assignments |
-| `/control` | Scoped manual/proposed commands, setpoints, control modes |
-| `/ai-chat` | AI conversation with group/greenhouse/zone scope and tool transparency |
-| `/logs` | Command log, event log, alert history with group/greenhouse/zone filters |
-| `/rag` | Knowledge base management |
-| `/settings` | Local non-secret settings and system status |
+| `/dashboard` | Fleet telemetry overview, greenhouse cards, zone drill-down charts, and anomaly alerts |
+| `/simulator` | Internal simulator controls, scenario selection, live zone visualization, and MQTT status display |
+| `/zones` | Group/greenhouse zone setup, edge-node identity, MQTT topic display, and plant batch creation |
+| `/plants` | Planned plant-profile and plant-batch workspace |
+| `/control` | Operator panel with greenhouse map, zone drawer, actuator proposals, approvals, and recent outcomes |
+| `/ai-chat` | Scoped AI conversation with tool transparency and proposed action approval cards |
+| `/logs` | Persisted debug logs with level/component/event filters and expandable failure details |
+| `/rag` | Knowledge-base documents, upload, reindex, and semantic search |
+| `/settings` | Model catalog, selected AI model, embedding config, and persisted control mode |
 
 ## MQTT Topics
 

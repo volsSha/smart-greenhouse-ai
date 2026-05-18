@@ -54,7 +54,7 @@ class MQTTStatusPanel:
             )
             ui.label(
                 _(
-                    "Run ngrok TCP for local Mosquitto, then paste the ngrok host and port into "
+                    "Use a public MQTT broker, then paste its host, port, and credentials into "
                     "firmware/wokwi-greenhouse-zone/config.py for the hosted Wokwi MicroPython simulator."
                 )
             ).classes("text-xs opacity-60")

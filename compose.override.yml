@@ -30,3 +30,7 @@ services:
       - ./tests:/app/tests
     environment:
       DEBUG: "true"
+      APP_SECRET: ${APP_SECRET:-smart-greenhouse-dev-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
+      MQTT_USERNAME: app

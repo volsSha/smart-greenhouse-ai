@@ -16,6 +16,7 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 
 ## Dev Workflow
 
+- In most cases, run Python commands with `uv`.
 - `docker compose up -d --build app` — rebuild and start dev container
 - Source edits in `app/` and `locales/` hot-reload via uvicorn --reload
 - After `.po` edits, run `pybabel compile -d locales` then the container auto-reloads
@@ -25,6 +26,7 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 
 - Language switcher uses `ui.select` with label-to-code mapping (NiceGUI select events emit display labels, not dict keys)
 - NiceGUI components that need language must call `_()` from `app.i18n.core` at render time
+- All user-facing UI labels, descriptions, empty states, notifications, and placeholders must have English and Ukrainian translations in `locales/`
 - `ui.run_with(...)` requires a real `storage_secret` for `app.storage.user` persistence
 
 ## Debugging
@@ -32,3 +34,8 @@ NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQ
 - Check `/logs` first when debugging API, UI, or AI command failures; it displays persisted `debug_log` entries.
 - For failed AI commands, inspect `debug_log` rows with `level="error"`, `component="ai_agent"`, and `event_type="ai_chat_failed"`.
 - Correlate error-log entries with AI conversation messages and `ai_tool_calls` when the failure involves tool execution.
+
+## App-wide Testing
+
+- When asked to test the whole app or all features, use `docs/APP_TEST_CHECKLIST.md` as the minimal feature checklist.
+- For production app-wide tests, verify behavior through the deployed domain/nginx route; use localhost or internal Docker requests only as diagnostics.

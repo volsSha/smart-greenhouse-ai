@@ -1,1 +1,1 @@
-"""Service package for Smart Greenhouse Fleet Control."""
+"""Service package for Smart Greenhouse Management."""

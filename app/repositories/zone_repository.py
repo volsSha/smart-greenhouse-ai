@@ -23,12 +23,16 @@ class ZoneRepository:
         greenhouse_id: uuid.UUID,
         name: str,
         description: str | None = None,
+        source_type: str = "real",
+        simulator_managed: bool = False,
     ) -> GreenhouseZone:
         """Create a new zone."""
         zone = GreenhouseZone(
             greenhouse_id=greenhouse_id,
             name=name,
             description=description,
+            source_type=source_type,
+            simulator_managed=simulator_managed,
         )
         self.session.add(zone)
         await self.session.flush()
