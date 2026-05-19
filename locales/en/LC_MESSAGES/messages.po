@@ -437,16 +437,12 @@ msgid "Intelligence"
 msgstr "Intelligence"
 
 #: app/ui/pages/ai_chat.py:267
-msgid "Conversation Context"
-msgstr "Conversation Context"
-
-#: app/ui/pages/ai_chat.py:267
-msgid "Select a saved thread or start a fresh all-greenhouses chat."
-msgstr "Select a saved thread or start a fresh all-greenhouses chat."
+msgid "Open a saved thread or continue the current scoped conversation in one workspace."
+msgstr "Open a saved thread or continue the current scoped conversation in one workspace."
 
 #: app/ui/pages/ai_chat.py:270
-msgid "Conversation"
-msgstr "Conversation"
+msgid "Chat history"
+msgstr "Chat history"
 
 #: app/ui/pages/ai_chat.py:274
 msgid "New Conversation"
@@ -522,6 +518,10 @@ msgstr "Command rejected"
 #, python-brace-format
 msgid "Rejection failed: {detail}"
 msgstr "Rejection failed: {detail}"
+
+#: app/ui/pages/ai_chat.py:496
+msgid "Loading conversation..."
+msgstr "Loading conversation..."
 
 #: app/ui/pages/ai_chat.py:484
 #, python-brace-format

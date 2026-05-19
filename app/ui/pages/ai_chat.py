@@ -197,11 +197,12 @@ def _render_conversation_messages(
 ) -> None:
     """Render all messages from a conversation into the chat area."""
     if not messages:
-        empty_state(
-            _("No messages yet"),
-            _("Ask about greenhouse health, sensor anomalies, recent trends, or safe actuator actions."),
-            icon="forum",
-        )
+        with ui.column().classes("w-full h-full min-h-[260px] items-center justify-center"):
+            empty_state(
+                _("No messages yet"),
+                _("Ask about greenhouse health, sensor anomalies, recent trends, or safe actuator actions."),
+                icon="forum",
+            )
         return
 
     tool_calls_by_idx: dict[int, list[dict[str, Any]]] = {}
@@ -264,32 +265,31 @@ async def ai_chat() -> None:
     selector_errors: dict[ScopeLevel, str | None] = {"group": None, "greenhouse": None, "zone": None}
 
     with page_container():
-        with section_card(_("Conversation Context"), _("Select a saved thread or start a fresh all-greenhouses chat."), icon="hub"):
-            with ui.row().classes("w-full gap-4 mt-4 items-center flex-wrap"):
+        with section_card(_("Operator Chat"), _("Open a saved thread or continue the current scoped conversation in one workspace."), icon="forum"):
+            with ui.row().classes("w-full gap-3 mt-4 items-center flex-wrap"):
                 conversation_select = ui.select(
-                    label=_("Conversation"),
+                    label=_("Chat history"),
                     options=[],
                     on_change=lambda e: select_conversation(e.value),
-                ).classes("flex-1 min-w-[220px]")
+                ).classes("flex-1 min-w-[220px]").props("outlined dense")
                 ui.button(_("New Conversation"), icon="add", on_click=lambda: start_new_conversation()).props("flat color=primary")
-
-        with section_card(_("Operator Chat"), _("Responses include observations, recommendations, proposed actions, and tool traces."), icon="forum"):
-            chat_area = ui.column().classes("greenhouse-chat-panel w-full gap-4 mt-4 flex-1 overflow-y-auto")
-            chat_area.style("max-height: 60vh; min-height: 340px;")
-
-            loading_container = ui.column().classes("w-full items-center gap-2 mt-4")
-            loading_container.set_visibility(False)
-            error_container = ui.column().classes("w-full mt-4")
-            error_container.set_visibility(False)
 
             with ui.column().classes("w-full gap-2 mt-4"):
                 scope_status = ui.row().classes("items-center gap-2 flex-wrap")
                 scope_error = ui.label().classes("text-xs text-red-500")
                 with ui.row().classes("w-full gap-2 flex-wrap"):
-                    group_select = ui.select(label=_("Group"), options=[], on_change=lambda e: choose_group(e.value)).classes("min-w-[180px]")
-                    greenhouse_select = ui.select(label=_("Greenhouse"), options=[], on_change=lambda e: choose_greenhouse(e.value)).classes("min-w-[180px]")
-                    zone_select = ui.select(label=_("Zone"), options=[], on_change=lambda e: choose_zone(e.value)).classes("min-w-[180px]")
+                    group_select = ui.select(label=_("Group"), options=[], on_change=lambda e: choose_group(e.value)).classes("min-w-[180px]").props("outlined dense")
+                    greenhouse_select = ui.select(label=_("Greenhouse"), options=[], on_change=lambda e: choose_greenhouse(e.value)).classes("min-w-[180px]").props("outlined dense")
+                    zone_select = ui.select(label=_("Zone"), options=[], on_change=lambda e: choose_zone(e.value)).classes("min-w-[180px]").props("outlined dense")
                     ui.button(_("Clear scope"), icon="close", on_click=lambda: clear_scope()).props("flat size=sm aria-label='Clear scope'")
+
+            chat_area = ui.column().classes("greenhouse-chat-panel w-full gap-4 mt-4 flex-1 overflow-y-auto p-4")
+            chat_area.style("max-height: 62vh; min-height: 380px;")
+
+            loading_container = ui.column().classes("w-full items-center gap-2 mt-4")
+            loading_container.set_visibility(False)
+            error_container = ui.column().classes("w-full mt-4")
+            error_container.set_visibility(False)
 
             with ui.row().classes("greenhouse-composer w-full gap-2 mt-4 items-end sticky bottom-0 p-3"):
                 message_input = ui.textarea(placeholder=_("Ask about your greenhouses...")).classes("flex-1").props("rows=1 autogrow outlined dense")
@@ -473,15 +473,17 @@ async def ai_chat() -> None:
                 return
             scope_state.rehydrate(group_id, greenhouse_id, zone_id, option_labels)
             apply_scope_values()
-            _render_conversation_messages(
-                detail.get("messages", []),
-                tool_calls,
-                on_approve=lambda cid: _approve_command(cid),
-                on_reject=lambda cid: _reject_command(cid),
-            )
+            with chat_area:
+                _render_conversation_messages(
+                    detail.get("messages", []),
+                    tool_calls,
+                    on_approve=lambda cid: _approve_command(cid),
+                    on_reject=lambda cid: _reject_command(cid),
+                )
         except httpx.HTTPError as exc:
             if render_state.load_is_current(token, conversation_id):
-                ui.label(_("Error loading conversation: {error}", error=exc)).classes("text-red-500 text-sm")
+                with chat_area:
+                    ui.label(_("Error loading conversation: {error}", error=exc)).classes("text-red-500 text-sm")
 
     def select_conversation(label: str | None) -> None:
         conversation_id = conversation_label_to_id.get(label or "")
@@ -491,14 +493,21 @@ async def ai_chat() -> None:
         error_container.clear()
         error_container.set_visibility(False)
         if conversation_id:
+            with chat_area:
+                ui.spinner("dots", size="2rem")
+                ui.label(_("Loading conversation...")).classes("text-sm opacity-50")
             ui.timer(0.1, lambda: load_conversation_messages(conversation_id, token), once=True)
+        else:
+            with chat_area:
+                _render_conversation_messages([], [])
 
     def start_new_conversation() -> None:
         render_state.start_new()
         conversation_select.set_value(None)
         chat_area.clear()
         clear_scope()
-        _render_conversation_messages([], [])
+        with chat_area:
+            _render_conversation_messages([], [])
 
     async def refresh_visible_conversation(
         persisted_conversation_id: str,
@@ -578,4 +587,5 @@ async def ai_chat() -> None:
     await load_scope_options("group", "/api/groups")
     update_selector_enabled()
     render_scope_status()
-    _render_conversation_messages([], [])
+    with chat_area:
+        _render_conversation_messages([], [])

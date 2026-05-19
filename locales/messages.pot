@@ -436,8 +436,12 @@ msgstr ""
 msgid "Select a saved thread or start a fresh all-greenhouses chat."
 msgstr ""
 
+#: app/ui/pages/ai_chat.py:267
+msgid "Open a saved thread or continue the current scoped conversation in one workspace."
+msgstr ""
+
 #: app/ui/pages/ai_chat.py:270
-msgid "Conversation"
+msgid "Chat history"
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:274
@@ -509,6 +513,10 @@ msgstr ""
 #: app/ui/pages/ai_chat.py:449
 #, python-brace-format
 msgid "Rejection failed: {detail}"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:496
+msgid "Loading conversation..."
 msgstr ""
 
 #: app/ui/pages/ai_chat.py:484

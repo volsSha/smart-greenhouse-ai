@@ -440,16 +440,12 @@ msgid "Intelligence"
 msgstr "Інтелект"
 
 #: app/ui/pages/ai_chat.py:267
-msgid "Conversation Context"
-msgstr "Контекст розмови"
-
-#: app/ui/pages/ai_chat.py:267
-msgid "Select a saved thread or start a fresh all-greenhouses chat."
-msgstr "Виберіть збережену гілку або почніть новий чат для всіх теплиць."
+msgid "Open a saved thread or continue the current scoped conversation in one workspace."
+msgstr "Відкрийте збережену гілку або продовжуйте поточну розмову з вибраним контекстом в одному робочому просторі."
 
 #: app/ui/pages/ai_chat.py:270
-msgid "Conversation"
-msgstr "Розмова"
+msgid "Chat history"
+msgstr "Історія чату"
 
 #: app/ui/pages/ai_chat.py:274
 msgid "New Conversation"
@@ -525,6 +521,10 @@ msgstr "Команду відхилено"
 #, python-brace-format
 msgid "Rejection failed: {detail}"
 msgstr "Відхилення не вдалося: {detail}"
+
+#: app/ui/pages/ai_chat.py:496
+msgid "Loading conversation..."
+msgstr "Завантаження розмови..."
 
 #: app/ui/pages/ai_chat.py:484
 #, python-brace-format
