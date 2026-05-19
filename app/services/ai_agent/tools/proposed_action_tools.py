@@ -125,29 +125,40 @@ async def _resolve_scope(
     greenhouse_id: str | UUID,
     zone_id: str | UUID,
 ) -> tuple[UUID, UUID, UUID] | dict[str, object]:
-    if isinstance(group_id, UUID) and isinstance(greenhouse_id, UUID) and isinstance(zone_id, UUID):
-        return group_id, greenhouse_id, zone_id
+    group_uuid = _uuid_or_none(group_id)
+    greenhouse_uuid = _uuid_or_none(greenhouse_id)
+    zone_uuid = _uuid_or_none(zone_id)
+    if group_uuid and greenhouse_uuid and zone_uuid:
+        return group_uuid, greenhouse_uuid, zone_uuid
 
-    try:
-        return UUID(str(group_id)), UUID(str(greenhouse_id)), UUID(str(zone_id))
-    except ValueError:
-        pass
-
-    groups = await ctx.deps.group_repo.list(name=group_id)
-    group = groups[0] if groups else None
+    if group_uuid:
+        group = await ctx.deps.group_repo.get_by_id(group_uuid)
+    else:
+        groups = await ctx.deps.group_repo.list(name=str(group_id))
+        group = groups[0] if groups else None
     if group is None:
         return {"error": f"Group {group_id} not found", "requires_confirmation": False}
 
-    greenhouses = await ctx.deps.greenhouse_repo.list(group_id=group.id, name=greenhouse_id)
-    greenhouse = greenhouses[0] if greenhouses else None
+    if greenhouse_uuid:
+        greenhouse = await ctx.deps.greenhouse_repo.get_by_id(greenhouse_uuid)
+        if greenhouse is not None and greenhouse.group_id != group.id:
+            greenhouse = None
+    else:
+        greenhouses = await ctx.deps.greenhouse_repo.list(group_id=group.id, name=str(greenhouse_id))
+        greenhouse = greenhouses[0] if greenhouses else None
     if greenhouse is None:
         return {
             "error": f"Greenhouse {greenhouse_id} not found in group {group_id}",
             "requires_confirmation": False,
         }
 
-    zones = await ctx.deps.zone_repo.list(greenhouse_id=greenhouse.id, name=zone_id)
-    zone = zones[0] if zones else None
+    if zone_uuid:
+        zone = await ctx.deps.zone_repo.get_by_id(zone_uuid)
+        if zone is not None and zone.greenhouse_id != greenhouse.id:
+            zone = None
+    else:
+        zones = await ctx.deps.zone_repo.list(greenhouse_id=greenhouse.id, name=str(zone_id))
+        zone = zones[0] if zones else None
     if zone is None:
         return {
             "error": f"Zone {zone_id} not found in greenhouse {greenhouse_id}",
@@ -155,6 +166,15 @@ async def _resolve_scope(
         }
 
     return group.id, greenhouse.id, zone.id
+
+
+def _uuid_or_none(value: str | UUID) -> UUID | None:
+    if isinstance(value, UUID):
+        return value
+    try:
+        return UUID(str(value))
+    except ValueError:
+        return None
 
 
 async def _create_proposal(ctx: RunContext[ToolDeps], data: CommandPropose) -> dict[str, object]:

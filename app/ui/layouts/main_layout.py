@@ -10,36 +10,37 @@ from app.i18n.core import _
 from app.ui.components.language_switcher import language_switcher
 
 
-_NAV_GROUPS = [
-    (
-        "Operations",
-        [
-            ("Dashboard", "dashboard", "/dashboard", "dashboard"),
-            ("Simulator", "precision_manufacturing", "/simulator", "simulator"),
-            ("Zones", "view_in_ar", "/zones", "zones"),
-            ("Plants", "local_florist", "/plants", "plants"),
-            ("Control", "tune", "/control", "control"),
-        ],
-    ),
-    (
-        "Intelligence",
-        [
-            ("AI Chat", "smart_toy", "/ai-chat", "ai_chat"),
-            ("RAG", "travel_explore", "/rag", "rag"),
-            ("Logs", "fact_check", "/logs", "logs"),
-        ],
-    ),
-    (
-        "System",
-        [("Settings", "settings", "/settings", "settings")],
-    ),
-]
+def _nav_groups() -> list[tuple[str, list[tuple[str, str, str, str]]]]:
+    return [
+        (
+            _("Operations"),
+            [
+                (_("Dashboard"), "dashboard", "/dashboard", "dashboard"),
+                (_("Simulator"), "precision_manufacturing", "/simulator", "simulator"),
+                (_("Zones"), "view_in_ar", "/zones", "zones"),
+                (_("Plants"), "local_florist", "/plants", "plants"),
+                (_("Control"), "tune", "/control", "control"),
+            ],
+        ),
+        (
+            _("Intelligence"),
+            [
+                (_("AI Chat"), "smart_toy", "/ai-chat", "ai_chat"),
+                (_("RAG"), "travel_explore", "/rag", "rag"),
+                (_("Logs"), "fact_check", "/logs", "logs"),
+            ],
+        ),
+        (
+            _("System"),
+            [(_("Settings"), "settings", "/settings", "settings")],
+        ),
+    ]
 
 
-def _nav_link(label_key: str, icon: str, target: str) -> None:
+def _nav_link(label: str, icon: str, target: str) -> None:
     with ui.link(target=target).classes("greenhouse-nav-link"):
         ui.icon(icon, size="1.1rem")
-        ui.label(_(label_key)).classes("text-sm font-medium")
+        ui.label(label).classes("text-sm font-medium")
 
 
 def main_layout() -> None:
@@ -65,8 +66,8 @@ def main_layout() -> None:
             ui.label(_("Greenhouse Ops")).classes("text-md font-bold")
             ui.label(_("Telemetry, control, and AI guidance")).classes("text-xs opacity-55")
 
-        for group_label, items in _NAV_GROUPS:
-            ui.label(_(group_label)).classes("text-xs uppercase tracking-widest opacity-45 mt-4 mb-1")
+        for group_label, items in _nav_groups():
+            ui.label(group_label).classes("text-xs uppercase tracking-widest opacity-45 mt-4 mb-1")
             with ui.column().classes("w-full gap-1"):
-                for label_key, icon, target, _name in items:
-                    _nav_link(label_key, icon, target)
+                for label, icon, target, _name in items:
+                    _nav_link(label, icon, target)

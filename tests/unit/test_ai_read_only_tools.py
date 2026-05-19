@@ -402,6 +402,37 @@ async def test_get_zone_state_accepts_display_identifiers() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_zone_state_accepts_mixed_uuid_and_display_identifiers() -> None:
+    """get_zone_state resolves a selected UUID group with display greenhouse and zone IDs."""
+    group = _make_group(name="group-001")
+    greenhouse = _make_greenhouse(name="gh-001-tomatoes")
+    zone = _make_zone(name="zone-01-seedlings")
+    deps = _make_deps(
+        group_repo=AsyncMock(
+            get_by_id=AsyncMock(return_value=group),
+            list=AsyncMock(return_value=[]),
+        ),
+        greenhouse_repo=AsyncMock(list=AsyncMock(return_value=[greenhouse])),
+        zone_repo=AsyncMock(
+            list=AsyncMock(return_value=[zone]),
+            get_by_id=AsyncMock(return_value=zone),
+        ),
+        alert_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        sensor_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        actuator_repo=AsyncMock(list=AsyncMock(return_value=[])),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[])),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_state(ctx, str(GROUP_ID), "gh-001-tomatoes", "zone-01-seedlings")
+
+    assert result["zone_id"] == str(ZONE_ID)
+    deps.group_repo.get_by_id.assert_awaited_once_with(GROUP_ID)
+    deps.greenhouse_repo.list.assert_awaited_once_with(group_id=GROUP_ID, name="gh-001-tomatoes")
+    deps.zone_repo.list.assert_awaited_once_with(greenhouse_id=GREENHOUSE_ID, name="zone-01-seedlings")
+
+
+@pytest.mark.asyncio
 async def test_get_zone_state_not_found() -> None:
     """get_zone_state returns error dict when zone missing."""
     deps = _make_deps(zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=None)))
@@ -612,6 +643,35 @@ async def test_get_latest_readings_with_filters() -> None:
         zone_id=str(ZONE_ID),
     )
 
+    telemetry_repo.get_latest.assert_called_once_with(
+        str(GROUP_ID), greenhouse_id=str(GREENHOUSE_ID), zone_id=str(ZONE_ID),
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_latest_readings_resolves_mixed_scope_identifiers() -> None:
+    """get_latest_readings resolves selected UUID group with display greenhouse and zone IDs."""
+    group = _make_group(name="group-001")
+    greenhouse = _make_greenhouse(name="gh-001-tomatoes")
+    zone = _make_zone(name="zone-01-seedlings")
+    telemetry_repo = MagicMock()
+    telemetry_repo.get_latest.return_value = [{"metric": "soil_moisture", "_value": 42.0}]
+    deps = _make_deps(
+        group_repo=AsyncMock(get_by_id=AsyncMock(return_value=group)),
+        greenhouse_repo=AsyncMock(list=AsyncMock(return_value=[greenhouse])),
+        zone_repo=AsyncMock(list=AsyncMock(return_value=[zone])),
+        telemetry_repo=telemetry_repo,
+    )
+    ctx = _ctx(deps)
+
+    result = await get_latest_readings(
+        ctx,
+        str(GROUP_ID),
+        greenhouse_id="gh-001-tomatoes",
+        zone_id="zone-01-seedlings",
+    )
+
+    assert result == [{"metric": "soil_moisture", "_value": 42.0}]
     telemetry_repo.get_latest.assert_called_once_with(
         str(GROUP_ID), greenhouse_id=str(GREENHOUSE_ID), zone_id=str(ZONE_ID),
     )

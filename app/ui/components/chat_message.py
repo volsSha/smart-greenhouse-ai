@@ -68,15 +68,15 @@ def _status_badge(status: str) -> None:
 def user_message_bubble(
     content: str,
     timestamp: Any = None,
+    scope_note: str | None = None,
 ) -> None:
-    """Render a right-aligned blue user message bubble.
-
-    Parameters:
-        content: The user's message text.
-        timestamp: Optional timestamp for display.
-    """
+    """Render a right-aligned blue user message bubble."""
     with ui.row().classes("w-full justify-end"):
-        with ui.column().classes("items-end max-w-[75%]"):
+        with ui.column().classes("items-end max-w-[75%] gap-1"):
+            if scope_note:
+                with ui.row().classes("items-center gap-1 text-xs opacity-70"):
+                    ui.icon("my_location", size="0.9rem")
+                    ui.label(scope_note)
             with ui.row().classes("items-end gap-2"):
                 if timestamp:
                     ui.label(_format_timestamp(timestamp)).classes("text-xs opacity-40")

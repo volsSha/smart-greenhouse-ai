@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any, Literal
 
 import httpx
-from nicegui import ui
+from nicegui import app, ui
 
 from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
@@ -164,7 +164,37 @@ def _option_maps(options: list[ScopeOption]) -> tuple[dict[str, str], dict[str, 
 
 
 def _level_name(level: ScopeLevel) -> str:
-    return {"group": "Group", "greenhouse": "Greenhouse", "zone": "Zone"}[level]
+    return {"group": _("Group"), "greenhouse": _("Greenhouse"), "zone": _("Zone")}[level]
+
+
+def _strip_option_id(label: str) -> str:
+    return label.rsplit(" · ", 1)[0]
+
+
+def _scope_parts(scope: ChatScopeState) -> list[tuple[str, str]]:
+    parts: list[tuple[str, str]] = []
+    for level in ("group", "greenhouse", "zone"):
+        value = getattr(scope, f"{level}_id")
+        if value:
+            parts.append((_level_name(level), _strip_option_id(scope.labels.get(level, value[:8]))))
+    return parts
+
+
+def _scope_note(scope: ChatScopeState) -> str:
+    parts = _scope_parts(scope)
+    if not parts:
+        return _("Sent to: All greenhouses")
+    return _("Sent to: {scope}", scope=" / ".join(f"{name}: {label}" for name, label in parts))
+
+
+def _prompt_templates() -> list[tuple[str, str, str]]:
+    return [
+        ("analytics", _("Current status"), _("Check current status for the selected greenhouse scope.")),
+        ("today", _("Daily report"), _("Create a daily report for the selected greenhouse scope.")),
+        ("warning", _("Issues and anomalies"), _("Find issues and anomalies in the selected greenhouse scope.")),
+        ("water_drop", _("Irrigation advice"), _("Recommend irrigation changes for the selected greenhouse scope.")),
+        ("task_alt", _("Action plan"), _("Create a safe action plan for the selected greenhouse scope.")),
+    ]
 
 
 _DEFAULTS: dict[str, Any] = {
@@ -192,6 +222,7 @@ def _parse_assistant_content(content: str) -> dict[str, Any]:
 def _render_conversation_messages(
     messages: list[dict[str, Any]],
     tool_calls: list[dict[str, Any]],
+    scope_note: str | None = None,
     on_approve: Callable[[str], Any] | None = None,
     on_reject: Callable[[str], Any] | None = None,
 ) -> None:
@@ -218,7 +249,7 @@ def _render_conversation_messages(
             created_at = msg.get("created_at")
 
             if role == "user":
-                user_message_bubble(content, timestamp=created_at)
+                user_message_bubble(content, timestamp=created_at, scope_note=scope_note)
             elif role == "assistant":
                 parsed = _parse_assistant_content(content)
                 assistant_message_bubble(
@@ -256,10 +287,14 @@ async def ai_chat() -> None:
             meta=_("Intelligence"),
         )
 
-    render_state = ChatRenderState()
+    last_conversation_key = "ai_chat_selected_conversation_id"
+    render_state = ChatRenderState(
+        selected_conversation_id=app.storage.user.get(last_conversation_key),
+    )
     scope_state = ChatScopeState()
     is_processing: dict[str, bool] = {"value": False}
     conversation_label_to_id: dict[str, str] = {}
+    conversation_id_to_label: dict[str, str] = {}
     option_labels: dict[ScopeLevel, dict[str, str]] = {"group": {}, "greenhouse": {}, "zone": {}}
     option_label_to_id: dict[ScopeLevel, dict[str, str]] = {"group": {}, "greenhouse": {}, "zone": {}}
     selector_errors: dict[ScopeLevel, str | None] = {"group": None, "greenhouse": None, "zone": None}
@@ -281,38 +316,90 @@ async def ai_chat() -> None:
                     group_select = ui.select(label=_("Group"), options=[], on_change=lambda e: choose_group(e.value)).classes("min-w-[180px]").props("outlined dense")
                     greenhouse_select = ui.select(label=_("Greenhouse"), options=[], on_change=lambda e: choose_greenhouse(e.value)).classes("min-w-[180px]").props("outlined dense")
                     zone_select = ui.select(label=_("Zone"), options=[], on_change=lambda e: choose_zone(e.value)).classes("min-w-[180px]").props("outlined dense")
-                    ui.button(_("Clear scope"), icon="close", on_click=lambda: clear_scope()).props("flat size=sm aria-label='Clear scope'")
+                    clear_scope_button = ui.button(_("Clear scope"), icon="close", on_click=lambda: clear_scope()).props("flat size=sm aria-label='Clear scope'")
 
-            chat_area = ui.column().classes("greenhouse-chat-panel w-full gap-4 mt-4 flex-1 overflow-y-auto p-4")
-            chat_area.style("max-height: 62vh; min-height: 380px;")
+            with ui.row().classes("w-full gap-4 mt-4 items-stretch flex-wrap"):
+                chat_area = ui.column().classes("greenhouse-chat-panel gap-4 flex-1 min-w-[320px] overflow-y-auto p-4")
+                chat_area.style("max-height: 62vh; min-height: 380px;")
+
+                with ui.column().classes("w-full lg:w-80 gap-3"):
+                    ideas_panel = ui.column().classes("w-full gap-2 greenhouse-card p-3")
 
             loading_container = ui.column().classes("w-full items-center gap-2 mt-4")
             loading_container.set_visibility(False)
             error_container = ui.column().classes("w-full mt-4")
             error_container.set_visibility(False)
 
-            with ui.row().classes("greenhouse-composer w-full gap-2 mt-4 items-end sticky bottom-0 p-3"):
-                message_input = ui.textarea(placeholder=_("Ask about your greenhouses...")).classes("flex-1").props("rows=1 autogrow outlined dense")
-                send_button = ui.button(_("Send"), icon="send", on_click=lambda: send_message()).props("color=primary")
+            with ui.column().classes("greenhouse-composer w-full gap-3 mt-4 sticky bottom-0 p-3"):
+                composer_scope = ui.row().classes("items-center gap-2 flex-wrap")
+                template_buttons = ui.row().classes("items-center gap-2 flex-wrap")
+                with ui.row().classes("w-full gap-2 items-end"):
+                    message_input = ui.textarea(placeholder=_("Ask about your greenhouses...")).classes("flex-1").props("rows=1 autogrow outlined dense")
+                    send_button = ui.button(_("Send"), icon="send", on_click=lambda: send_message()).props("color=primary")
 
-    def render_scope_status() -> None:
-        scope_status.clear()
-        with scope_status:
+    def render_scope_chips(container: Any, compact: bool = False) -> None:
+        container.clear()
+        with container:
+            if compact:
+                ui.label(_("Send target")).classes("text-xs font-semibold opacity-60")
             if not any([scope_state.group_id, scope_state.greenhouse_id, scope_state.zone_id]):
-                ui.chip(_("All-greenhouses chat"), icon="public").props("outline")
+                ui.chip(_("All greenhouses"), icon="public").props("outline")
             for level in ("group", "greenhouse", "zone"):
                 value = getattr(scope_state, f"{level}_id")
                 if not value:
                     continue
-                label = scope_state.labels.get(level, value[:8])
+                label = _strip_option_id(scope_state.labels.get(level, value[:8]))
                 color = "warning" if level in scope_state.unresolved else "primary"
-                ui.chip(label, icon="warning" if level in scope_state.unresolved else "check").props(f"outline color={color}")
+                ui.chip(f"{_level_name(level)}: {label}", icon="warning" if level in scope_state.unresolved else "check").props(f"outline color={color}")
+
+    def render_scope_status() -> None:
+        render_scope_chips(scope_status)
+        render_scope_chips(composer_scope, compact=True)
         unresolved = bool(scope_state.unresolved)
         scope_error.text = _("Saved scope contains unavailable entities. Clear or reselect scope before sending.") if unresolved else ""
 
+    def render_templates() -> None:
+        template_buttons.clear()
+        with template_buttons:
+            ui.label(_("Prompt templates")).classes("text-xs font-semibold opacity-60")
+            for icon, label, prompt in _prompt_templates():
+                ui.button(label, icon=icon, on_click=lambda p=prompt: message_input.set_value(p)).props("outline size=sm")
+
+    def render_ideas(messages: list[dict[str, Any]] | None = None, note: str | None = None) -> None:
+        ideas_panel.clear()
+        with ideas_panel:
+            ui.label(_("Ideas and recommendations")).classes("text-sm font-semibold")
+            ui.label(_("Assistant recommendations collected from this thread.")).classes("text-xs opacity-60")
+            collected: list[tuple[str, str]] = []
+            for msg in messages or []:
+                if msg.get("role") != "assistant":
+                    continue
+                parsed = _parse_assistant_content(str(msg.get("content", "")))
+                for recommendation in parsed.get("recommendations", []) or []:
+                    collected.append((_("Recommendation"), str(recommendation)))
+                for action in parsed.get("proposed_actions", []) or []:
+                    if isinstance(action, dict):
+                        title = action.get("description") or action.get("action") or action.get("type") or _("Proposed action")
+                    else:
+                        title = str(action)
+                    collected.append((_("Action proposed"), str(title)))
+            if not collected:
+                ui.label(_("Generated ideas will appear after the assistant responds with recommendations or proposed actions.")).classes("text-xs opacity-50")
+                return
+            if note:
+                ui.chip(note, icon="my_location").props("outline color=primary")
+            for kind, text in collected[:8]:
+                with ui.column().classes("w-full gap-1 border rounded-lg p-2"):
+                    ui.label(kind).classes("text-[11px] uppercase tracking-wide opacity-50")
+                    ui.label(text).classes("text-xs")
+                    ui.button(_("Use as follow-up"), icon="reply", on_click=lambda t=text: message_input.set_value(t)).props("flat dense size=sm")
+
     def update_selector_enabled() -> None:
-        greenhouse_select.set_enabled(bool(scope_state.group_id))
-        zone_select.set_enabled(bool(scope_state.greenhouse_id))
+        saved_thread_selected = bool(render_state.selected_conversation_id)
+        group_select.set_enabled(not saved_thread_selected)
+        greenhouse_select.set_enabled(bool(scope_state.group_id) and not saved_thread_selected)
+        zone_select.set_enabled(bool(scope_state.greenhouse_id) and not saved_thread_selected)
+        clear_scope_button.set_enabled(not saved_thread_selected)
 
     def apply_scope_values() -> None:
         group_select.set_value(option_labels["group"].get(scope_state.group_id or ""))
@@ -329,14 +416,20 @@ async def ai_chat() -> None:
                 conversations = resp.json()
 
             conversation_label_to_id.clear()
+            conversation_id_to_label.clear()
             options: list[str] = []
             for conv in conversations:
                 conv_id = str(conv.get("id", ""))
                 title = conv.get("title") or conv_id[:8]
                 label = _option_label(title, conv_id)
                 conversation_label_to_id[label] = conv_id
+                conversation_id_to_label[conv_id] = label
                 options.append(label)
             conversation_select.set_options(options)
+            if render_state.selected_conversation_id not in conversation_id_to_label:
+                render_state.selected_conversation_id = None
+                app.storage.user.pop(last_conversation_key, None)
+            conversation_select.set_value(conversation_id_to_label.get(render_state.selected_conversation_id or ""))
         except httpx.HTTPError:
             logger.warning("Failed to load conversations", exc_info=True)
 
@@ -406,18 +499,24 @@ async def ai_chat() -> None:
 
     def choose_group(label: str | None) -> None:
         value, display = label_value("group", label)
+        if value == scope_state.group_id:
+            return
         scope_state.select_group(value, display)
         apply_scope_values()
         ui.timer(0, _load_greenhouses_for_selected_group, once=True)
 
     def choose_greenhouse(label: str | None) -> None:
         value, display = label_value("greenhouse", label)
+        if value == scope_state.greenhouse_id:
+            return
         scope_state.select_greenhouse(value, display)
         apply_scope_values()
         ui.timer(0, _load_zones_for_selected_greenhouse, once=True)
 
     def choose_zone(label: str | None) -> None:
         value, display = label_value("zone", label)
+        if value == scope_state.zone_id:
+            return
         scope_state.select_zone(value, display)
         apply_scope_values()
 
@@ -474,20 +573,31 @@ async def ai_chat() -> None:
             scope_state.rehydrate(group_id, greenhouse_id, zone_id, option_labels)
             apply_scope_values()
             with chat_area:
+                messages = detail.get("messages", [])
+                note = _scope_note(scope_state)
                 _render_conversation_messages(
-                    detail.get("messages", []),
+                    messages,
                     tool_calls,
+                    scope_note=note,
                     on_approve=lambda cid: _approve_command(cid),
                     on_reject=lambda cid: _reject_command(cid),
                 )
+            render_ideas(messages, note)
         except httpx.HTTPError as exc:
             if render_state.load_is_current(token, conversation_id):
-                with chat_area:
+                error_container.clear()
+                error_container.set_visibility(True)
+                with error_container:
                     ui.label(_("Error loading conversation: {error}", error=exc)).classes("text-red-500 text-sm")
 
     def select_conversation(label: str | None) -> None:
         conversation_id = conversation_label_to_id.get(label or "")
         token = render_state.select_conversation(conversation_id)
+        if conversation_id:
+            app.storage.user[last_conversation_key] = conversation_id
+        else:
+            app.storage.user.pop(last_conversation_key, None)
+        update_selector_enabled()
         loading_container.clear()
         loading_container.set_visibility(False)
         error_container.clear()
@@ -498,14 +608,17 @@ async def ai_chat() -> None:
                 ui.label(_("Loading conversation...")).classes("text-sm opacity-50")
             ui.timer(0.1, lambda: load_conversation_messages(conversation_id, token), once=True)
         else:
+            render_ideas([])
             with chat_area:
                 _render_conversation_messages([], [])
 
     def start_new_conversation() -> None:
         render_state.start_new()
+        app.storage.user.pop(last_conversation_key, None)
         conversation_select.set_value(None)
         chat_area.clear()
         clear_scope()
+        render_ideas([])
         with chat_area:
             _render_conversation_messages([], [])
 
@@ -517,9 +630,15 @@ async def ai_chat() -> None:
         if not render_state.send_is_current(token, original_conversation_id):
             return
         render_state.selected_conversation_id = persisted_conversation_id
+        app.storage.user[last_conversation_key] = persisted_conversation_id
+        conversation_select.set_value(conversation_id_to_label.get(persisted_conversation_id))
         load_token = render_state.load_token + 1
         render_state.load_token = load_token
         await load_conversation_messages(persisted_conversation_id, load_token)
+
+    async def retry_message(failed_content: str) -> None:
+        message_input.set_value(failed_content)
+        await send_message()
 
     async def send_message() -> None:
         if is_processing["value"]:
@@ -541,7 +660,7 @@ async def ai_chat() -> None:
 
         if render_state.send_is_current(send_token, target_conversation_id):
             with chat_area:
-                user_message_bubble(content.strip())
+                user_message_bubble(content.strip(), scope_note=_scope_note(scope_state))
             loading_container.set_visibility(True)
             with loading_container:
                 ui.spinner("dots", size="2rem")
@@ -577,15 +696,21 @@ async def ai_chat() -> None:
                     ui.label(_("Request failed")).classes("text-red-500 font-semibold")
                     detail = response_error(exc.response) if isinstance(exc, httpx.HTTPStatusError) else str(exc)
                     ui.label(detail).classes("text-sm text-red-400")
-                    ui.button(_("Retry"), icon="refresh", on_click=lambda: send_message()).props("flat color=red size=sm")
+                    ui.button(_("Retry"), icon="refresh", on_click=lambda c=content.strip(): retry_message(c)).props("flat color=red size=sm")
             logger.error("AI chat request failed: %s", exc)
         finally:
             is_processing["value"] = False
             send_button.enable()
 
+    render_templates()
+    render_ideas([])
     await load_conversations()
     await load_scope_options("group", "/api/groups")
     update_selector_enabled()
     render_scope_status()
-    with chat_area:
-        _render_conversation_messages([], [])
+    selected_label = conversation_id_to_label.get(render_state.selected_conversation_id or "")
+    if selected_label:
+        select_conversation(selected_label)
+    else:
+        with chat_area:
+            _render_conversation_messages([], [])

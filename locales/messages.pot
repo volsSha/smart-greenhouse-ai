@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-18 13:08+0300\n"
+"POT-Creation-Date: 2026-05-20 00:11+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -380,163 +380,283 @@ msgstr ""
 msgid "No pending proposals for this zone."
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:55
-msgid "Smart Greenhouse Management"
+#: app/ui/layouts/main_layout.py:16 app/ui/pages/dashboard.py:136
+msgid "Operations"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:18 app/ui/pages/dashboard.py:133
+msgid "Dashboard"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:19 app/ui/pages/simulator.py:113
+#: app/ui/pages/zone_management.py:124
+msgid "Simulator"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:20
+msgid "Zones"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:21 app/ui/pages/plants.py:16
+msgid "Plants"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:22
+msgid "Control"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:26 app/ui/pages/ai_chat.py:287
+msgid "Intelligence"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:28
+msgid "AI Chat"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:29 app/ui/pages/rag.py:22
+msgid "RAG"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:30
+msgid "Logs"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:34 app/ui/pages/settings.py:28
+msgid "System"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:35
+msgid "Settings"
 msgstr ""
 
 #: app/ui/layouts/main_layout.py:56
+msgid "Smart Greenhouse Management"
+msgstr ""
+
+#: app/ui/layouts/main_layout.py:57
 msgid "Greenhouse Control System"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:61
+#: app/ui/layouts/main_layout.py:62
 msgid "Logout"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:65
+#: app/ui/layouts/main_layout.py:66
 msgid "Greenhouse Ops"
 msgstr ""
 
-#: app/ui/layouts/main_layout.py:66
+#: app/ui/layouts/main_layout.py:67
 msgid "Telemetry, control, and AI guidance"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:201
+#: app/ui/pages/ai_chat.py:167 app/ui/pages/ai_chat.py:316
+#: app/ui/pages/control.py:60 app/ui/pages/control.py:266
+#: app/ui/pages/zone_management.py:42 app/ui/pages/zone_management.py:144
+msgid "Group"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:167 app/ui/pages/ai_chat.py:317
+#: app/ui/pages/control.py:61 app/ui/pages/control.py:296
+#: app/ui/pages/zone_management.py:43 app/ui/pages/zone_management.py:160
+msgid "Greenhouse"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:167 app/ui/pages/ai_chat.py:318
+#: app/ui/pages/control.py:329 app/ui/pages/zone_management.py:55
+msgid "Zone"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:186
+msgid "Sent to: All greenhouses"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:187
+#, python-brace-format
+msgid "Sent to: {scope}"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:192
+msgid "Current status"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:192
+msgid "Check current status for the selected greenhouse scope."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:193
+msgid "Daily report"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:193
+msgid "Create a daily report for the selected greenhouse scope."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:194
+msgid "Issues and anomalies"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:194
+msgid "Find issues and anomalies in the selected greenhouse scope."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:195
+msgid "Irrigation advice"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:195
+msgid "Recommend irrigation changes for the selected greenhouse scope."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:196
+msgid "Action plan"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:196
+msgid "Create a safe action plan for the selected greenhouse scope."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:233
 msgid "No messages yet"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:202
+#: app/ui/pages/ai_chat.py:234
 msgid ""
 "Ask about greenhouse health, sensor anomalies, recent trends, or safe "
 "actuator actions."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:238
+#: app/ui/pages/ai_chat.py:270
 msgid "Proposed Actions"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:252
+#: app/ui/pages/ai_chat.py:284
 msgid "AI Assistant"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:253
+#: app/ui/pages/ai_chat.py:285
 msgid ""
 "Ask scoped operational questions and review transparent tool calls before"
 " approving physical actions."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:255
-msgid "Intelligence"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:267
-msgid "Conversation Context"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:267
-msgid "Select a saved thread or start a fresh all-greenhouses chat."
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:267
-msgid "Open a saved thread or continue the current scoped conversation in one workspace."
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:270
-msgid "Chat history"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:274
-msgid "New Conversation"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:276
+#: app/ui/pages/ai_chat.py:303
 msgid "Operator Chat"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:276
+#: app/ui/pages/ai_chat.py:303
 msgid ""
-"Responses include observations, recommendations, proposed actions, and "
-"tool traces."
+"Open a saved thread or continue the current scoped conversation in one "
+"workspace."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:289 app/ui/pages/control.py:60
-#: app/ui/pages/control.py:266 app/ui/pages/zone_management.py:42
-#: app/ui/pages/zone_management.py:144
-msgid "Group"
+#: app/ui/pages/ai_chat.py:306
+msgid "Chat history"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:290 app/ui/pages/control.py:61
-#: app/ui/pages/control.py:296 app/ui/pages/zone_management.py:43
-#: app/ui/pages/zone_management.py:160
-msgid "Greenhouse"
+#: app/ui/pages/ai_chat.py:310
+msgid "New Conversation"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:291 app/ui/pages/control.py:329
-#: app/ui/pages/zone_management.py:55
-msgid "Zone"
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:292
+#: app/ui/pages/ai_chat.py:319
 msgid "Clear scope"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:295
+#: app/ui/pages/ai_chat.py:337
 msgid "Ask about your greenhouses..."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:296
+#: app/ui/pages/ai_chat.py:338
 msgid "Send"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:302
-msgid "All-greenhouses chat"
+#: app/ui/pages/ai_chat.py:344
+msgid "Send target"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:311
+#: app/ui/pages/ai_chat.py:346
+msgid "All greenhouses"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:359
 msgid ""
 "Saved scope contains unavailable entities. Clear or reselect scope before"
 " sending."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:435
+#: app/ui/pages/ai_chat.py:364
+msgid "Prompt templates"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:371
+msgid "Ideas and recommendations"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:372
+msgid "Assistant recommendations collected from this thread."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:379
+msgid "Recommendation"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:382
+msgid "Proposed action"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:385
+msgid "Action proposed"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:387
+msgid ""
+"Generated ideas will appear after the assistant responds with "
+"recommendations or proposed actions."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:395
+msgid "Use as follow-up"
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:534
 msgid "Command approved and executed"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:438
+#: app/ui/pages/ai_chat.py:537
 #, python-brace-format
 msgid "Approval failed: {detail}"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:446 app/ui/pages/control.py:455
+#: app/ui/pages/ai_chat.py:545 app/ui/pages/control.py:455
 msgid "Command rejected"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:449
+#: app/ui/pages/ai_chat.py:548
 #, python-brace-format
 msgid "Rejection failed: {detail}"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:496
-msgid "Loading conversation..."
-msgstr ""
-
-#: app/ui/pages/ai_chat.py:484
+#: app/ui/pages/ai_chat.py:591
 #, python-brace-format
 msgid "Error loading conversation: {error}"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:522
+#: app/ui/pages/ai_chat.py:608
+msgid "Loading conversation..."
+msgstr ""
+
+#: app/ui/pages/ai_chat.py:650
 msgid "Clear or reselect unavailable scope before sending"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:539
+#: app/ui/pages/ai_chat.py:667
 msgid "Thinking..."
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:568
+#: app/ui/pages/ai_chat.py:696
 msgid "Request failed"
 msgstr ""
 
-#: app/ui/pages/ai_chat.py:571 app/ui/pages/settings.py:309
+#: app/ui/pages/ai_chat.py:699 app/ui/pages/settings.py:309
 msgid "Retry"
 msgstr ""
 
@@ -777,18 +897,10 @@ msgstr ""
 msgid "Reject failed: {error}"
 msgstr ""
 
-#: app/ui/pages/dashboard.py:133
-msgid "Dashboard"
-msgstr ""
-
 #: app/ui/pages/dashboard.py:134
 msgid ""
 "Live greenhouse telemetry, alerts, and zone trends for the active fleet "
 "group."
-msgstr ""
-
-#: app/ui/pages/dashboard.py:136
-msgid "Operations"
 msgstr ""
 
 #: app/ui/pages/dashboard.py:153
@@ -949,10 +1061,6 @@ msgstr ""
 msgid "Event type"
 msgstr ""
 
-#: app/ui/pages/plants.py:16
-msgid "Plants"
-msgstr ""
-
 #: app/ui/pages/plants.py:17
 msgid ""
 "Plan crop profiles, track batches, and connect growth stages to "
@@ -1017,10 +1125,6 @@ msgstr ""
 
 #: app/ui/pages/rag.py:20
 msgid "Manage agronomic documents that ground AI answers and semantic search."
-msgstr ""
-
-#: app/ui/pages/rag.py:22
-msgid "RAG"
 msgstr ""
 
 #: app/ui/pages/rag.py:32
@@ -1188,10 +1292,6 @@ msgstr ""
 
 #: app/ui/pages/settings.py:26
 msgid "Configure the AI chat model and manage the OpenRouter model catalog."
-msgstr ""
-
-#: app/ui/pages/settings.py:28
-msgid "System"
 msgstr ""
 
 #: app/ui/pages/settings.py:31
@@ -1424,10 +1524,6 @@ msgstr ""
 
 #: app/ui/pages/simulator.py:83
 msgid "Erratic readings from one or more sensors"
-msgstr ""
-
-#: app/ui/pages/simulator.py:113 app/ui/pages/zone_management.py:124
-msgid "Simulator"
 msgstr ""
 
 #: app/ui/pages/simulator.py:114
