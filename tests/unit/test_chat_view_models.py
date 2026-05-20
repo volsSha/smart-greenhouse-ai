@@ -17,6 +17,8 @@ from app.ui.pages.ai_chat import (
     _build_scope_dict,
     _option_maps,
     _parse_assistant_content,
+    _scope_context_note,
+    _scope_note,
 )
 from app.ui.components.tool_call_trace import _truncate_value, _format_duration
 from app.ui.components.chat_message import _format_timestamp
@@ -92,6 +94,21 @@ class TestParseAssistantContent:
 
         assert len(result["proposed_actions"]) == 1
         assert result["proposed_actions"][0]["actuator"] == "pump"
+
+    def test_ukrainian_missing_threshold_text_is_preserved(self) -> None:
+        """Ukrainian missing-threshold wording survives persisted JSON parsing."""
+        content = json.dumps({
+            "summary": "Відсутні оптимальні пороги вологості ґрунту для цієї зони.",
+            "observations": ["Профіль культури не містить soil_moisture_opt."],
+            "recommendations": ["Звірте поріг з агротехнічними вимогами культури."],
+            "status": "insufficient_data",
+        })
+
+        result = _parse_assistant_content(content)
+
+        assert "оптимальні пороги вологості ґрунту" in result["summary"]
+        assert result["recommendations"] == ["Звірте поріг з агротехнічними вимогами культури."]
+        assert result["status"] == "insufficient_data"
 
     def test_none_input_falls_back(self) -> None:
         """None input is handled gracefully."""
@@ -245,6 +262,20 @@ class TestChatScopeState:
         assert state.to_dict() == {"group_id": None, "greenhouse_id": None, "zone_id": None}
         assert state.labels == {}
         assert state.unresolved == set()
+
+
+class TestScopeNotes:
+    """Tests for scope labels shown in chat and ideas panel."""
+
+    def test_user_scope_note_uses_sent_to_label(self) -> None:
+        state = ChatScopeState(group_id="group-a", labels={"group": "Group A · group-a"})
+
+        assert _scope_note(state) == "Sent to: Group: Group A"
+
+    def test_ideas_scope_note_uses_context_label(self) -> None:
+        state = ChatScopeState()
+
+        assert _scope_context_note(state) == "Scope: All greenhouses"
 
 
 class TestScopeOptionMaps:

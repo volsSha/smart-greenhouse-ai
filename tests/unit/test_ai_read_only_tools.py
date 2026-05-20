@@ -100,6 +100,7 @@ def _make_batch(**overrides):
     b.cultivar = "Roma"
     b.planted_at = datetime.now(timezone.utc).date()
     b.growth_stage = "flowering"
+    b.profile_id = None
     b.notes = None
     for k, v in overrides.items():
         setattr(b, k, v)
@@ -392,6 +393,7 @@ async def test_get_zone_state_accepts_display_identifiers() -> None:
     result = await get_zone_state(ctx, "group-001", "gh-001", "zone-01")
 
     assert result["zone_id"] == str(ZONE_ID)
+    assert result["greenhouse_id"] == str(GREENHOUSE_ID)
     deps.zone_repo.get_by_id.assert_awaited_once_with(ZONE_ID)
     deps.alert_repo.list.assert_awaited_once_with(
         group_id=GROUP_ID,
@@ -448,9 +450,17 @@ async def test_get_zone_plant_info_returns_shape() -> None:
     """get_zone_plant_info returns plant batches with profile info."""
     zone = _make_zone()
     batch = _make_batch()
+    profile = MagicMock()
+    profile.id = uuid.uuid4()
+    profile.crop_name = batch.species
+    profile.growth_stage = batch.growth_stage
+    profile.soil_moisture_min = 40.0
+    profile.soil_moisture_opt = 55.0
+    profile.soil_moisture_max = 70.0
     deps = _make_deps(
         zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=zone)),
         plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[batch])),
+        plant_profile_repo=AsyncMock(find_by_crop_and_stage=AsyncMock(return_value=profile)),
     )
     ctx = _ctx(deps)
 
@@ -462,6 +472,121 @@ async def test_get_zone_plant_info_returns_shape() -> None:
     assert "batch_id" in pb
     assert "name" in pb
     assert "species" in pb
+    assert result["profiles"][0]["soil_moisture"] == {
+        "min": 40.0,
+        "optimal": 55.0,
+        "max": 70.0,
+    }
+    assert result["profiles"][0]["soil_moisture_opt_missing"] is False
+
+
+@pytest.mark.asyncio
+async def test_get_zone_plant_info_reports_missing_soil_moisture_opt() -> None:
+    """get_zone_plant_info flags missing optimal soil moisture thresholds."""
+    zone = _make_zone()
+    batch = _make_batch()
+    profile = MagicMock()
+    profile.id = uuid.uuid4()
+    profile.crop_name = batch.species
+    profile.growth_stage = batch.growth_stage
+    profile.soil_moisture_min = 40.0
+    profile.soil_moisture_opt = None
+    profile.soil_moisture_max = 70.0
+    deps = _make_deps(
+        zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=zone)),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[batch])),
+        plant_profile_repo=AsyncMock(find_by_crop_and_stage=AsyncMock(return_value=profile)),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_plant_info(ctx, str(GROUP_ID), str(GREENHOUSE_ID), str(ZONE_ID))
+
+    assert result["profiles"][0]["soil_moisture_opt_missing"] is True
+    assert result["profiles"][0]["soil_moisture"]["optimal"] is None
+
+
+@pytest.mark.asyncio
+async def test_get_zone_plant_info_reports_missing_profile() -> None:
+    """get_zone_plant_info reports missing profile without failing."""
+    zone = _make_zone()
+    batch = _make_batch()
+    deps = _make_deps(
+        zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=zone)),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[batch])),
+        plant_profile_repo=AsyncMock(find_by_crop_and_stage=AsyncMock(return_value=None)),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_plant_info(ctx, str(GROUP_ID), str(GREENHOUSE_ID), str(ZONE_ID))
+
+    assert result["profiles"][0]["profile_found"] is False
+    assert result["profiles"][0]["soil_moisture_opt_missing"] is True
+
+
+@pytest.mark.asyncio
+async def test_get_zone_plant_info_prefers_linked_profile() -> None:
+    """get_zone_plant_info uses profile_id before species/stage matching."""
+    zone = _make_zone()
+    linked_profile_id = uuid.uuid4()
+    batch = _make_batch(profile_id=linked_profile_id, species="Tomato", growth_stage="seedling")
+    linked_profile = MagicMock()
+    linked_profile.id = linked_profile_id
+    linked_profile.crop_name = "Cucumber"
+    linked_profile.growth_stage = "vegetative"
+    linked_profile.soil_moisture_min = 45.0
+    linked_profile.soil_moisture_opt = 60.0
+    linked_profile.soil_moisture_max = 75.0
+    matched_profile = MagicMock()
+    matched_profile.id = uuid.uuid4()
+
+    deps = _make_deps(
+        zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=zone)),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[batch])),
+        plant_profile_repo=AsyncMock(
+            get_by_id=AsyncMock(return_value=linked_profile),
+            find_by_crop_and_stage=AsyncMock(return_value=matched_profile),
+        ),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_plant_info(ctx, str(GROUP_ID), str(GREENHOUSE_ID), str(ZONE_ID))
+
+    profile = result["profiles"][0]
+    assert profile["profile_id"] == str(linked_profile_id)
+    assert profile["profile_source"] == "linked_profile"
+    assert profile["crop_name"] == "Cucumber"
+    deps.plant_profile_repo.find_by_crop_and_stage.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_get_zone_plant_info_falls_back_when_linked_profile_missing() -> None:
+    """get_zone_plant_info reports dangling link and still uses matching profile."""
+    zone = _make_zone()
+    linked_profile_id = uuid.uuid4()
+    fallback_profile = MagicMock()
+    fallback_profile.id = uuid.uuid4()
+    fallback_profile.crop_name = "Tomato"
+    fallback_profile.growth_stage = "seedling"
+    fallback_profile.soil_moisture_min = 40.0
+    fallback_profile.soil_moisture_opt = 55.0
+    fallback_profile.soil_moisture_max = 70.0
+    batch = _make_batch(profile_id=linked_profile_id, species="Tomato", growth_stage="seedling")
+    deps = _make_deps(
+        zone_repo=AsyncMock(get_by_id=AsyncMock(return_value=zone)),
+        plant_batch_repo=AsyncMock(list_by_zone=AsyncMock(return_value=[batch])),
+        plant_profile_repo=AsyncMock(
+            get_by_id=AsyncMock(return_value=None),
+            find_by_crop_and_stage=AsyncMock(return_value=fallback_profile),
+        ),
+    )
+    ctx = _ctx(deps)
+
+    result = await get_zone_plant_info(ctx, str(GROUP_ID), str(GREENHOUSE_ID), str(ZONE_ID))
+
+    profile = result["profiles"][0]
+    assert profile["profile_id"] == str(fallback_profile.id)
+    assert profile["profile_source"] == "species_growth_stage_match"
+    assert profile["linked_profile_missing"] is True
 
 
 @pytest.mark.asyncio

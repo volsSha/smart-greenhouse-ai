@@ -1,41 +1,13 @@
 # Smart Greenhouse AI
 
-## Project Overview
+NiceGUI + FastAPI greenhouse app with English/Ukrainian i18n, MQTT, InfluxDB, PostgreSQL+pgvector.
 
-NiceGUI + FastAPI greenhouse fleet control app with i18n (English/Ukrainian), MQTT telemetry, InfluxDB time-series, and PostgreSQL+pgvector storage.
+Key paths: `app/` source; `app/ui/pages/` pages; `app/ui/components/` components; `app/i18n/core.py` gettext helpers; `locales/` catalogs; `docs/solutions/` past problem writeups; `Dockerfile` production; `Dockerfile.dev` dev; `compose.override.yml` dev mounts.
 
-## Key Paths
+Workflow: run Python commands with `uv`. Rebuild/start dev app with `docker compose up -d --build app`. Source edits hot-reload. After `.po` edits run `pybabel compile -d locales`. Production uses `Dockerfile`.
 
-- `app/` — application source (UI pages in `app/ui/pages/`, components in `app/ui/components/`)
-- `app/i18n/` — gettext-backed translation helpers (`core.py`)
-- `locales/` — `.po`/`.mo` translation catalogs; run `pybabel compile -d locales` after edits
-- `docs/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
-- `Dockerfile` — production image (multi-stage, non-root)
-- `Dockerfile.dev` — development image (uvicorn --reload, dev deps)
-- `compose.override.yml` — dev overrides: builds from Dockerfile.dev, mounts source volumes
+Conventions: NiceGUI language switcher uses label-to-code `ui.select`; translatable components call `_()` from `app.i18n.core` at render time; all user-facing UI text needs English and Ukrainian translations; `ui.run_with(...)` needs real `storage_secret` for `app.storage.user`.
 
-## Dev Workflow
+Debugging: check `/logs` first. For AI failures inspect `debug_log` rows `level="error"`, `component="ai_agent"`, `event_type="ai_chat_failed"`, then correlate with conversation messages and `ai_tool_calls`.
 
-- In most cases, run Python commands with `uv`.
-- `docker compose up -d --build app` — rebuild and start dev container
-- Source edits in `app/` and `locales/` hot-reload via uvicorn --reload
-- After `.po` edits, run `pybabel compile -d locales` then the container auto-reloads
-- Production uses `Dockerfile` (not `Dockerfile.dev`)
-
-## Conventions
-
-- Language switcher uses `ui.select` with label-to-code mapping (NiceGUI select events emit display labels, not dict keys)
-- NiceGUI components that need language must call `_()` from `app.i18n.core` at render time
-- All user-facing UI labels, descriptions, empty states, notifications, and placeholders must have English and Ukrainian translations in `locales/`
-- `ui.run_with(...)` requires a real `storage_secret` for `app.storage.user` persistence
-
-## Debugging
-
-- Check `/logs` first when debugging API, UI, or AI command failures; it displays persisted `debug_log` entries.
-- For failed AI commands, inspect `debug_log` rows with `level="error"`, `component="ai_agent"`, and `event_type="ai_chat_failed"`.
-- Correlate error-log entries with AI conversation messages and `ai_tool_calls` when the failure involves tool execution.
-
-## App-wide Testing
-
-- When asked to test the whole app or all features, use `docs/APP_TEST_CHECKLIST.md` as the minimal feature checklist.
-- For production app-wide tests, verify behavior through the deployed domain/nginx route; use localhost or internal Docker requests only as diagnostics.
+App-wide testing: use `docs/APP_TEST_CHECKLIST.md`. Production app-wide tests must verify through deployed domain/nginx; localhost/internal Docker only diagnostics.

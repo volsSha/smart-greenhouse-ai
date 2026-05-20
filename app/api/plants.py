@@ -20,6 +20,7 @@ from app.schemas.plant_batches import (
     PlantBatchUpdate,
     PlantProfileCreate,
     PlantProfileResponse,
+    PlantProfileUpdate,
 )
 
 router = APIRouter(tags=["plants"])
@@ -81,9 +82,16 @@ async def create_plant_batch(
     if greenhouse is None or greenhouse.group_id != group_id:
         raise HTTPException(status_code=404, detail="Zone not found in this group")
 
+    if body.profile_id is not None:
+        profile_repo = PlantProfileRepository(session)
+        profile = await profile_repo.get_by_id(body.profile_id)
+        if profile is None:
+            raise HTTPException(status_code=404, detail="Plant profile not found")
+
     batch_repo = PlantBatchRepository(session)
     batch = await batch_repo.create(
         zone_id=body.zone_id,
+        profile_id=body.profile_id,
         name=body.name,
         species=body.species,
         cultivar=body.cultivar,
@@ -152,7 +160,14 @@ async def update_plant_batch(
         raise HTTPException(status_code=404, detail="Plant batch not found")
 
     update_data = body.model_dump(exclude_unset=True)
+    if "profile_id" in update_data and update_data["profile_id"] is not None:
+        profile_repo = PlantProfileRepository(session)
+        profile = await profile_repo.get_by_id(update_data["profile_id"])
+        if profile is None:
+            raise HTTPException(status_code=404, detail="Plant profile not found")
+
     updated = await batch_repo.update(batch_id, **update_data)
+    await session.commit()
     return PlantBatchResponse.model_validate(updated)
 
 
@@ -185,24 +200,40 @@ async def create_plant_profile(
 ) -> PlantProfileResponse:
     """Create a new plant profile."""
     repo = PlantProfileRepository(session)
-    profile = await repo.create(
-        crop_name=body.crop_name,
-        growth_stage=body.growth_stage,
-        temp_min=body.temp_min,
-        temp_opt=body.temp_opt,
-        temp_max=body.temp_max,
-        humidity_min=body.humidity_min,
-        humidity_opt=body.humidity_opt,
-        humidity_max=body.humidity_max,
-        soil_moisture_min=body.soil_moisture_min,
-        soil_moisture_opt=body.soil_moisture_opt,
-        soil_moisture_max=body.soil_moisture_max,
-        co2_min=body.co2_min,
-        co2_opt=body.co2_opt,
-        co2_max=body.co2_max,
-        light_min=body.light_min,
-        light_opt=body.light_opt,
-        light_max=body.light_max,
-        description=body.description,
-    )
+    profile = await repo.create(**body.model_dump())
+    await session.commit()
+    return PlantProfileResponse.model_validate(profile)
+
+
+@router.get(
+    "/api/plant-profiles/{profile_id}",
+    response_model=PlantProfileResponse,
+)
+async def get_plant_profile(
+    profile_id: UUID,
+    session: AsyncSession = Depends(get_db_session),
+) -> PlantProfileResponse:
+    """Get a single reusable plant profile."""
+    repo = PlantProfileRepository(session)
+    profile = await repo.get_by_id(profile_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Plant profile not found")
+    return PlantProfileResponse.model_validate(profile)
+
+
+@router.patch(
+    "/api/plant-profiles/{profile_id}",
+    response_model=PlantProfileResponse,
+)
+async def update_plant_profile(
+    profile_id: UUID,
+    body: PlantProfileUpdate,
+    session: AsyncSession = Depends(get_db_session),
+) -> PlantProfileResponse:
+    """Update a reusable plant profile."""
+    repo = PlantProfileRepository(session)
+    profile = await repo.update(profile_id, **body.model_dump(exclude_unset=True))
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Plant profile not found")
+    await session.commit()
     return PlantProfileResponse.model_validate(profile)

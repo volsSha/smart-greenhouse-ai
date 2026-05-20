@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 # ---------------------------------------------------------------------------
@@ -13,50 +13,51 @@ from pydantic import BaseModel, Field
 # ---------------------------------------------------------------------------
 
 
-class PlantProfileCreate(BaseModel):
+class PlantProfileBase(BaseModel):
+    """Shared plant profile fields."""
+
+    growth_stage: str | None = Field(None, max_length=50)
+    temp_min: float | None = None
+    temp_opt: float | None = None
+    temp_max: float | None = None
+    humidity_min: float | None = None
+    humidity_opt: float | None = None
+    humidity_max: float | None = None
+    soil_moisture_min: float | None = None
+    soil_moisture_opt: float | None = None
+    soil_moisture_max: float | None = None
+    co2_min: float | None = None
+    co2_opt: float | None = None
+    co2_max: float | None = None
+    light_min: float | None = None
+    light_opt: float | None = None
+    light_max: float | None = None
+    description: str | None = None
+
+    @model_validator(mode="after")
+    def validate_soil_moisture_order(self) -> "PlantProfileBase":
+        values = [
+            self.soil_moisture_min,
+            self.soil_moisture_opt,
+            self.soil_moisture_max,
+        ]
+        if all(value is not None for value in values):
+            min_value, opt_value, max_value = values
+            if not min_value <= opt_value <= max_value:
+                raise ValueError("soil_moisture_min must be <= soil_moisture_opt <= soil_moisture_max")
+        return self
+
+
+class PlantProfileCreate(PlantProfileBase):
     """Schema for creating a new plant profile."""
 
     crop_name: str = Field(..., max_length=255)
-    growth_stage: str | None = Field(None, max_length=50)
-    temp_min: float | None = None
-    temp_opt: float | None = None
-    temp_max: float | None = None
-    humidity_min: float | None = None
-    humidity_opt: float | None = None
-    humidity_max: float | None = None
-    soil_moisture_min: float | None = None
-    soil_moisture_opt: float | None = None
-    soil_moisture_max: float | None = None
-    co2_min: float | None = None
-    co2_opt: float | None = None
-    co2_max: float | None = None
-    light_min: float | None = None
-    light_opt: float | None = None
-    light_max: float | None = None
-    description: str | None = None
 
 
-class PlantProfileUpdate(BaseModel):
+class PlantProfileUpdate(PlantProfileBase):
     """Schema for updating an existing plant profile. All fields optional."""
 
     crop_name: str | None = Field(None, max_length=255)
-    growth_stage: str | None = Field(None, max_length=50)
-    temp_min: float | None = None
-    temp_opt: float | None = None
-    temp_max: float | None = None
-    humidity_min: float | None = None
-    humidity_opt: float | None = None
-    humidity_max: float | None = None
-    soil_moisture_min: float | None = None
-    soil_moisture_opt: float | None = None
-    soil_moisture_max: float | None = None
-    co2_min: float | None = None
-    co2_opt: float | None = None
-    co2_max: float | None = None
-    light_min: float | None = None
-    light_opt: float | None = None
-    light_max: float | None = None
-    description: str | None = None
 
 
 class PlantProfileResponse(BaseModel):
@@ -94,6 +95,7 @@ class PlantBatchCreate(BaseModel):
     """Schema for creating a new plant batch."""
 
     zone_id: UUID
+    profile_id: UUID | None = None
     name: str = Field(..., max_length=255)
     species: str | None = Field(None, max_length=255)
     cultivar: str | None = Field(None, max_length=255)
@@ -105,6 +107,7 @@ class PlantBatchCreate(BaseModel):
 class PlantBatchUpdate(BaseModel):
     """Schema for updating an existing plant batch. All fields optional."""
 
+    profile_id: UUID | None = None
     name: str | None = Field(None, max_length=255)
     species: str | None = Field(None, max_length=255)
     cultivar: str | None = Field(None, max_length=255)
@@ -118,6 +121,7 @@ class PlantBatchResponse(BaseModel):
 
     id: UUID
     zone_id: UUID
+    profile_id: UUID | None
     name: str
     species: str | None
     cultivar: str | None

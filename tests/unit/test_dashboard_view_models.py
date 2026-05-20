@@ -6,10 +6,16 @@ responses into card/chart structures. No UI rendering is involved.
 
 from __future__ import annotations
 
-
+from datetime import datetime, timezone
 
 from app.ui.pages.dashboard import (
+    alert_identity,
     build_group_data,
+    format_datetime_input,
+    normalize_alert,
+    parse_datetime_input,
+    range_query_limit,
+    time_range_bounds,
     transform_latest_to_greenhouses,
     transform_latest_to_zones,
 )
@@ -42,6 +48,32 @@ def _make_reading(
         "_time": timestamp,
         **extra,
     }
+
+
+# ---------------------------------------------------------------------------
+# time range helpers
+# ---------------------------------------------------------------------------
+
+
+class TestTimeRangeHelpers:
+    def test_time_range_bounds_uses_requested_preset(self) -> None:
+        now = datetime(2026, 5, 20, 12, 0, tzinfo=timezone.utc)
+        start, end = time_range_bounds("30m", now)
+
+        assert end == now
+        assert start.isoformat() == "2026-05-20T11:30:00+00:00"
+
+    def test_range_query_limit_scales_for_long_ranges(self) -> None:
+        start = datetime(2026, 5, 19, 12, 0, tzinfo=timezone.utc)
+        end = datetime(2026, 5, 20, 13, 0, tzinfo=timezone.utc)
+
+        assert range_query_limit(start, end) == 10000
+
+    def test_datetime_input_round_trip_uses_utc(self) -> None:
+        value = datetime(2026, 5, 20, 12, 30, tzinfo=timezone.utc)
+
+        assert format_datetime_input(value) == "2026-05-20T12:30"
+        assert parse_datetime_input("2026-05-20T12:30") == value
 
 
 # ---------------------------------------------------------------------------
@@ -164,6 +196,60 @@ class TestTransformLatestToZones:
 
 
 # ---------------------------------------------------------------------------
+# alert_identity
+# ---------------------------------------------------------------------------
+
+
+class TestAlertIdentity:
+    def test_prefers_persisted_alert_id(self) -> None:
+        alert = {
+            "id": "alert-001",
+            "_time": "2026-05-20T12:00:00Z",
+            "greenhouse_id": "gh-001",
+            "zone_id": "zone-01",
+            "metric": "temperature",
+            "_value": 42.0,
+            "severity": "critical",
+        }
+
+        assert alert_identity(alert) == "alert-001"
+
+    def test_stable_for_same_non_persisted_alert(self) -> None:
+        alert = {
+            "_time": "2026-05-20T12:00:00Z",
+            "greenhouse_id": "gh-001",
+            "zone_id": "zone-01",
+            "metric": "temperature",
+            "_value": 42.0,
+            "severity": "critical",
+        }
+
+        assert alert_identity(alert) == alert_identity(dict(alert))
+
+    def test_distinguishes_repeated_non_persisted_alert_values_at_different_times(self) -> None:
+        first = _make_reading(timestamp="2026-05-20T12:00:00Z", value=42.0)
+        second = _make_reading(timestamp="2026-05-20T12:01:00Z", value=42.0)
+
+        assert alert_identity(first) != alert_identity(second)
+
+
+class TestNormalizeAlert:
+    def test_uses_created_at_as_display_timestamp(self) -> None:
+        alert = {"id": "alert-001", "created_at": "2026-05-20T12:00:00Z"}
+
+        assert normalize_alert(alert)["timestamp"] == "2026-05-20T12:00:00Z"
+
+    def test_preserves_existing_timestamp(self) -> None:
+        alert = {
+            "id": "alert-001",
+            "created_at": "2026-05-20T12:00:00Z",
+            "timestamp": "12:00",
+        }
+
+        assert normalize_alert(alert)["timestamp"] == "12:00"
+
+
+# ---------------------------------------------------------------------------
 # build_group_data
 # ---------------------------------------------------------------------------
 
@@ -176,28 +262,29 @@ class TestBuildGroupData:
             "gh-001": {"greenhouse_id": "gh-001", "metrics": {}},
             "gh-002": {"greenhouse_id": "gh-002", "metrics": {}},
         }
-        anomalies = [{"severity": "warning"}]
+        active_alerts = [{"id": "alert-001", "severity": "warning"}]
 
-        result = build_group_data(greenhouses, anomalies, "group-001")
+        result = build_group_data(greenhouses, active_alerts, "group-001")
 
         assert result["group_id"] == "group-001"
         assert result["name"] == "group-001"
         assert result["greenhouse_count"] == 2
         assert result["active_alerts"] == 1
 
-    def test_empty_greenhouses_and_anomalies(self) -> None:
+    def test_empty_greenhouses_and_alerts(self) -> None:
         result = build_group_data({}, [], "group-001")
 
         assert result["greenhouse_count"] == 0
         assert result["active_alerts"] == 0
 
-    def test_multiple_anomalies_counted(self) -> None:
+    def test_counts_persisted_alerts_not_raw_anomaly_shape(self) -> None:
         greenhouses = {"gh-001": {"greenhouse_id": "gh-001", "metrics": {}}}
-        anomalies = [
-            {"severity": "critical"},
-            {"severity": "warning"},
-            {"severity": "warning"},
+        active_alerts = [
+            {"id": "alert-001", "severity": "critical", "title": "Temperature high"},
+            {"id": "alert-002", "severity": "warning", "title": "Soil moisture low"},
         ]
+        raw_anomalies = [_make_reading(timestamp=f"2026-05-20T12:{minute:02d}:00Z") for minute in range(100)]
 
-        result = build_group_data(greenhouses, anomalies, "group-001")
-        assert result["active_alerts"] == 3
+        result = build_group_data(greenhouses, active_alerts, "group-001")
+        assert result["active_alerts"] == 2
+        assert all("title" not in anomaly for anomaly in raw_anomalies)

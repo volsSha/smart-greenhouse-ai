@@ -77,6 +77,15 @@ class TestModelMetadata:
         table = Base.metadata.tables["rag_chunks"]
         assert "embedding" in {c.name for c in table.columns}
 
+    def test_plant_batches_profile_id_foreign_key(self):
+        """Plant batches can link to a reusable plant profile."""
+        table = Base.metadata.tables["plant_batches"]
+        assert "profile_id" in {c.name for c in table.columns}
+        profile_id = table.columns["profile_id"]
+        assert profile_id.nullable
+        fk_names = {fk.target_fullname for fk in profile_id.foreign_keys}
+        assert "plant_profiles.id" in fk_names
+
 
 # ---------------------------------------------------------------------------
 # Mixin verification (via actual model that uses the mixin)

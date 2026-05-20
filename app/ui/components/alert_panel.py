@@ -5,6 +5,7 @@ Provides alert list and item display widgets with severity badges.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Any
 
@@ -29,24 +30,17 @@ def _format_timestamp(ts: Any) -> str:
     return str(ts)[-8:] if len(str(ts)) >= 8 else str(ts)
 
 
-def alert_item(alert: dict[str, Any]) -> None:
-    """Render a single alert with icon, title, message, and timestamp.
-
-    Parameters:
-        alert: Dict with keys:
-            - severity (str): 'critical', 'warning', or 'info'
-            - title (str): Alert title
-            - message (str, optional): Alert description
-            - timestamp (datetime or str, optional): When the alert was raised
-            - zone_id (str, optional): Affected zone
-            - greenhouse_id (str, optional): Affected greenhouse
-    """
+def alert_item(
+    alert: dict[str, Any],
+    on_dismiss: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
+) -> None:
+    """Render a single alert with icon, title, message, and timestamp."""
     severity = alert.get("severity", "info").lower()
     config = _SEVERITY_CONFIG.get(severity, _SEVERITY_CONFIG["info"])
 
     title = alert.get("title", _("Unknown Alert"))
     message = alert.get("message", "")
-    timestamp = alert.get("timestamp")
+    timestamp = alert.get("timestamp") or alert.get("created_at")
     zone_id = alert.get("zone_id")
     greenhouse_id = alert.get("greenhouse_id")
 
@@ -65,24 +59,35 @@ def alert_item(alert: dict[str, Any]) -> None:
                 if zone_id:
                     ui.label(f"/ {zone_id}").classes("text-xs opacity-60")
                 if timestamp:
-                    ui.label(_format_timestamp(timestamp)).classes(
-                        "text-xs opacity-50 ml-auto"
-                    )
+                    ui.label(_format_timestamp(timestamp)).classes("text-xs opacity-50")
 
             if message:
                 ui.label(message).classes("text-xs opacity-70")
 
+        if on_dismiss:
+            async def dismiss_alert() -> None:
+                await on_dismiss(alert)
 
-def alert_panel(alerts: list[dict[str, Any]]) -> None:
-    """Render a panel listing active alerts with severity badges.
+            ui.button(icon="close", on_click=dismiss_alert).props(
+                f"flat dense round color=primary aria-label='{_('Dismiss alert')}'"
+            )
 
-    Parameters:
-        alerts: List of alert dicts as described in :func:`alert_item`.
-    """
+
+def alert_panel(
+    alerts: list[dict[str, Any]],
+    on_dismiss: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
+    on_dismiss_all: Callable[[], Awaitable[None]] | None = None,
+) -> None:
+    """Render a panel listing active alerts with severity badges."""
     with ui.card().classes("greenhouse-card w-full p-5"):
         with ui.row().classes("items-center justify-between w-full"):
             ui.label(_("Active Alerts")).classes("text-lg font-bold")
-            ui.icon("notifications_active", size="1.2rem").classes("opacity-45")
+            if alerts and on_dismiss_all:
+                ui.button(_("Dismiss all"), on_click=on_dismiss_all).props(
+                    f"flat dense color=primary aria-label='{_('Dismiss all alerts')}'"
+                )
+            else:
+                ui.icon("notifications_active", size="1.2rem").classes("opacity-45")
 
         if not alerts:
             with ui.row().classes("items-center gap-2 mt-3"):
@@ -99,4 +104,4 @@ def alert_panel(alerts: list[dict[str, Any]]) -> None:
 
         with ui.column().classes("w-full gap-2 mt-2"):
             for alert in sorted_alerts:
-                alert_item(alert)
+                alert_item(alert, on_dismiss)

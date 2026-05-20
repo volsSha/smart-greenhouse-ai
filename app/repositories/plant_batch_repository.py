@@ -23,6 +23,7 @@ class PlantBatchRepository:
         *,
         zone_id: uuid.UUID,
         name: str,
+        profile_id: uuid.UUID | None = None,
         species: str | None = None,
         cultivar: str | None = None,
         planted_at: date | None = None,
@@ -32,6 +33,7 @@ class PlantBatchRepository:
         """Create a new plant batch."""
         batch = PlantBatch(
             zone_id=zone_id,
+            profile_id=profile_id,
             name=name,
             species=species,
             cultivar=cultivar,

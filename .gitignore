@@ -13,3 +13,4 @@ __pycache__/
 /docs/brainstorms/
 /.mcp.json
 /deploy/production/PRODUCTION_SETUP_TODO.md
+/temp/

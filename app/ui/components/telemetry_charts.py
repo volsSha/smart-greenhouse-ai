@@ -6,7 +6,7 @@ soil moisture, and configurable multi-metric displays.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from nicegui import ui
 
@@ -57,13 +57,17 @@ def _metric_label(metric_name: str) -> str:
     return labels.get(metric_name, metric_name.replace("_", " ").title())
 
 
-def _parse_readings(readings: list[dict[str, Any]]) -> tuple[list[str], list[float]]:
-    """Extract timestamps and values from raw InfluxDB query results.
+ChartSize = Literal["compact", "normal", "expanded"]
 
-    Returns (timestamps, values) lists sorted by time ascending.
-    """
-    timestamps: list[str] = []
-    values: list[float] = []
+_CHART_SIZE_CLASSES: dict[ChartSize, str] = {
+    "compact": "h-56",
+    "normal": "h-80",
+    "expanded": "h-[28rem]",
+}
+
+
+def _parse_readings(readings: list[dict[str, Any]]) -> list[list[Any]]:
+    points: list[list[Any]] = []
 
     sorted_readings = sorted(
         readings,
@@ -71,28 +75,22 @@ def _parse_readings(readings: list[dict[str, Any]]) -> tuple[list[str], list[flo
     )
 
     for reading in sorted_readings:
-        ts = reading.get("_time", reading.get("timestamp", ""))
+        ts = str(reading.get("_time", reading.get("timestamp", "")))
         val = reading.get("_value", reading.get("value", 0))
-        timestamps.append(str(ts))
-        values.append(float(val))
+        points.append([ts, float(val)])
 
-    return timestamps, values
+    return points
+
+
+def chart_size_class(size: ChartSize = "normal") -> str:
+    return f"w-full {_CHART_SIZE_CLASSES.get(size, _CHART_SIZE_CLASSES['normal'])}"
 
 
 def _build_line_option(
     title: str,
-    timestamps: list[str],
     series_data: list[dict[str, Any]],
     y_unit: str = "",
 ) -> dict[str, Any]:
-    """Build an ECharts option dict for a line chart.
-
-    Parameters:
-        title: Chart title.
-        timestamps: X-axis time labels.
-        series_data: List of dicts with 'name' and 'data' keys.
-        y_unit: Unit label for the Y axis.
-    """
     return {
         "title": {
             "text": title,
@@ -109,14 +107,20 @@ def _build_line_option(
         "grid": {
             "left": "3%",
             "right": "4%",
-            "bottom": "15%",
+            "bottom": "20%",
             "containLabel": True,
         },
+        "toolbox": {
+            "feature": {"restore": {}, "saveAsImage": {}},
+            "right": 12,
+        },
+        "dataZoom": [
+            {"type": "inside", "throttle": 50},
+            {"type": "slider", "bottom": 28},
+        ],
         "xAxis": {
-            "type": "category",
-            "data": timestamps,
+            "type": "time",
             "axisLabel": {
-                "rotate": 30,
                 "fontSize": 10,
             },
         },
@@ -131,6 +135,7 @@ def _build_line_option(
                 "type": "line",
                 "data": s["data"],
                 "smooth": True,
+                "showSymbol": False,
                 "itemStyle": {"color": s.get("color", "#3498db")},
                 "lineStyle": {"width": 2},
             }
@@ -144,108 +149,72 @@ def _build_line_option(
 # ---------------------------------------------------------------------------
 
 
-def temperature_chart(readings: list[dict[str, Any]]) -> ui.echart:
-    """Render a line chart of temperature over time.
-
-    Parameters:
-        readings: Raw InfluxDB query results with ``_time`` and ``_value`` fields.
-
-    Returns:
-        The EChart element for later updates.
-    """
-    timestamps, values = _parse_readings(readings)
+def temperature_chart(readings: list[dict[str, Any]], size: ChartSize = "normal") -> ui.echart:
+    points = _parse_readings(readings)
     option = _build_line_option(
         title=_("Temperature"),
-        timestamps=timestamps,
-        series_data=[{"name": _("Temperature"), "data": values, "color": _METRIC_COLORS["temperature"]}],
+        series_data=[{"name": _("Temperature"), "data": points, "color": _METRIC_COLORS["temperature"]}],
         y_unit="C",
     )
-    return ui.echart(option).classes("w-full h-64")
+    return ui.echart(option).classes(chart_size_class(size))
 
 
-def humidity_chart(readings: list[dict[str, Any]]) -> ui.echart:
-    """Render a line chart of humidity over time.
-
-    Parameters:
-        readings: Raw InfluxDB query results with ``_time`` and ``_value`` fields.
-
-    Returns:
-        The EChart element for later updates.
-    """
-    timestamps, values = _parse_readings(readings)
+def humidity_chart(readings: list[dict[str, Any]], size: ChartSize = "normal") -> ui.echart:
+    points = _parse_readings(readings)
     option = _build_line_option(
         title=_("Air Humidity"),
-        timestamps=timestamps,
-        series_data=[{"name": _("Humidity"), "data": values, "color": _METRIC_COLORS["air_humidity"]}],
+        series_data=[{"name": _("Humidity"), "data": points, "color": _METRIC_COLORS["air_humidity"]}],
         y_unit="%",
     )
-    return ui.echart(option).classes("w-full h-64")
+    return ui.echart(option).classes(chart_size_class(size))
 
 
-def soil_moisture_chart(readings: list[dict[str, Any]]) -> ui.echart:
-    """Render a line chart of soil moisture over time.
-
-    Parameters:
-        readings: Raw InfluxDB query results with ``_time`` and ``_value`` fields.
-
-    Returns:
-        The EChart element for later updates.
-    """
-    timestamps, values = _parse_readings(readings)
+def soil_moisture_chart(readings: list[dict[str, Any]], size: ChartSize = "normal") -> ui.echart:
+    points = _parse_readings(readings)
     option = _build_line_option(
         title=_("Soil Moisture"),
-        timestamps=timestamps,
-        series_data=[{"name": _("Soil Moisture"), "data": values, "color": _METRIC_COLORS["soil_moisture"]}],
+        series_data=[{"name": _("Soil Moisture"), "data": points, "color": _METRIC_COLORS["soil_moisture"]}],
         y_unit="%",
     )
-    return ui.echart(option).classes("w-full h-64")
+    return ui.echart(option).classes(chart_size_class(size))
+
+
+def _series_label(reading: dict[str, Any], metric_name: str) -> str:
+    zone_id = reading.get("zone_id")
+    if zone_id:
+        return _("{metric} / {zone_id}", metric=_metric_label(metric_name), zone_id=zone_id)
+    return _metric_label(metric_name)
 
 
 def multi_metric_chart(
     readings: list[dict[str, Any]],
     metrics: list[str] | None = None,
+    size: ChartSize = "normal",
 ) -> ui.echart:
-    """Render a configurable multi-metric line chart.
-
-    Groups readings by the ``metric`` tag and renders one line per metric.
-    Falls back to all detected metrics if *metrics* is None.
-
-    Parameters:
-        readings: Raw InfluxDB query results with ``_time``, ``_value``,
-            and ``metric`` fields.
-        metrics: Subset of metric names to display. None = all detected.
-
-    Returns:
-        The EChart element for later updates.
-    """
     if not readings:
-        return ui.echart({"title": {"text": _("No data")}}).classes("w-full h-64")
+        return ui.echart({"title": {"text": _("No data")}}).classes(chart_size_class(size))
 
-    # Group readings by metric
     grouped: dict[str, list[dict[str, Any]]] = {}
+    labels: dict[str, str] = {}
     for reading in readings:
         metric = reading.get("metric", "unknown")
         if metrics and metric not in metrics:
             continue
-        grouped.setdefault(metric, []).append(reading)
+        series_key = f"{metric}:{reading.get('zone_id', '')}"
+        grouped.setdefault(series_key, []).append(reading)
+        labels.setdefault(series_key, _series_label(reading, metric))
 
-    # Build series
     series_data: list[dict[str, Any]] = []
-    all_timestamps: list[str] = []
-
-    for metric_name, metric_readings in grouped.items():
-        ts, vals = _parse_readings(metric_readings)
-        if ts and not all_timestamps:
-            all_timestamps = ts
+    for series_key, metric_readings in grouped.items():
+        metric_name = metric_readings[0].get("metric", "unknown")
         series_data.append({
-            "name": _metric_label(metric_name),
-            "data": vals,
+            "name": labels[series_key],
+            "data": _parse_readings(metric_readings),
             "color": _METRIC_COLORS.get(metric_name, "#95a5a6"),
         })
 
     option = _build_line_option(
         title=_("Metrics Overview"),
-        timestamps=all_timestamps,
         series_data=series_data,
     )
-    return ui.echart(option).classes("w-full h-64")
+    return ui.echart(option).classes(chart_size_class(size))

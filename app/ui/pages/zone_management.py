@@ -12,6 +12,12 @@ from app.i18n.core import _
 from app.ui.api_client import api_client, response_error
 from app.ui.components.control_panel_state import ScopeOption, build_scope_options
 from app.ui.components.design import empty_state, page_container, page_hero, section_card
+from app.ui.components.plant_profile_helpers import (
+    default_soil_moisture_payload,
+    empty_soil_moisture_fields,
+    find_matching_profile,
+    profile_label,
+)
 from app.ui.layouts.main_layout import main_layout
 
 
@@ -24,10 +30,12 @@ async def zone_management() -> None:
     zones: list[dict[str, Any]] = []
     edge_nodes: list[dict[str, Any]] = []
     plants: list[dict[str, Any]] = []
+    profiles: list[dict[str, Any]] = []
     selected_group: ScopeOption | None = None
     selected_greenhouse: ScopeOption | None = None
     group_label_to_id: dict[str, str] = {}
     greenhouse_label_to_id: dict[str, str] = {}
+    profile_label_to_id: dict[str, str] = {}
 
     with page_container():
         page_hero(
@@ -53,10 +61,14 @@ async def zone_management() -> None:
         with section_card(_("Create Plant Batch"), _("Attach plants to a zone so the control page can show plant context."), icon="local_florist"):
             with ui.row().classes("w-full gap-4 mt-4 flex-wrap items-end"):
                 plant_zone_select = ui.select(label=_("Zone"), options=[]).classes("min-w-[220px] flex-1")
+                profile_select = ui.select(label=_("Profile"), options=[], on_change=lambda e: select_profile(e.value)).classes("min-w-[220px] flex-1")
                 plant_name = ui.input(_("Batch name"), placeholder=_("Tomato batch")).classes("min-w-[220px] flex-1")
                 plant_species = ui.input(_("Species"), placeholder=_("Tomato")).classes("min-w-[180px] flex-1")
                 growth_stage = ui.input(_("Growth stage"), placeholder=_("vegetative")).classes("min-w-[180px] flex-1")
                 ui.button(_("Add plants"), icon="add", on_click=lambda: ui.timer(0, create_plant_batch, once=True)).props("color=primary")
+                ui.button(_("Seed default profile values"), icon="water_drop", on_click=lambda: ui.timer(0, seed_default_profile_values, once=True)).props("outline")
+                ui.button(_("Clear profile"), icon="link_off", on_click=lambda: clear_profile()).props("outline")
+            ui.label(_("Select a profile to fill species and growth stage, or seed editable starter profile values first.")).classes("text-xs opacity-60 mt-2")
 
         with section_card(_("Wokwi / MQTT Setup"), _("Use these identifiers in firmware/wokwi-greenhouse-zone/config.py and publish telemetry to the matching topic."), icon="developer_board"):
             with ui.column().classes("w-full gap-2 mt-4"):
@@ -99,6 +111,30 @@ async def zone_management() -> None:
         options = {zone["id"]: zone.get("name", zone["id"]) for zone in zones}
         plant_zone_select.set_options(options)
         plant_zone_select.set_value(next(iter(options), None))
+
+    def set_profile_options(selected_profile_id: str | None = None) -> None:
+        nonlocal profile_label_to_id
+        profile_label_to_id = {profile_label(profile): str(profile["id"]) for profile in profiles}
+        id_to_label = {profile_id: label for label, profile_id in profile_label_to_id.items()}
+        profile_select.set_options(list(profile_label_to_id))
+        profile_select.set_value(id_to_label.get(selected_profile_id) if selected_profile_id else None)
+
+    def profile_by_id(profile_id: str | None) -> dict[str, Any] | None:
+        if profile_id is None:
+            return None
+        return next((profile for profile in profiles if str(profile.get("id")) == profile_id), None)
+
+    def apply_profile(profile: dict[str, Any]) -> None:
+        plant_species.set_value(profile.get("crop_name") or "")
+        growth_stage.set_value(profile.get("growth_stage") or "")
+
+    def select_profile(label: str | None) -> None:
+        profile = profile_by_id(profile_label_to_id.get(label or ""))
+        if profile is not None:
+            apply_profile(profile)
+
+    def clear_profile() -> None:
+        profile_select.set_value(None)
 
     def node_for_zone(zone: dict[str, Any]) -> dict[str, Any] | None:
         zone_id = str(zone["id"])
@@ -162,12 +198,14 @@ async def zone_management() -> None:
         set_greenhouse_options()
 
     async def load_registry() -> None:
-        nonlocal zones, edge_nodes, plants
+        nonlocal zones, edge_nodes, plants, profiles
         zones = []
         edge_nodes = []
         plants = []
+        profiles = []
         if selected_group is None or selected_greenhouse is None:
             set_zone_options()
+            set_profile_options()
             render_zones()
             return
         try:
@@ -175,12 +213,16 @@ async def zone_management() -> None:
                 zones_response = await client.get(f"/api/groups/{selected_group.id}/greenhouses/{selected_greenhouse.id}/zones")
                 nodes_response = await client.get(f"/api/groups/{selected_group.id}/devices/edge-nodes")
                 plants_response = await client.get(f"/api/groups/{selected_group.id}/plant-batches")
+                profiles_response = await client.get("/api/plant-profiles")
             zones = zones_response.json() if zones_response.status_code == 200 else []
             edge_nodes = nodes_response.json() if nodes_response.status_code == 200 else []
             plants = plants_response.json() if plants_response.status_code == 200 else []
+            profiles = profiles_response.json() if profiles_response.status_code == 200 else []
         except httpx.HTTPError as exc:
             notify(_("Failed to load registry: {error}", error=exc), "negative")
+        selected_profile_id = profile_label_to_id.get(profile_select.value or "")
         set_zone_options()
+        set_profile_options(selected_profile_id)
         render_zones()
 
     async def create_zone() -> None:
@@ -217,11 +259,13 @@ async def zone_management() -> None:
         if selected_group is None or not plant_zone_select.value or not plant_name.value:
             notify(_("Select a zone and enter a plant batch name."), "warning")
             return
+        profile_id = profile_label_to_id.get(profile_select.value or "")
         async with api_client(timeout=10.0) as client:
             response = await client.post(
                 f"/api/groups/{selected_group.id}/plant-batches",
                 json={
                     "zone_id": plant_zone_select.value,
+                    "profile_id": profile_id,
                     "name": plant_name.value,
                     "species": plant_species.value or None,
                     "growth_stage": growth_stage.value or None,
@@ -231,10 +275,42 @@ async def zone_management() -> None:
             notify(_("Create plant batch failed: {error}", error=response_error(response)), "negative")
             return
         plant_name.set_value("")
-        plant_species.set_value("")
-        growth_stage.set_value("")
-        notify(_("Plant batch created"), "positive")
+        notify(_("Plant batch created. Use the separate seed button to add editable default profile values."), "positive")
         await load_registry()
+
+    async def seed_default_profile_values() -> None:
+        species = (plant_species.value or "").strip()
+        stage = (growth_stage.value or "").strip() or None
+        if not species:
+            notify(_("Enter species before seeding default profile values."), "warning")
+            return
+        seeded_profile_id: str | None = None
+        async with api_client(timeout=10.0) as client:
+            profile = find_matching_profile(profiles, species, stage)
+            if profile is None:
+                response = await client.post(
+                    "/api/plant-profiles",
+                    json=default_soil_moisture_payload(species, stage),
+                )
+            else:
+                payload = empty_soil_moisture_fields(profile)
+                if not payload:
+                    seeded_profile_id = str(profile["id"])
+                    set_profile_options(seeded_profile_id)
+                    apply_profile(profile)
+                    notify(_("Matching profile already has soil moisture values; selected it for this batch."), "info")
+                    return
+                response = await client.patch(f"/api/plant-profiles/{profile['id']}", json=payload)
+        if response.status_code not in {200, 201}:
+            notify(_("Seed default profile values failed: {error}", error=response_error(response)), "negative")
+            return
+        seeded_profile_id = str(response.json()["id"])
+        notify(_("Editable default profile values seeded and selected for this batch."), "positive")
+        await load_registry()
+        seeded_profile = profile_by_id(seeded_profile_id)
+        set_profile_options(seeded_profile_id)
+        if seeded_profile is not None:
+            apply_profile(seeded_profile)
 
     async def delete_zone(zone: dict[str, Any]) -> None:
         if selected_group is None or selected_greenhouse is None:

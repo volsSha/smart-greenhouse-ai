@@ -5,6 +5,7 @@ from __future__ import annotations
 from pydantic import ValidationError
 
 from app.services.ai_agent.models import AIResponse, AIResponseStatus, AIScope
+from app.services.ai_agent.prompts import SYSTEM_PROMPT
 
 
 def test_ai_response_accepts_minimal_structured_payload() -> None:
@@ -46,6 +47,14 @@ def test_proposed_actions_default_to_confirmation_required() -> None:
     )
 
     assert response.proposed_actions[0]["requires_confirmation"] is True
+
+
+def test_prompt_requires_recommendations_to_be_user_follow_up_prompts() -> None:
+    assert "recommendations array is rendered as follow-up ideas" in SYSTEM_PROMPT
+    assert "Write recommendations as short user-style prompts" in SYSTEM_PROMPT
+    assert "Do not start recommendations with phrases like" in SYSTEM_PROMPT
+    assert "please specify" in SYSTEM_PROMPT
+    assert "Greenhouse report for gh-001-tomatoes." in SYSTEM_PROMPT
 
 
 def test_ai_response_rejects_unknown_top_level_fields() -> None:

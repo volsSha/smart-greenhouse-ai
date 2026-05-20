@@ -52,7 +52,7 @@ async def get_zone_state(
         "zone_id": str(zone.id),
         "name": zone.name,
         "description": zone.description,
-        "greenhouse_id": greenhouse_id,
+        "greenhouse_id": str(ghid),
         "sensor_count": len(sensors),
         "actuator_count": len(actuators),
         "plant_batches": batch_summaries,
@@ -100,6 +100,7 @@ async def get_zone_plant_info(
     batch_summaries: list[dict] = []
     profiles: list[dict] = []
     for b in batches:
+        profile_id = getattr(b, "profile_id", None)
         batch_summaries.append({
             "batch_id": str(b.id),
             "name": b.name,
@@ -107,7 +108,49 @@ async def get_zone_plant_info(
             "cultivar": b.cultivar,
             "planted_at": str(b.planted_at) if b.planted_at else None,
             "growth_stage": b.growth_stage,
+            "profile_id": str(profile_id) if profile_id else None,
             "notes": b.notes,
+        })
+
+        profile = None
+        missing_linked_profile = False
+        if profile_id:
+            profile = await ctx.deps.plant_profile_repo.get_by_id(profile_id)
+            missing_linked_profile = profile is None
+        if profile is None and b.species:
+            profile = await ctx.deps.plant_profile_repo.find_by_crop_and_stage(
+                crop_name=b.species,
+                growth_stage=b.growth_stage,
+            )
+        if profile is None:
+            profiles.append({
+                "batch_id": str(b.id),
+                "profile_id": str(profile_id) if profile_id else None,
+                "crop_name": b.species,
+                "growth_stage": b.growth_stage,
+                "profile_source": "missing",
+                "profile_found": False,
+                "linked_profile_missing": missing_linked_profile,
+                "missing_reason": "No matching plant profile found" if b.species else "Plant batch species is missing",
+                "soil_moisture_opt_missing": True,
+            })
+            continue
+        profiles.append({
+            "batch_id": str(b.id),
+            "profile_id": str(profile.id),
+            "crop_name": profile.crop_name,
+            "growth_stage": profile.growth_stage,
+            "profile_source": "species_growth_stage_match" if profile_id is None or missing_linked_profile else "linked_profile",
+            "profile_found": True,
+            "linked_profile_missing": missing_linked_profile,
+            "soil_moisture": {
+                "min": profile.soil_moisture_min,
+                "optimal": profile.soil_moisture_opt,
+                "max": profile.soil_moisture_max,
+            },
+            "soil_moisture_min_missing": profile.soil_moisture_min is None,
+            "soil_moisture_opt_missing": profile.soil_moisture_opt is None,
+            "soil_moisture_max_missing": profile.soil_moisture_max is None,
         })
 
     return {

@@ -187,6 +187,13 @@ def _scope_note(scope: ChatScopeState) -> str:
     return _("Sent to: {scope}", scope=" / ".join(f"{name}: {label}" for name, label in parts))
 
 
+def _scope_context_note(scope: ChatScopeState) -> str:
+    parts = _scope_parts(scope)
+    if not parts:
+        return _("Scope: All greenhouses")
+    return _("Scope: {scope}", scope=" / ".join(f"{name}: {label}" for name, label in parts))
+
+
 def _prompt_templates() -> list[tuple[str, str, str]]:
     return [
         ("analytics", _("Current status"), _("Check current status for the selected greenhouse scope.")),
@@ -307,6 +314,7 @@ async def ai_chat() -> None:
                     options=[],
                     on_change=lambda e: select_conversation(e.value),
                 ).classes("flex-1 min-w-[220px]").props("outlined dense")
+                delete_conversation_button = ui.button(_("Delete"), icon="delete", on_click=lambda: open_delete_dialog()).props("flat color=negative")
                 ui.button(_("New Conversation"), icon="add", on_click=lambda: start_new_conversation()).props("flat color=primary")
 
             with ui.column().classes("w-full gap-2 mt-4"):
@@ -368,15 +376,15 @@ async def ai_chat() -> None:
     def render_ideas(messages: list[dict[str, Any]] | None = None, note: str | None = None) -> None:
         ideas_panel.clear()
         with ideas_panel:
-            ui.label(_("Ideas and recommendations")).classes("text-sm font-semibold")
-            ui.label(_("Assistant recommendations collected from this thread.")).classes("text-xs opacity-60")
+            ui.label(_("Follow-up ideas")).classes("text-sm font-semibold")
+            ui.label(_("Suggestions from the assistant that you can send as your next message.")).classes("text-xs opacity-60")
             collected: list[tuple[str, str]] = []
             for msg in messages or []:
                 if msg.get("role") != "assistant":
                     continue
                 parsed = _parse_assistant_content(str(msg.get("content", "")))
                 for recommendation in parsed.get("recommendations", []) or []:
-                    collected.append((_("Recommendation"), str(recommendation)))
+                    collected.append((_("Suggested follow-up"), str(recommendation)))
                 for action in parsed.get("proposed_actions", []) or []:
                     if isinstance(action, dict):
                         title = action.get("description") or action.get("action") or action.get("type") or _("Proposed action")
@@ -384,7 +392,7 @@ async def ai_chat() -> None:
                         title = str(action)
                     collected.append((_("Action proposed"), str(title)))
             if not collected:
-                ui.label(_("Generated ideas will appear after the assistant responds with recommendations or proposed actions.")).classes("text-xs opacity-50")
+                ui.label(_("Follow-up ideas will appear after the assistant suggests next steps or proposed actions.")).classes("text-xs opacity-50")
                 return
             if note:
                 ui.chip(note, icon="my_location").props("outline color=primary")
@@ -400,6 +408,46 @@ async def ai_chat() -> None:
         greenhouse_select.set_enabled(bool(scope_state.group_id) and not saved_thread_selected)
         zone_select.set_enabled(bool(scope_state.greenhouse_id) and not saved_thread_selected)
         clear_scope_button.set_enabled(not saved_thread_selected)
+        delete_conversation_button.set_enabled(saved_thread_selected)
+
+    async def delete_conversation(conversation_id: str) -> None:
+        try:
+            async with api_client(timeout=10.0) as client:
+                resp = await client.delete(f"/api/ai/conversations/{conversation_id}")
+                resp.raise_for_status()
+            ui.notify(_("Conversation deleted"), type="warning")
+            if render_state.selected_conversation_id == conversation_id:
+                start_new_conversation()
+            await load_conversations()
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                ui.notify(_("Conversation no longer exists"), type="warning")
+                if render_state.selected_conversation_id == conversation_id:
+                    start_new_conversation()
+                await load_conversations()
+                return
+            detail = response_error(exc.response)
+            ui.notify(_("Delete conversation failed: {detail}", detail=detail), type="negative")
+            logger.warning("Conversation %s delete failed: %s", conversation_id, exc)
+        except httpx.HTTPError as exc:
+            ui.notify(_("Delete conversation failed: {detail}", detail=str(exc)), type="negative")
+            logger.warning("Conversation %s delete failed: %s", conversation_id, exc)
+
+    def open_delete_dialog() -> None:
+        conversation_id = render_state.selected_conversation_id
+        if not conversation_id:
+            return
+        with ui.dialog() as dialog, ui.card().classes("gap-3"):
+            ui.label(_("Delete conversation?")).classes("text-lg font-semibold")
+            ui.label(_("This will permanently delete this conversation, its messages, and tool-call history.")).classes("text-sm opacity-70")
+            with ui.row().classes("w-full justify-end gap-2"):
+                ui.button(_("Cancel"), on_click=dialog.close).props("flat")
+                ui.button(
+                    _("Delete"),
+                    icon="delete",
+                    on_click=lambda cid=conversation_id: (dialog.close(), ui.timer(0, lambda: delete_conversation(cid), once=True)),
+                ).props("color=negative")
+        dialog.open()
 
     def apply_scope_values() -> None:
         group_select.set_value(option_labels["group"].get(scope_state.group_id or ""))
@@ -430,6 +478,7 @@ async def ai_chat() -> None:
                 render_state.selected_conversation_id = None
                 app.storage.user.pop(last_conversation_key, None)
             conversation_select.set_value(conversation_id_to_label.get(render_state.selected_conversation_id or ""))
+            update_selector_enabled()
         except httpx.HTTPError:
             logger.warning("Failed to load conversations", exc_info=True)
 
@@ -582,7 +631,7 @@ async def ai_chat() -> None:
                     on_approve=lambda cid: _approve_command(cid),
                     on_reject=lambda cid: _reject_command(cid),
                 )
-            render_ideas(messages, note)
+            render_ideas(messages, _scope_context_note(scope_state))
         except httpx.HTTPError as exc:
             if render_state.load_is_current(token, conversation_id):
                 error_container.clear()
@@ -619,6 +668,7 @@ async def ai_chat() -> None:
         chat_area.clear()
         clear_scope()
         render_ideas([])
+        update_selector_enabled()
         with chat_area:
             _render_conversation_messages([], [])
 

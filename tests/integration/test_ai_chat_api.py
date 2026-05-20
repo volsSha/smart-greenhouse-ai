@@ -230,6 +230,55 @@ class TestChatEndpoint:
         assert data["proposed_actions"][0]["requires_confirmation"] is True
 
     @pytest.mark.anyio
+    async def test_chat_preserves_ukrainian_missing_threshold_response(self) -> None:
+        """Chat endpoint returns Ukrainian text about missing optimal thresholds."""
+        global _mock_session
+        _mock_session = _make_mock_session()
+        ai_test_app.dependency_overrides[get_db_session] = _session_override
+        response = AIResponse(
+            scope=AIScope(
+                group_id="group-001",
+                greenhouse_id="gh-001",
+                zone_id="zone-01",
+            ),
+            status=AIResponseStatus.INSUFFICIENT_DATA,
+            summary="Відсутні оптимальні пороги вологості ґрунту для цієї зони.",
+            observations=["Профіль культури не містить soil_moisture_opt."],
+            recommendations=["Звірте показник з агротехнічними вимогами ваших культур."],
+            proposed_actions=[],
+        )
+
+        with patch("app.api.ai_chat.GreenhouseAIAgent") as MockAgent:
+            mock_agent_instance = MockAgent.return_value
+            mock_agent_instance.last_conversation_id = _SAMPLE_CONVERSATION_ID
+            mock_agent_instance.chat = AsyncMock(return_value=response)
+
+            transport = ASGITransport(app=ai_test_app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.post(
+                    "/api/ai/chat",
+                    json={
+                        "message": "Порівняй вологість ґрунту з оптимальним порогом.",
+                        "scope": {
+                            "group_id": "group-001",
+                            "greenhouse_id": "gh-001",
+                            "zone_id": "zone-01",
+                        },
+                    },
+                )
+
+        ai_test_app.dependency_overrides.clear()
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "оптимальні пороги вологості ґрунту" in data["summary"]
+        assert data["status"] == "insufficient_data"
+        assert data["scope"]["zone_id"] == "zone-01"
+        assert data["recommendations"] == [
+            "Звірте показник з агротехнічними вимогами ваших культур."
+        ]
+
+    @pytest.mark.anyio
     async def test_chat_commits_session(self) -> None:
         """Chat endpoint commits the session after successful response."""
         global _mock_session
@@ -361,6 +410,55 @@ class TestGetConversationEndpoint:
         ai_test_app.dependency_overrides.clear()
 
         assert resp.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# DELETE /api/ai/conversations/{conversation_id}
+# ---------------------------------------------------------------------------
+
+
+class TestDeleteConversationEndpoint:
+    """Tests for the DELETE /api/ai/conversations/{id} endpoint."""
+
+    @pytest.mark.anyio
+    async def test_delete_conversation_returns_no_content(self) -> None:
+        global _mock_session
+        conv_id = uuid.uuid4()
+        _mock_session = _make_mock_session()
+        ai_test_app.dependency_overrides[get_db_session] = _session_override
+
+        with patch("app.api.ai_chat.AIConversationRepository") as MockRepo:
+            MockRepo.return_value.delete = AsyncMock(return_value=True)
+
+            transport = ASGITransport(app=ai_test_app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.delete(f"/api/ai/conversations/{conv_id}")
+
+        ai_test_app.dependency_overrides.clear()
+
+        assert resp.status_code == 204
+        MockRepo.return_value.delete.assert_awaited_once_with(conv_id)
+        _mock_session.commit.assert_awaited_once()
+
+    @pytest.mark.anyio
+    async def test_delete_conversation_not_found(self) -> None:
+        global _mock_session
+        conv_id = uuid.uuid4()
+        _mock_session = _make_mock_session()
+        ai_test_app.dependency_overrides[get_db_session] = _session_override
+
+        with patch("app.api.ai_chat.AIConversationRepository") as MockRepo:
+            MockRepo.return_value.delete = AsyncMock(return_value=False)
+
+            transport = ASGITransport(app=ai_test_app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.delete(f"/api/ai/conversations/{conv_id}")
+
+        ai_test_app.dependency_overrides.clear()
+
+        assert resp.status_code == 404
+        MockRepo.return_value.delete.assert_awaited_once_with(conv_id)
+        _mock_session.commit.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------

@@ -192,6 +192,29 @@ class TestEvaluateReadings:
         assert results[0].metric == "soil_moisture"
         assert results[0].severity == "warning"
 
+    def test_soil_moisture_optimal_missing_does_not_skip_min_max_alert(self) -> None:
+        """Missing optimal value does not affect min/max threshold alerts."""
+        session = MagicMock(spec=object)
+        service = ThresholdService(session)  # type: ignore[arg-type]
+        profile = _make_profile()
+        profile.soil_moisture_opt = None
+
+        results = service.evaluate_readings(profile, {"soil_moisture": 35.0})
+
+        assert len(results) == 1
+        assert results[0].metric == "soil_moisture"
+        assert results[0].severity == "warning"
+
+    def test_soil_moisture_missing_min_skips_threshold_alert(self) -> None:
+        """Missing min or max still skips soil moisture threshold evaluation."""
+        session = MagicMock(spec=object)
+        service = ThresholdService(session)  # type: ignore[arg-type]
+        profile = _make_profile(soil_moisture_min=None)
+
+        results = service.evaluate_readings(profile, {"soil_moisture": 35.0})
+
+        assert results == []
+
     def test_co2_out_of_range(self) -> None:
         """CO2 out of range generates alert."""
         session = MagicMock(spec=object)

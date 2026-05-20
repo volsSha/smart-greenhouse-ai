@@ -19,6 +19,7 @@ class PlantBatch(Base, IdTimestampMixin):
         ForeignKey("greenhouse_zones.id"),
         nullable=False,
     )
+    profile_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("plant_profiles.id", ondelete="RESTRICT"), index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     species: Mapped[str | None] = mapped_column(String(255))
     cultivar: Mapped[str | None] = mapped_column(String(255))
@@ -28,6 +29,7 @@ class PlantBatch(Base, IdTimestampMixin):
 
     # -- relationships --
     zone: Mapped["GreenhouseZone"] = relationship(back_populates="plant_batches")  # noqa: F821
+    profile: Mapped["PlantProfile | None"] = relationship(back_populates="plant_batches")
 
 
 class PlantProfile(Base, IdMixin):
@@ -53,6 +55,9 @@ class PlantProfile(Base, IdMixin):
     light_opt: Mapped[float | None] = mapped_column(Float)
     light_max: Mapped[float | None] = mapped_column(Float)
     description: Mapped[str | None] = mapped_column(Text)
+
+    # -- relationships --
+    plant_batches: Mapped[list[PlantBatch]] = relationship(back_populates="profile")
 
 
 class GroupControlPolicy(Base, IdTimestampMixin):

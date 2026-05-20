@@ -179,6 +179,7 @@ from app.api.devices import router as devices_router  # noqa: E402
 from app.api.plants import router as plants_router  # noqa: E402
 from app.api.commands import router as commands_router  # noqa: E402
 from app.api.ai_chat import router as ai_chat_router  # noqa: E402
+from app.api.alerts import router as alerts_router  # noqa: E402
 from app.api.debug_logs import router as debug_logs_router  # noqa: E402
 from app.api.rag import router as rag_router  # noqa: E402
 from app.api.simulator import router as simulator_router  # noqa: E402
@@ -194,6 +195,7 @@ app.include_router(devices_router)
 app.include_router(plants_router)
 app.include_router(commands_router)
 app.include_router(ai_chat_router)
+app.include_router(alerts_router)
 app.include_router(debug_logs_router)
 app.include_router(rag_router)
 app.include_router(simulator_router)

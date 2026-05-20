@@ -63,6 +63,15 @@ class AIConversationRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
+    async def delete(self, conversation_id: uuid.UUID) -> bool:
+        """Delete a conversation and its child records."""
+        conversation = await self.session.get(AIConversation, conversation_id)
+        if conversation is None:
+            return False
+        await self.session.delete(conversation)
+        await self.session.flush()
+        return True
+
     async def add_message(
         self,
         conversation_id: uuid.UUID,
