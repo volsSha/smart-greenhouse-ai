@@ -28,6 +28,7 @@ from app.services.ai_agent.tools.telemetry_tools import (
     get_today_group_summary,
     get_latest_readings,
 )
+from app.repositories.rag_repository import RAGRepository
 
 
 # ---------------------------------------------------------------------------
@@ -443,3 +444,15 @@ async def test_tools_registered_on_agent() -> None:
     assert "get_latest_readings" in tool_names
     assert "get_active_alerts" in tool_names
     assert "get_recent_commands" in tool_names
+
+
+def test_agent_deps_include_rag_repo_and_settings() -> None:
+    session = MagicMock()
+    settings = MagicMock()
+    test_agent = MagicMock()
+    service = GreenhouseAIAgent(session, settings=settings, agent=test_agent)
+
+    deps = service._build_deps()
+
+    assert isinstance(deps.rag_repo, RAGRepository)
+    assert deps.settings is settings

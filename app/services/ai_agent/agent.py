@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import functools
+import inspect
 import json
 import uuid
 from collections.abc import Sequence
@@ -25,6 +27,7 @@ from app.repositories.plant_batch_repository import (
     PlantBatchRepository,
     PlantProfileRepository,
 )
+from app.repositories.rag_repository import RAGRepository
 from app.repositories.telemetry_repository import TelemetryRepository
 from app.repositories.zone_repository import ZoneRepository
 from app.services.ai_agent.models import AIResponse, AIResponseStatus, AIScope
@@ -62,7 +65,7 @@ class GreenhouseAIAgent:
         if agent is None:
             self.register_tools()
 
-    def _build_deps(self) -> ToolDeps:
+    def _build_deps(self, conversation_id: uuid.UUID | None = None) -> ToolDeps:
         """Build the dependency container for tool functions."""
         return ToolDeps(
             group_repo=GroupRepository(self.session),
@@ -76,6 +79,9 @@ class GreenhouseAIAgent:
             sensor_repo=SensorRepository(self.session),
             actuator_repo=ActuatorRepository(self.session),
             tool_logger=self.tool_logger,
+            conversation_id=str(conversation_id) if conversation_id else None,
+            rag_repo=RAGRepository(self.session),
+            settings=self.settings,
         )
 
     @staticmethod
@@ -141,7 +147,7 @@ class GreenhouseAIAgent:
     def register_tools(self) -> None:
         """Register all read-only tools on the Pydantic AI agent."""
         for tool_func in ALL_TOOLS:
-            self.agent.tool(tool_func)
+            self.agent.tool(_logged_tool(tool_func))
 
     async def chat(
         self,
@@ -176,7 +182,7 @@ class GreenhouseAIAgent:
             role="user",
             content=message,
         )
-        deps = self._build_deps()
+        deps = self._build_deps(conversation.id)
         try:
             result = await self.agent.run(prompt, deps=deps)
         except UnexpectedModelBehavior:
@@ -280,6 +286,32 @@ class GreenhouseAIAgent:
                 if isinstance(item, str)
             )
         return "\n".join(lines) or "[previous assistant response unavailable]"
+
+
+def _logged_tool(tool_func):
+    signature = inspect.signature(tool_func)
+
+    @functools.wraps(tool_func)
+    async def wrapper(ctx, *args, **kwargs):
+        bound = signature.bind(ctx, *args, **kwargs)
+        bound.apply_defaults()
+        arguments = {key: value for key, value in bound.arguments.items() if key != "ctx"}
+        conversation_id = getattr(ctx.deps, "conversation_id", None)
+        if conversation_id is None:
+            return await tool_func(ctx, *args, **kwargs)
+
+        async def run_tool(**tool_arguments):
+            return await tool_func(ctx, **tool_arguments)
+
+        return await ctx.deps.tool_logger.run_and_log(
+            uuid.UUID(conversation_id),
+            tool_func.__name__,
+            arguments,
+            run_tool,
+        )
+
+    wrapper.__signature__ = signature
+    return wrapper
 
 
 def _extract_usage(result: Any) -> tuple[int | None, int | None]:

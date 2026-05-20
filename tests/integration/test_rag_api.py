@@ -172,6 +172,60 @@ class TestCreateDocumentEndpoint:
         assert response.status_code == 201
 
 
+class TestCreateTemplateDocumentsEndpoint:
+    """Tests for POST /api/rag/documents/templates/ukrainian-greenhouse."""
+
+    @pytest.mark.anyio
+    async def test_create_templates_returns_10_documents(self) -> None:
+        fake_docs = [_make_fake_document(title=f"Template {i}", source_type="template") for i in range(10)]
+        mock_session = _make_mock_session()
+
+        async def _session_override():
+            yield mock_session
+
+        rag_test_app.dependency_overrides[get_db_session] = _session_override
+
+        with (
+            patch(
+                "app.api.rag.RAGRepository.create_document",
+                new_callable=AsyncMock,
+                side_effect=fake_docs,
+            ) as mock_create,
+            patch(
+                "app.api.rag.RAGRepository.add_chunks",
+                new_callable=AsyncMock,
+                return_value=[],
+            ),
+            patch(
+                "app.api.rag.chunk_text",
+                return_value=["content"],
+            ),
+            patch(
+                "app.api.rag._build_embedding_client",
+            ) as mock_build_client,
+        ):
+            mock_client = AsyncMock()
+            mock_client.embed.return_value = [[0.1] * 1536]
+            mock_client.model_name = "text-embedding-3-small"
+            mock_build_client.return_value = mock_client
+
+            transport = ASGITransport(app=rag_test_app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                response = await client.post("/api/rag/documents/templates/ukrainian-greenhouse")
+
+        rag_test_app.dependency_overrides.clear()
+
+        assert response.status_code == 201
+        data = response.json()
+        assert data["created"] == 10
+        assert len(data["documents"]) == 10
+        assert mock_create.await_count == 10
+        first_call = mock_create.await_args_list[0].kwargs
+        assert first_call["source_type"] == "template"
+        assert first_call["metadata_"]["language"] == "uk"
+        assert "тепли" in first_call["content"].lower()
+
+
 class TestListDocumentsEndpoint:
     """Tests for GET /api/rag/documents."""
 

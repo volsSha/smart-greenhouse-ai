@@ -43,5 +43,6 @@ class ToolDeps:
     sensor_repo: SensorRepository = field(repr=False)
     actuator_repo: ActuatorRepository = field(repr=False)
     tool_logger: ToolCallLogger = field(repr=False)
+    conversation_id: str | None = None
     rag_repo: RAGRepository | None = field(default=None, repr=False)
     settings: Settings | None = field(default=None, repr=False)

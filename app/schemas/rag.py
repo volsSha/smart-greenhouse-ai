@@ -32,7 +32,7 @@ class RAGDocumentResponse(BaseModel):
     source_type: str | None
     source_url: str | None
     content: str | None
-    metadata_: dict | None = Field(None, alias="metadata")
+    metadata_: dict | None = Field(None, serialization_alias="metadata")
     created_at: datetime
 
     model_config = {"from_attributes": True}

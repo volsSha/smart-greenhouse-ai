@@ -73,7 +73,35 @@ async def rag_page() -> None:
 
         await load_documents()
 
-        ui.button(_("Refresh"), on_click=load_documents).props("flat color=primary")
+        template_notification = ui.notification(position="top", timeout=5)
+
+        async def generate_template_documents() -> None:
+            try:
+                async with api_client(timeout=120.0) as client:
+                    response = await client.post("/api/rag/documents/templates/ukrainian-greenhouse")
+                    if response.status_code == 201:
+                        created = response.json().get("created", 0)
+                        notify(
+                            template_notification,
+                            _("Generated {created} Ukrainian greenhouse research documents.", created=created),
+                            "positive",
+                        )
+                        await load_documents()
+                    else:
+                        notify(
+                            template_notification,
+                            _("Template generation failed: {error}", error=response_error(response)),
+                            "negative",
+                        )
+            except httpx.HTTPError as e:
+                notify(template_notification, _("Template generation error: {error}", error=e), "negative")
+
+        with ui.row().classes("gap-2"):
+            ui.button(_("Refresh"), on_click=load_documents).props("flat color=primary")
+            ui.button(
+                _("Generate Ukrainian greenhouse research templates"),
+                on_click=generate_template_documents,
+            ).props("color=primary icon=auto_awesome")
 
     # --- Add document form ---
     with page_container():

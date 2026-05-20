@@ -15,6 +15,7 @@ from app.schemas.rag import (
 )
 from app.services.rag.embedding_client import EmbeddingClient, EmbeddingError
 from app.services.rag.reindex_service import ReindexService
+from app.services.rag.templates import RAGTemplateDocument, load_ukrainian_greenhouse_templates
 from app.repositories.rag_repository import RAGRepository
 from app.services.rag.chunker import chunk_text
 from app.config import get_settings
@@ -33,6 +34,45 @@ def _build_embedding_client() -> EmbeddingClient:
     )
 
 
+async def _create_indexed_document(
+    repo: RAGRepository,
+    body: RAGDocumentCreate,
+    embedding_client: EmbeddingClient | None = None,
+):
+    document = await repo.create_document(
+        title=body.title,
+        content=body.content,
+        source_type=body.source_type,
+        source_url=body.source_url,
+        group_id=body.group_id,
+        metadata_=body.metadata_,
+    )
+
+    chunks = chunk_text(body.content)
+    if chunks:
+        client = embedding_client or _build_embedding_client()
+        try:
+            embeddings = await client.embed(chunks)
+        except EmbeddingError as e:
+            raise HTTPException(status_code=502, detail=str(e))
+
+        await repo.add_chunks(
+            document.id,
+            [
+                {
+                    "chunk_index": i,
+                    "content": chunk,
+                    "embedding": embedding,
+                    "embedding_model": client.model_name,
+                    "metadata": None,
+                }
+                for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+            ],
+        )
+
+    return document
+
+
 @router.post("/documents", response_model=RAGDocumentResponse, status_code=201)
 async def create_document(
     body: RAGDocumentCreate,
@@ -43,45 +83,41 @@ async def create_document(
     The document is chunked and embedded immediately.
     """
     repo = RAGRepository(session)
-
-    # Create the document record
-    document = await repo.create_document(
-        title=body.title,
-        content=body.content,
-        source_type=body.source_type,
-        source_url=body.source_url,
-        group_id=body.group_id,
-        metadata_=body.metadata_,
-    )
-
-    # Chunk the content
-    chunks = chunk_text(body.content)
-    if chunks:
-        # Generate embeddings
-        try:
-            embedding_client = _build_embedding_client()
-            embeddings = await embedding_client.embed(chunks)
-        except EmbeddingError as e:
-            raise HTTPException(status_code=502, detail=str(e))
-
-        # Build chunk data
-        chunk_data_list = []
-        for i, (chunk_text_val, embedding) in enumerate(zip(chunks, embeddings)):
-            chunk_data_list.append(
-                {
-                    "chunk_index": i,
-                    "content": chunk_text_val,
-                    "embedding": embedding,
-                    "embedding_model": embedding_client.model_name,
-                    "metadata": None,
-                }
-            )
-
-        await repo.add_chunks(document.id, chunk_data_list)
-
+    document = await _create_indexed_document(repo, body)
     await session.commit()
     await session.refresh(document)
     return RAGDocumentResponse.model_validate(document)
+
+
+def _template_to_create_body(template: RAGTemplateDocument) -> RAGDocumentCreate:
+    return RAGDocumentCreate(
+        title=template.title,
+        source_type="template",
+        source_url=template.source_url,
+        content=template.content,
+        metadata=template.metadata,
+    )
+
+
+@router.post("/documents/templates/ukrainian-greenhouse", status_code=201)
+async def create_ukrainian_greenhouse_templates(
+    session: AsyncSession = Depends(get_db_session),
+) -> dict:
+    """Seed built-in Ukrainian greenhouse research documents."""
+    repo = RAGRepository(session)
+    embedding_client = _build_embedding_client()
+    documents = []
+
+    for template in load_ukrainian_greenhouse_templates():
+        document = await _create_indexed_document(
+            repo,
+            _template_to_create_body(template),
+            embedding_client,
+        )
+        documents.append(document)
+
+    await session.commit()
+    return {"created": len(documents), "documents": [RAGDocumentResponse.model_validate(document) for document in documents]}
 
 
 @router.get("/documents", response_model=list[RAGDocumentResponse])

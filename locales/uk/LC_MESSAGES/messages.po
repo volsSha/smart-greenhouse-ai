@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Smart Greenhouse Management 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-20 04:35+0300\n"
+"POT-Creation-Date: 2026-05-21 00:33+0300\n"
 "PO-Revision-Date: 2026-05-08 00:00+0000\n"
 "Last-Translator: Smart Greenhouse Management\n"
 "Language: uk\n"
@@ -748,7 +748,7 @@ msgstr ""
 msgid "Choose the group and greenhouse, then select zones from the map."
 msgstr ""
 
-#: app/ui/pages/control.py:62 app/ui/pages/logs.py:151 app/ui/pages/rag.py:76
+#: app/ui/pages/control.py:62 app/ui/pages/logs.py:151 app/ui/pages/rag.py:100
 #: app/ui/pages/zone_management.py:52
 msgid "Refresh"
 msgstr ""
@@ -1428,133 +1428,152 @@ msgstr ""
 msgid "Check API and database availability, then refresh."
 msgstr ""
 
-#: app/ui/pages/rag.py:80 app/ui/pages/rag.py:135
+#: app/ui/pages/rag.py:86
+#, python-brace-format
+msgid "Generated {created} Ukrainian greenhouse research documents."
+msgstr "Створено {created} українських дослідницьких документів про теплиці."
+
+#: app/ui/pages/rag.py:93
+#, python-brace-format
+msgid "Template generation failed: {error}"
+msgstr "Не вдалося створити шаблони: {error}"
+
+#: app/ui/pages/rag.py:97
+#, python-brace-format
+msgid "Template generation error: {error}"
+msgstr "Помилка створення шаблонів: {error}"
+
+#: app/ui/pages/rag.py:102
+msgid "Generate Ukrainian greenhouse research templates"
+msgstr "Створити українські дослідницькі шаблони про теплиці"
+
+#: app/ui/pages/rag.py:108 app/ui/pages/rag.py:163
 msgid "Add Document"
 msgstr ""
 
-#: app/ui/pages/rag.py:80
+#: app/ui/pages/rag.py:108
 msgid "Paste, type, or upload knowledge content for indexing."
 msgstr ""
 
-#: app/ui/pages/rag.py:82
+#: app/ui/pages/rag.py:110
 msgid "Title"
 msgstr ""
 
-#: app/ui/pages/rag.py:84
+#: app/ui/pages/rag.py:112
 msgid "Source Type"
 msgstr ""
 
-#: app/ui/pages/rag.py:89
+#: app/ui/pages/rag.py:117
 msgid "Content"
 msgstr ""
 
-#: app/ui/pages/rag.py:90
+#: app/ui/pages/rag.py:118
 msgid "Paste or type the agronomic knowledge content here..."
 msgstr ""
 
-#: app/ui/pages/rag.py:101
+#: app/ui/pages/rag.py:129
 msgid "Loaded file content. Review it, then add the document."
 msgstr ""
 
-#: app/ui/pages/rag.py:104
+#: app/ui/pages/rag.py:132
 msgid "Upload text file"
 msgstr ""
 
-#: app/ui/pages/rag.py:112
+#: app/ui/pages/rag.py:140
 msgid "Title and content are required."
 msgstr ""
 
-#: app/ui/pages/rag.py:126
+#: app/ui/pages/rag.py:154
 msgid "Document added successfully!"
 msgstr ""
 
-#: app/ui/pages/rag.py:131
+#: app/ui/pages/rag.py:159
 #, python-brace-format
 msgid "Failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:133
+#: app/ui/pages/rag.py:161
 #, python-brace-format
 msgid "Error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:140
+#: app/ui/pages/rag.py:168
 msgid "Reindex"
 msgstr ""
 
-#: app/ui/pages/rag.py:141
+#: app/ui/pages/rag.py:169
 msgid ""
 "Re-chunk and re-embed all documents. Use after changing the embedding "
 "model."
 msgstr ""
 
-#: app/ui/pages/rag.py:158
+#: app/ui/pages/rag.py:186
 #, python-brace-format
 msgid "Reindex complete: {total} documents processed."
 msgstr ""
 
-#: app/ui/pages/rag.py:164
+#: app/ui/pages/rag.py:192
 #, python-brace-format
 msgid "Reindex failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:168
+#: app/ui/pages/rag.py:196
 #, python-brace-format
 msgid "Reindex error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:170
+#: app/ui/pages/rag.py:198
 msgid "Reindex All Documents"
 msgstr ""
 
-#: app/ui/pages/rag.py:176
+#: app/ui/pages/rag.py:204
 msgid "Search Knowledge Base"
 msgstr ""
 
-#: app/ui/pages/rag.py:176
+#: app/ui/pages/rag.py:204
 msgid "Probe semantic matches before relying on documents in AI answers."
 msgstr ""
 
-#: app/ui/pages/rag.py:179
+#: app/ui/pages/rag.py:207
 msgid "Search Query"
 msgstr ""
 
-#: app/ui/pages/rag.py:180
+#: app/ui/pages/rag.py:208
 msgid "e.g. tomato wilting, CO2 optimal levels..."
 msgstr ""
 
-#: app/ui/pages/rag.py:190
+#: app/ui/pages/rag.py:218
 msgid "Enter a search query."
 msgstr ""
 
-#: app/ui/pages/rag.py:208
+#: app/ui/pages/rag.py:236
 msgid "No results found"
 msgstr ""
 
-#: app/ui/pages/rag.py:208
+#: app/ui/pages/rag.py:236
 msgid "Try a broader crop, symptom, or environmental query."
 msgstr ""
 
-#: app/ui/pages/rag.py:217
+#: app/ui/pages/rag.py:245
 #, python-brace-format
 msgid "Score: {score:.4f}"
 msgstr ""
 
-#: app/ui/pages/rag.py:226
+#: app/ui/pages/rag.py:254
 #, python-brace-format
 msgid "Search failed: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:232
+#: app/ui/pages/rag.py:260
 #, python-brace-format
 msgid "Search error: {error}"
 msgstr ""
 
-#: app/ui/pages/rag.py:234
+#: app/ui/pages/rag.py:262
 msgid "Search"
 msgstr ""
 
-#: app/ui/pages/rag.py:237
+#: app/ui/pages/rag.py:265
 msgid "Search on Enter"
 msgstr ""
 
