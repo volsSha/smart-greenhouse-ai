@@ -110,3 +110,4 @@ Open /ai-chat
 - `docs/wokwi-mqtt-mode.md` — Wokwi/MQTT setup and verification.
 - `firmware/wokwi-greenhouse-zone/README.md` — firmware configuration and device-side setup.
 - `docs/OPERATIONS.md` — local services and manual verification checklist.
+- `docs/llm-upload-uk/` — Ukrainian upload-ready architecture, UML/Mermaid diagrams, operational flows, Wokwi/ESP32 examples, and image-generation prompts.

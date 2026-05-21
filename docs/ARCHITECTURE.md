@@ -78,6 +78,19 @@ FastAPI Backend
   └── RAG Service
 ```
 
+## Ukrainian LLM Documentation Bundle
+
+A consolidated Ukrainian documentation package for diagram generation, architecture review, and LLM upload lives in `docs/llm-upload-uk/`.
+
+Key files:
+
+- `docs/llm-upload-uk/01-system-overview-uk.md` — Ukrainian architecture overview, domain model, safety boundaries, and ESP32/Wokwi model.
+- `docs/llm-upload-uk/02-diagrams-uk.md` — Mermaid/UML component, class, use-case, sequence, state, deployment, and acknowledgement diagrams.
+- `docs/llm-upload-uk/03-operational-flows-uk.md` — operational flows for simulator, Wokwi/ESP32, AI chat, RAG, commands, alerts, and production verification.
+- `docs/llm-upload-uk/04-examples-and-payloads-uk.md` — topology examples, MQTT topics, payloads, policy examples, watering/light/ventilation strategies, and Wokwi pinout.
+- `docs/llm-upload-uk/05-llm-image-prompts-uk.md` — Ukrainian prompts for generating architecture and flow images.
+- `docs/llm-upload-uk/ALL-IN-ONE-uk.md` — combined file for uploading to an LLM.
+
 ## Architecture Pattern
 
 Monorepo with clear service boundaries. The web/API application can run as one integrated FastAPI + NiceGUI process, while simulators, control engine, and workers remain separate process entry points.
@@ -120,14 +133,19 @@ smart-greenhouse-ai/
 ```text
 GreenhouseGroup 1 ── 1..* Greenhouse
 Greenhouse 1 ── 1..* GreenhouseZone
-Greenhouse 1 ── 1..* EdgeNode
+Greenhouse 1 ── 0..* EdgeNode
 GreenhouseZone 1 ── 0..* Sensor
 GreenhouseZone 1 ── 0..* Actuator
 GreenhouseZone 1 ── 0..* PlantBatch
+PlantProfile 1 ── 0..* PlantBatch
 GreenhouseZone 1 ── 0..* ControlSetpoint
 GreenhouseZone 1 ── 0..* Alert
 GreenhouseZone 1 ── 0..* Command
 GreenhouseGroup 1 ── 0..* GroupControlPolicy
+GreenhouseGroup 1 ── 0..* RAGDocument
+RAGDocument 1 ── 0..* RAGChunk
+AIConversation 1 ── 0..* AIMessage
+AIMessage 1 ── 0..* AIToolCall
 ```
 
 ## Database Roles
@@ -198,6 +216,32 @@ SAFETY_LIMITS = {
     "lamp": {"max_duration_seconds": 3600},
 }
 ```
+
+Recommended policy details and examples are documented in `docs/llm-upload-uk/04-examples-and-payloads-uk.md`. The intended policy model covers watering, ventilation, heating, lighting, quiet hours, max duration, cooldown, and whether AI/control-engine proposals require manual approval.
+
+## Control Strategies
+
+The baseline control engine remains an observer/proposer, not an autonomous command publisher. It should produce proposals that pass through the same command log, safety validation, and approval workflow as UI and AI actions.
+
+Dedicated strategy examples are in `docs/llm-upload-uk/04-examples-and-payloads-uk.md`:
+
+- watering strategy based on soil moisture, plant profile thresholds, cooldown, and max pump duration;
+- lighting strategy based on light readings, plant profile requirements, quiet hours, and heat conflicts;
+- ventilation strategy based on temperature, humidity, CO2 trend, and heater/fan conflicts.
+
+## Command Acknowledgement Roadmap
+
+In v1, an MQTT command marked `executed` means the backend published the command successfully. It does not prove that the device received and physically applied it. The recommended follow-up is a device acknowledgement flow over the `state` channel:
+
+```text
+CommandService publishes command_id
+  -> ESP32 validates target identity
+  -> ESP32 applies actuator state
+  -> ESP32 publishes state/ack with command_id and result
+  -> backend updates CommandLog as device_confirmed or device_failed
+```
+
+The sequence diagram for this extension is in `docs/llm-upload-uk/02-diagrams-uk.md`.
 
 ## UI Flow Documentation
 

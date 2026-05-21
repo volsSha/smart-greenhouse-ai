@@ -56,3 +56,11 @@ search_plant_knowledge(query: str, group_id: str | None = None)
 ```
 
 The tool must return source attribution so the UI and AI response can show where agronomic advice came from.
+
+## Ukrainian Flow References
+
+Upload-ready Ukrainian RAG documentation is included in:
+
+- `docs/llm-upload-uk/03-operational-flows-uk.md` — RAG ingestion and scoped AI usage flow.
+- `docs/llm-upload-uk/04-examples-and-payloads-uk.md` — example AI response combining telemetry, plant profile, alerts, and RAG.
+- `docs/llm-upload-uk/ALL-IN-ONE-uk.md` — combined LLM upload file.

@@ -1,6 +1,14 @@
 # MVP Roadmap
 
+## Status Legend
+
+- **Implemented:** present in the current app architecture and docs.
+- **Partial:** core pieces exist, but workflow, automation, or docs still need completion.
+- **Planned:** described target behavior that should be implemented later.
+
 ## MVP 1 - Multi-Greenhouse IoT Core
+
+**Status:** Implemented.
 
 **Goal:** Data pipeline from multiple simulated edge nodes to group dashboard.
 
@@ -21,6 +29,8 @@ Mosquitto + Multi-Greenhouse Simulator + FastAPI + InfluxDB + NiceGUI dashboard
 ---
 
 ## MVP 2 - Fleet Metadata Core
+
+**Status:** Implemented for core registry/schema; policy JSON semantics and lifecycle docs are expanded in `docs/llm-upload-uk/04-examples-and-payloads-uk.md`.
 
 **Goal:** System knows about greenhouse groups, greenhouses, zones, devices, plant batches, and optimal conditions.
 
@@ -46,6 +56,8 @@ PostgreSQL + groups + greenhouses + zones + devices + plant_batches + plant_prof
 
 ## MVP 3 - AI Chat with Group-Aware Tools
 
+**Status:** Implemented for scoped conversations, tool logging, and grouped analysis. Ukrainian AI safety and chat flows are in `docs/llm-upload-uk/02-diagrams-uk.md` and `docs/llm-upload-uk/03-operational-flows-uk.md`.
+
 **Goal:** User can ask natural language questions about one zone, one greenhouse, or the whole group and get data-grounded answers.
 
 ```text
@@ -65,6 +77,8 @@ OpenRouter + Pydantic AI tool calling + group/greenhouse/zone read-only tools
 ---
 
 ## MVP 4 - RAG + Scoped Proposed Actions
+
+**Status:** Partial to implemented depending on deployment configuration: RAG, scoped proposed actions, safety validation, and approval workflow exist; device acknowledgement and deeper watering/light policy automation remain planned follow-up work.
 
 **Goal:** AI has domain knowledge and can propose safe scoped actions for specific greenhouse zones.
 

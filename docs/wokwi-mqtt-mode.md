@@ -144,7 +144,7 @@ Approved MQTT-mode commands are published with QoS 1:
   "zone_id": "...",
   "actuator": "pump",
   "action": "on",
-  "value": 50.0,
+  "value": null,
   "duration_seconds": 30,
   "source": "ai_agent",
   "reason": "Needs water"
@@ -153,9 +153,30 @@ Approved MQTT-mode commands are published with QoS 1:
 
 The MicroPython firmware ignores commands whose `group_id`, `greenhouse_id`, or `zone_id` do not match `config.py`.
 
+## Wokwi pinout
+
+| Wokwi part | ESP32 pin | Purpose |
+|---|---:|---|
+| DHT22 SDA | D15 | `temperature`, `air_humidity` |
+| Soil potentiometer SIG | D34 | `soil_moisture` |
+| Light potentiometer SIG | D35 | `light` |
+| CO2 potentiometer SIG | D32 | `co2` |
+| Pump LED anode | D25 | `pump_state` / pump command visualization |
+| Fan LED anode | D26 | `fan_power` / fan command visualization |
+| Heater LED anode | D27 | `heater_power` / heater command visualization |
+| Lamp LED anode | D14 | `lamp_state` / lamp command visualization |
+
+The Wokwi project source is `firmware/wokwi-greenhouse-zone/diagram.json`. Ukrainian diagram prompts and upload-ready architecture docs are in `docs/llm-upload-uk/`.
+
 ## Command status semantics
 
 In v1, `executed` means the backend successfully published the command to MQTT. It does not mean the ESP32 confirmed receipt or actuation. Device acknowledgements are deferred follow-up work.
+
+Recommended future acknowledgement flow:
+
+```text
+backend publishes command_id -> ESP32 receives and applies -> ESP32 publishes state/ack -> backend marks device_confirmed or device_failed
+```
 
 ## Troubleshooting
 

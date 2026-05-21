@@ -51,6 +51,14 @@ reason
 
 Restricted execution is handled by FastAPI command endpoints and the UI approval workflow, not by model-owned tools. Do not expose a model-callable `execute_command` unless it only resolves an existing approval request without publishing MQTT directly.
 
+## Safety and Diagram References
+
+Ukrainian AI safety-flow documentation and Mermaid sequence diagrams are available in:
+
+- `docs/llm-upload-uk/02-diagrams-uk.md` — AI proposed-action sequence and command lifecycle state diagram.
+- `docs/llm-upload-uk/03-operational-flows-uk.md` — scoped AI chat, RAG, proposed action, and approval flows.
+- `docs/llm-upload-uk/05-llm-image-prompts-uk.md` — prompts for generating AI safety workflow images.
+
 ## Agent Loop
 
 ```text

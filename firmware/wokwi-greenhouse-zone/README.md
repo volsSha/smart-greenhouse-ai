@@ -47,6 +47,21 @@ Hosted Wokwi cannot connect to your local Docker `localhost`, so use a public br
 
 5. Open the app `/simulator` page, select **Wokwi / MQTT** mode, and watch the MQTT status panel.
 
+## Pinout
+
+| Part | ESP32 pin | Firmware role |
+|---|---:|---|
+| DHT22 SDA | D15 | Temperature and air-humidity readings |
+| Soil potentiometer SIG | D34 | Soil-moisture simulation |
+| Light potentiometer SIG | D35 | Light simulation |
+| CO2 potentiometer SIG | D32 | CO2 simulation |
+| Pump LED anode | D25 | Pump actuator visualization |
+| Fan LED anode | D26 | Fan actuator visualization |
+| Heater LED anode | D27 | Heater actuator visualization |
+| Lamp LED anode | D14 | Lamp actuator visualization |
+
+Ukrainian architecture, flow, and image-generation docs for this Wokwi integration are in `docs/llm-upload-uk/`.
+
 ## Verification checklist
 
 - Public Mosquitto is reachable from the internet.
