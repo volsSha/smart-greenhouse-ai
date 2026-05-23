@@ -1,6 +1,6 @@
 # Smart Greenhouse Management
 
-FastAPI, NiceGUI, MQTT, PostgreSQL/pgvector, InfluxDB, and AI-assisted greenhouse fleet monitoring.
+FastAPI, NiceGUI, MQTT, PostgreSQL/pgvector, InfluxDB, and AI-assisted bilingual greenhouse fleet monitoring.
 
 ## Quick start
 
