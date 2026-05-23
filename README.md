@@ -40,6 +40,16 @@ uv run python -m services.simulator.main --once
 
 Implemented page, button, simulator, control-panel, AI chat, settings, and observability flows are documented in `docs/ui-flows/README.md`.
 
+## Localization
+
+The UI supports English and Ukrainian through gettext catalogs in `locales/`. After changing user-facing text, extract/update translations and compile catalogs:
+
+```bash
+uv run pybabel extract -F babel.cfg -o locales/messages.pot app
+uv run pybabel update -i locales/messages.pot -d locales
+uv run pybabel compile -d locales
+```
+
 ## Model Settings
 
 The application includes a model settings page at `/settings` where you can:
