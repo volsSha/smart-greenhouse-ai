@@ -932,7 +932,7 @@ msgstr "Не вдалося відхилити: {error}"
 
 #: app/ui/pages/dashboard.py:208
 msgid "Live greenhouse telemetry, alerts, and zone trends for the active fleet group."
-msgstr "Жива телеметрія теплиць, сповіщення та тренди зон для активної групи флоту."
+msgstr "Жива телеметрія теплиць, сповіщення та тренди зон для активної групи теплиць."
 
 #: app/ui/pages/dashboard.py:227
 msgid "30 min"
@@ -997,7 +997,7 @@ msgstr "Дані телеметрії недоступні"
 
 #: app/ui/pages/dashboard.py:327
 msgid "Start the simulator to generate data and see the fleet cockpit come alive."
-msgstr "Запустіть симулятор, щоб генерувати дані й оживити панель флоту."
+msgstr "Запустіть симулятор, щоб генерувати дані й оживити панель теплиць."
 
 #: app/ui/pages/dashboard.py:345 app/ui/pages/dashboard.py:360
 msgid "Unable to dismiss alert"
@@ -1807,7 +1807,7 @@ msgstr "Конфігурація запуску"
 
 #: app/ui/pages/simulator.py:160
 msgid "Scale the generated fleet and choose local simulation or external MQTT."
-msgstr "Масштабуйте згенерований флот і виберіть локальну симуляцію або зовнішній MQTT."
+msgstr "Масштабуйте згенеровані теплиці й виберіть локальну симуляцію або зовнішній MQTT."
 
 #: app/ui/pages/simulator.py:162
 msgid "Groups"
@@ -2694,7 +2694,7 @@ msgstr "Зону видалено"
 #~ msgstr "Панель керування"
 
 #~ msgid "Live greenhouse telemetry, alerts, and zone trends for the active fleet group."
-#~ msgstr "Поточна телеметрія теплиць, попередження та тенденції зон для активної групи флоту."
+#~ msgstr "Поточна телеметрія теплиць, попередження та тенденції зон для активної групи теплиць."
 
 #~ msgid "Operations"
 #~ msgstr "Операції"
@@ -2715,7 +2715,7 @@ msgstr "Зону видалено"
 #~ msgstr "Немає доступних телеметричних даних"
 
 #~ msgid "Start the simulator to generate data and see the fleet cockpit come alive."
-#~ msgstr "Запустіть симулятор, щоб згенерувати дані й оживити панель флоту."
+#~ msgstr "Запустіть симулятор, щоб згенерувати дані й оживити панель теплиць."
 
 #~ msgid "Greenhouses"
 #~ msgstr "Теплиці"
@@ -3196,7 +3196,7 @@ msgstr "Зону видалено"
 #~ msgstr "Конфігурація запуску"
 
 #~ msgid "Scale the generated fleet and choose local simulation or external MQTT."
-#~ msgstr "Масштабуйте згенерований флот і виберіть локальну симуляцію або зовнішній MQTT."
+#~ msgstr "Масштабуйте згенеровані теплиці й виберіть локальну симуляцію або зовнішній MQTT."
 
 #~ msgid "Groups"
 #~ msgstr "Групи"
