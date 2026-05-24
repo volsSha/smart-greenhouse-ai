@@ -26,3 +26,11 @@ def test_control_page_source_removes_raw_uuid_form() -> None:
     assert "Zone ID" not in source
     assert "_SAMPLE_GROUP_ID" not in source
     assert "_SAMPLE_ZONE_ID" not in source
+
+
+def test_control_page_refresh_preserves_selected_zone_source() -> None:
+    source = Path("app/ui/pages/control.py").read_text()
+
+    assert "previous_zone_id = selected_zone.id if selected_zone else None" in source
+    assert "selected_zone = selected_or_first(zones, previous_zone_id)" in source
+    assert "await refresh_commands()" in source

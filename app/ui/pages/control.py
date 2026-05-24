@@ -84,6 +84,9 @@ async def control() -> None:
             return None
         return next((option for option in options if option.id == option_id), None)
 
+    def selected_or_first(options: list[ScopeOption], previous_id: str | None) -> ScopeOption | None:
+        return option_by_id(options, previous_id) or (options[0] if options else None)
+
     def enable_demo_mode() -> None:
         nonlocal groups, greenhouses, zones, selected_group, selected_greenhouse, selected_zone, telemetry, plant_contexts, commands, demo_mode
         demo_mode = True
@@ -305,8 +308,8 @@ async def control() -> None:
         if demo_mode:
             render_all()
             return
+        previous_zone_id = selected_zone.id if selected_zone else None
         zones = []
-        selected_zone = None
         telemetry = {}
         plant_contexts = {}
         commands = []
@@ -327,7 +330,7 @@ async def control() -> None:
                 return
 
             zones = build_scope_options(zones_response.json(), fallback_prefix=_("Zone"))
-            selected_zone = zones[0] if zones else None
+            selected_zone = selected_or_first(zones, previous_zone_id)
             commands = commands_response.json() if commands_response.status_code == 200 else []
             telemetry_data = telemetry_response.json() if telemetry_response.status_code == 200 else {}
             telemetry_readings = telemetry_data.get("readings", []) if isinstance(telemetry_data, dict) else telemetry_data
