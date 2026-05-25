@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
@@ -26,6 +27,22 @@ def test_sanitize_for_tool_log_redacts_credentials_and_vectors() -> None:
     assert sanitized["nested"]["ok"] == "value"
     assert sanitized["embedding"] == "[OMITTED]"
     assert sanitized["readings"] == "[numeric-list:3]"
+
+
+def test_sanitize_for_tool_log_serializes_datetime_values() -> None:
+    timestamp = datetime(2026, 5, 24, 1, 30, 51, tzinfo=UTC)
+
+    sanitized = sanitize_for_tool_log(
+        {
+            "window_start": timestamp,
+            "readings": [{"recorded_at": timestamp, "value": 23.4}],
+        }
+    )
+
+    assert sanitized == {
+        "window_start": "2026-05-24T01:30:51+00:00",
+        "readings": [{"recorded_at": "2026-05-24T01:30:51+00:00", "value": 23.4}],
+    }
 
 
 @pytest.mark.asyncio

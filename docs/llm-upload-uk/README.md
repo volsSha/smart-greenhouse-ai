@@ -10,6 +10,7 @@
 - [04-examples-and-payloads-uk.md](04-examples-and-payloads-uk.md) — приклади топологій, MQTT topics, telemetry/command payloads, політик і правил.
 - [05-llm-image-prompts-uk.md](05-llm-image-prompts-uk.md) — готові промпти українською для генерації архітектурних зображень.
 - [06-physical-esp32-wiring-uk.md](06-physical-esp32-wiring-uk.md) — фізична інтеграція кількох ESP32, зон, реле, насосів, ламп, вентиляторів, нагрівачів і силового живлення.
+- [07-schema-and-data-uk.md](07-schema-and-data-uk.md) — детальна схема даних: PostgreSQL/pgvector, InfluxDB telemetry, команди, алерти, AI history і RAG.
 - [ALL-IN-ONE-uk.md](ALL-IN-ONE-uk.md) — один зведений файл для завантаження в LLM.
 
 ## Як використовувати

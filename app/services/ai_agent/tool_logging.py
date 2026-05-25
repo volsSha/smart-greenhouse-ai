@@ -5,6 +5,8 @@ from __future__ import annotations
 import time
 import uuid
 from collections.abc import Mapping
+from datetime import date, datetime
+from decimal import Decimal
 from typing import Any
 
 from app.models.ai import AIToolCall
@@ -44,6 +46,12 @@ def sanitize_for_tool_log(value: Any) -> Any:
         return [sanitize_for_tool_log(item) for item in value[:MAX_LIST_ITEMS]]
     if isinstance(value, tuple):
         return [sanitize_for_tool_log(item) for item in value[:MAX_LIST_ITEMS]]
+    if isinstance(value, datetime | date):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    if isinstance(value, uuid.UUID):
+        return str(value)
     if isinstance(value, str) and len(value) > MAX_STRING_LENGTH:
         return f"{value[:MAX_STRING_LENGTH]}...[truncated]"
     return value
